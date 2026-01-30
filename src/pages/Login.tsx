@@ -1,4 +1,4 @@
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Logo from "@/components/Logo";
 import { Button } from "@/components/ui/button";
@@ -36,6 +36,7 @@ interface FormErrors {
 
 const Login = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const role = searchParams.get("role") || "student";
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
@@ -73,11 +74,9 @@ const Login = () => {
     // Simulate login attempt
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // For demo, show a gentle error
-    setErrors({
-      general: "We couldn't find an account with those credentials. Please try again.",
-    });
+    // For demo purposes, navigate to dashboard on successful login
     setIsSubmitting(false);
+    navigate("/dashboard");
   };
 
   const clearFieldError = (field: keyof FormErrors) => {
