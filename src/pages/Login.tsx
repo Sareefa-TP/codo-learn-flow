@@ -4,8 +4,9 @@ import Logo from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 const roleLabels: Record<string, string> = {
   student: "Student",
@@ -17,50 +18,125 @@ const roleLabels: Record<string, string> = {
   superadmin: "Super Admin",
 };
 
+const roleColors: Record<string, string> = {
+  student: "bg-role-student",
+  intern: "bg-role-intern",
+  tutor: "bg-role-tutor",
+  mentor: "bg-role-mentor",
+  admin: "bg-role-admin",
+  finance: "bg-role-finance",
+  superadmin: "bg-role-superadmin",
+};
+
+interface FormErrors {
+  email?: string;
+  password?: string;
+  general?: string;
+}
+
 const Login = () => {
   const [searchParams] = useSearchParams();
   const role = searchParams.get("role") || "student";
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+
+    if (!email.trim()) {
+      newErrors.email = "Please enter your email address";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
+
+    if (!password) {
+      newErrors.password = "Please enter your password";
+    } else if (password.length < 6) {
+      newErrors.password = "Password should be at least 6 characters";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic
-    console.log("Login attempt:", { email, role });
+    
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
+    setErrors({});
+
+    // Simulate login attempt
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // For demo, show a gentle error
+    setErrors({
+      general: "We couldn't find an account with those credentials. Please try again.",
+    });
+    setIsSubmitting(false);
+  };
+
+  const clearFieldError = (field: keyof FormErrors) => {
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
   };
 
   return (
-    <div className="min-h-screen bg-background flex">
-      {/* Left side - Form */}
-      <div className="flex-1 flex flex-col justify-center px-8 py-12 lg:px-16">
-        <div className="w-full max-w-md mx-auto">
-          {/* Back link */}
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8 opacity-0 animate-fade-in"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Choose a different role
-          </Link>
+    <div className="min-h-screen bg-background flex items-center justify-center p-6">
+      {/* Login card */}
+      <div className="w-full max-w-md">
+        {/* Back link - outside card */}
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6 opacity-0 animate-fade-in"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Choose a different role
+        </Link>
+
+        {/* Card */}
+        <div
+          className="bg-card rounded-2xl shadow-soft border border-border/50 p-8 opacity-0 animate-scale-in"
+          style={{ animationDelay: "50ms" }}
+        >
+          {/* Role indicator */}
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <div className={cn("w-2 h-2 rounded-full", roleColors[role])} />
+            <span className="text-sm text-muted-foreground">
+              Signing in as {roleLabels[role]}
+            </span>
+          </div>
 
           {/* Logo */}
-          <div className="mb-8 opacity-0 animate-fade-in" style={{ animationDelay: "50ms" }}>
-            <Logo size="md" />
+          <div className="flex justify-center mb-6">
+            <Logo size="lg" />
           </div>
 
           {/* Welcome text */}
-          <div className="mb-8 opacity-0 animate-fade-in" style={{ animationDelay: "100ms" }}>
-            <h1 className="text-2xl font-semibold text-foreground mb-2">
-              Sign in as {roleLabels[role]}
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-semibold text-foreground mb-1">
+              Welcome back
             </h1>
             <p className="text-muted-foreground">
-              Enter your credentials to access your account
+              Glad to see you again
             </p>
           </div>
 
+          {/* General error message */}
+          {errors.general && (
+            <div className="mb-6 p-4 rounded-xl bg-warning-muted border border-warning/20 flex items-start gap-3 animate-fade-in">
+              <AlertCircle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
+              <p className="text-sm text-foreground">{errors.general}</p>
+            </div>
+          )}
+
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5 opacity-0 animate-fade-in" style={{ animationDelay: "150ms" }}>
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium">
                 Email address
@@ -70,10 +146,26 @@ const Login = () => {
                 type="email"
                 placeholder="you@example.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="h-11 bg-card border-border/50 focus:border-primary/50"
-                required
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  clearFieldError("email");
+                }}
+                className={cn(
+                  "h-12 bg-background border-border/50 focus:border-primary/50 transition-colors",
+                  errors.email && "border-warning/50 focus:border-warning/50"
+                )}
+                aria-invalid={!!errors.email}
+                aria-describedby={errors.email ? "email-error" : undefined}
               />
+              {errors.email && (
+                <p
+                  id="email-error"
+                  className="text-sm text-warning flex items-center gap-1.5 mt-1.5 animate-fade-in"
+                >
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  {errors.email}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -83,7 +175,7 @@ const Login = () => {
                 </Label>
                 <a
                   href="#"
-                  className="text-sm text-primary hover:underline underline-offset-4"
+                  className="text-sm text-primary hover:underline underline-offset-4 transition-colors"
                 >
                   Forgot password?
                 </a>
@@ -94,14 +186,22 @@ const Login = () => {
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="h-11 bg-card border-border/50 focus:border-primary/50 pr-10"
-                  required
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    clearFieldError("password");
+                  }}
+                  className={cn(
+                    "h-12 bg-background border-border/50 focus:border-primary/50 pr-10 transition-colors",
+                    errors.password && "border-warning/50 focus:border-warning/50"
+                  )}
+                  aria-invalid={!!errors.password}
+                  aria-describedby={errors.password ? "password-error" : undefined}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
                     <EyeOff className="w-4 h-4" />
@@ -110,67 +210,74 @@ const Login = () => {
                   )}
                 </button>
               </div>
+              {errors.password && (
+                <p
+                  id="password-error"
+                  className="text-sm text-warning flex items-center gap-1.5 mt-1.5 animate-fade-in"
+                >
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  {errors.password}
+                </p>
+              )}
             </div>
 
             <Button
               type="submit"
-              className="w-full h-11 font-medium"
+              className="w-full h-12 font-medium text-base"
+              disabled={isSubmitting}
             >
-              Sign in
+              {isSubmitting ? (
+                <span className="flex items-center gap-2">
+                  <svg
+                    className="animate-spin h-4 w-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                  Signing in...
+                </span>
+              ) : (
+                "Sign in"
+              )}
             </Button>
           </form>
 
           {/* Sign up link */}
-          <p className="mt-8 text-center text-sm text-muted-foreground opacity-0 animate-fade-in" style={{ animationDelay: "200ms" }}>
+          <p className="mt-8 text-center text-sm text-muted-foreground">
             Don't have an account?{" "}
             <a
               href="#"
-              className="text-primary hover:underline underline-offset-4"
+              className="text-primary hover:underline underline-offset-4 transition-colors"
             >
               Contact your administrator
             </a>
           </p>
         </div>
-      </div>
 
-      {/* Right side - Visual */}
-      <div className="hidden lg:flex flex-1 bg-secondary items-center justify-center p-12">
-        <div className="max-w-md text-center opacity-0 animate-scale-in" style={{ animationDelay: "200ms" }}>
-          {/* Illustration placeholder */}
-          <div className="w-64 h-64 mx-auto mb-8 rounded-3xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-            <div className="w-32 h-32 rounded-2xl bg-primary/30 flex items-center justify-center">
-              <div className="w-16 h-16 rounded-xl bg-primary flex items-center justify-center">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  className="w-8 h-8 text-primary-foreground"
-                >
-                  <path
-                    d="M12 4C7.58 4 4 7.58 4 12s3.58 8 8 8c1.85 0 3.55-.63 4.9-1.69"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    fill="none"
-                  />
-                  <path d="M14 8l4 2-4 2-4-2 4-2z" fill="currentColor" />
-                  <path
-                    d="M14 12v3"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          <h2 className="text-xl font-semibold text-foreground mb-3">
-            Your learning journey starts here
-          </h2>
-          <p className="text-muted-foreground">
-            Access courses, track your progress, connect with mentors, and achieve your goals with CODO Academy.
-          </p>
-        </div>
+        {/* Footer */}
+        <p className="mt-8 text-center text-xs text-muted-foreground opacity-0 animate-fade-in" style={{ animationDelay: "200ms" }}>
+          By signing in, you agree to our{" "}
+          <a href="#" className="text-primary hover:underline underline-offset-4">
+            Terms
+          </a>{" "}
+          and{" "}
+          <a href="#" className="text-primary hover:underline underline-offset-4">
+            Privacy Policy
+          </a>
+        </p>
       </div>
     </div>
   );
