@@ -43,6 +43,11 @@
     --destructive: 0 65% 55%;
     --destructive-foreground: 0 0% 100%;
     
+    /* Gentle warning - warm amber instead of panic red */
+    --warning: 38 92% 50%;
+    --warning-foreground: 38 92% 20%;
+    --warning-muted: 38 40% 96%;
+    
     /* Borders - soft and subtle */
     --border: 220 15% 90%;
     --input: 220 15% 90%;
@@ -101,6 +106,10 @@
     
     --destructive: 0 55% 45%;
     --destructive-foreground: 0 0% 100%;
+    
+    --warning: 38 75% 55%;
+    --warning-foreground: 38 10% 90%;
+    --warning-muted: 38 30% 20%;
     
     --border: 220 15% 20%;
     --input: 220 15% 20%;
