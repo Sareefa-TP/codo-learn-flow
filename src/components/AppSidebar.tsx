@@ -1,16 +1,8 @@
-import {
-  LayoutDashboard,
-  BookOpen,
-  Calendar,
-  Award,
-  Bell,
-  Settings,
-  LogOut,
-  User,
-} from "lucide-react";
+import { LogOut, User } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
-import { useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Logo from "@/components/Logo";
+import { useRole } from "@/hooks/useRole";
 
 import {
   Sidebar,
@@ -26,28 +18,15 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-const mainNavItems = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Classes", url: "/dashboard/classes", icon: BookOpen },
-  { title: "Schedule", url: "/dashboard/schedule", icon: Calendar },
-  { title: "Certificates", url: "/dashboard/certificates", icon: Award },
-  { title: "Notifications", url: "/dashboard/notifications", icon: Bell },
-];
-
-const secondaryNavItems = [
-  { title: "Settings", url: "/dashboard/settings", icon: Settings },
-];
-
 export function AppSidebar() {
-  const location = useLocation();
+  const navigate = useNavigate();
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
+  const { role, navigation, displayInfo } = useRole();
 
-  const isActive = (path: string) => {
-    if (path === "/dashboard") {
-      return location.pathname === "/dashboard";
-    }
-    return location.pathname.startsWith(path);
+  const handleLogout = () => {
+    sessionStorage.removeItem("selectedRole");
+    navigate("/");
   };
 
   return (
@@ -64,6 +43,15 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="p-2">
+        {/* Role indicator */}
+        {!isCollapsed && (
+          <div className="px-3 py-2 mb-2">
+            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${displayInfo.color} text-white`}>
+              <span>{displayInfo.label} Portal</span>
+            </div>
+          </div>
+        )}
+
         {/* Main navigation */}
         <SidebarGroup>
           <SidebarGroupLabel className={isCollapsed ? "sr-only" : ""}>
@@ -71,16 +59,15 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {mainNavItems.map((item) => (
+              {navigation.mainNav.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
-                    isActive={isActive(item.url)}
                     tooltip={item.title}
                   >
                     <NavLink
                       to={item.url}
-                      end={item.url === "/dashboard"}
+                      end={item.url === navigation.baseUrl}
                       className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors"
                       activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
                     >
@@ -95,17 +82,16 @@ export function AppSidebar() {
         </SidebarGroup>
 
         {/* Secondary navigation */}
-        <SidebarGroup className="mt-auto">
+        <SidebarGroup className="mt-4">
           <SidebarGroupLabel className={isCollapsed ? "sr-only" : ""}>
-            Settings
+            More
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {secondaryNavItems.map((item) => (
+              {navigation.secondaryNav.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
-                    isActive={isActive(item.url)}
                     tooltip={item.title}
                   >
                     <NavLink
@@ -127,17 +113,20 @@ export function AppSidebar() {
       {/* Footer with user info */}
       <SidebarFooter className="p-3 border-t border-sidebar-border">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+          <div className={`w-9 h-9 rounded-full ${displayInfo.color}/10 flex items-center justify-center shrink-0`}>
             <User className="w-4 h-4 text-primary" />
           </div>
           {!isCollapsed && (
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">Alex Johnson</p>
-              <p className="text-xs text-muted-foreground truncate">Student</p>
+              <p className="text-xs text-muted-foreground truncate">{displayInfo.label}</p>
             </div>
           )}
           {!isCollapsed && (
-            <button className="p-2 hover:bg-sidebar-accent rounded-lg transition-colors text-muted-foreground hover:text-foreground">
+            <button 
+              onClick={handleLogout}
+              className="p-2 hover:bg-sidebar-accent rounded-lg transition-colors text-muted-foreground hover:text-foreground"
+            >
               <LogOut className="w-4 h-4" />
             </button>
           )}

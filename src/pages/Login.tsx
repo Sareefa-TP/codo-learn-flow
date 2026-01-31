@@ -76,7 +76,9 @@ const Login = () => {
 
     // For demo purposes, navigate to dashboard on successful login
     setIsSubmitting(false);
-    navigate("/dashboard");
+    // Navigate to the role-specific dashboard
+    sessionStorage.setItem("selectedRole", role);
+    navigate(`/${role}`);
   };
 
   const clearFieldError = (field: keyof FormErrors) => {
