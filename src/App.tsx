@@ -44,6 +44,55 @@ import TutorSalary from "./pages/tutor/Salary";
 import TutorNotifications from "./pages/tutor/Notifications";
 import TutorFeedback from "./pages/tutor/Feedback";
 
+// Mentor Pages
+import MentorDashboard from "./pages/mentor/Dashboard";
+import MentorProfile from "./pages/mentor/Profile";
+import MentorStudents from "./pages/mentor/Students";
+import MentorInterns from "./pages/mentor/Interns";
+import MentorProgress from "./pages/mentor/Progress";
+import MentorGuidance from "./pages/mentor/Guidance";
+import MentorSalary from "./pages/mentor/Salary";
+import MentorNotifications from "./pages/mentor/Notifications";
+import MentorFeedback from "./pages/mentor/Feedback";
+
+// Admin Pages
+import AdminDashboard from "./pages/admin/Dashboard";
+import AdminStudents from "./pages/admin/Students";
+import AdminInterns from "./pages/admin/Interns";
+import AdminTutors from "./pages/admin/Tutors";
+import AdminMentors from "./pages/admin/Mentors";
+import AdminCourses from "./pages/admin/Courses";
+import AdminAttendance from "./pages/admin/Attendance";
+import AdminAssessments from "./pages/admin/Assessments";
+import AdminFinance from "./pages/admin/Finance";
+import AdminReports from "./pages/admin/Reports";
+import AdminNotifications from "./pages/admin/Notifications";
+
+// Finance Pages
+import FinanceDashboard from "./pages/finance/Dashboard";
+import FinanceStudentFees from "./pages/finance/StudentFees";
+import FinanceWallets from "./pages/finance/Wallets";
+import FinanceStipends from "./pages/finance/Stipends";
+import FinanceTutorSalaries from "./pages/finance/TutorSalaries";
+import FinanceMentorSalaries from "./pages/finance/MentorSalaries";
+import FinanceReports from "./pages/finance/Reports";
+import FinanceNotifications from "./pages/finance/Notifications";
+
+// Super Admin Pages
+import SuperAdminDashboard from "./pages/superadmin/Dashboard";
+import SuperAdminUsers from "./pages/superadmin/Users";
+import SuperAdminStudents from "./pages/superadmin/Students";
+import SuperAdminInterns from "./pages/superadmin/Interns";
+import SuperAdminTutors from "./pages/superadmin/Tutors";
+import SuperAdminMentors from "./pages/superadmin/Mentors";
+import SuperAdminCourses from "./pages/superadmin/Courses";
+import SuperAdminFinance from "./pages/superadmin/Finance";
+import SuperAdminReports from "./pages/superadmin/Reports";
+import SuperAdminCertificates from "./pages/superadmin/Certificates";
+import SuperAdminIntegrations from "./pages/superadmin/Integrations";
+import SuperAdminSettings from "./pages/superadmin/Settings";
+import SuperAdminNotifications from "./pages/superadmin/Notifications";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -93,6 +142,55 @@ const App = () => (
           <Route path="/tutor/salary" element={<TutorSalary />} />
           <Route path="/tutor/notifications" element={<TutorNotifications />} />
           <Route path="/tutor/feedback" element={<TutorFeedback />} />
+
+          {/* Mentor Routes */}
+          <Route path="/mentor" element={<MentorDashboard />} />
+          <Route path="/mentor/profile" element={<MentorProfile />} />
+          <Route path="/mentor/students" element={<MentorStudents />} />
+          <Route path="/mentor/interns" element={<MentorInterns />} />
+          <Route path="/mentor/progress" element={<MentorProgress />} />
+          <Route path="/mentor/guidance" element={<MentorGuidance />} />
+          <Route path="/mentor/salary" element={<MentorSalary />} />
+          <Route path="/mentor/notifications" element={<MentorNotifications />} />
+          <Route path="/mentor/feedback" element={<MentorFeedback />} />
+
+          {/* Admin Routes */}
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/students" element={<AdminStudents />} />
+          <Route path="/admin/interns" element={<AdminInterns />} />
+          <Route path="/admin/tutors" element={<AdminTutors />} />
+          <Route path="/admin/mentors" element={<AdminMentors />} />
+          <Route path="/admin/courses" element={<AdminCourses />} />
+          <Route path="/admin/attendance" element={<AdminAttendance />} />
+          <Route path="/admin/assessments" element={<AdminAssessments />} />
+          <Route path="/admin/finance" element={<AdminFinance />} />
+          <Route path="/admin/reports" element={<AdminReports />} />
+          <Route path="/admin/notifications" element={<AdminNotifications />} />
+
+          {/* Finance Routes */}
+          <Route path="/finance" element={<FinanceDashboard />} />
+          <Route path="/finance/student-fees" element={<FinanceStudentFees />} />
+          <Route path="/finance/wallets" element={<FinanceWallets />} />
+          <Route path="/finance/stipends" element={<FinanceStipends />} />
+          <Route path="/finance/tutor-salaries" element={<FinanceTutorSalaries />} />
+          <Route path="/finance/mentor-salaries" element={<FinanceMentorSalaries />} />
+          <Route path="/finance/reports" element={<FinanceReports />} />
+          <Route path="/finance/notifications" element={<FinanceNotifications />} />
+
+          {/* Super Admin Routes */}
+          <Route path="/superadmin" element={<SuperAdminDashboard />} />
+          <Route path="/superadmin/users" element={<SuperAdminUsers />} />
+          <Route path="/superadmin/students" element={<SuperAdminStudents />} />
+          <Route path="/superadmin/interns" element={<SuperAdminInterns />} />
+          <Route path="/superadmin/tutors" element={<SuperAdminTutors />} />
+          <Route path="/superadmin/mentors" element={<SuperAdminMentors />} />
+          <Route path="/superadmin/courses" element={<SuperAdminCourses />} />
+          <Route path="/superadmin/finance" element={<SuperAdminFinance />} />
+          <Route path="/superadmin/reports" element={<SuperAdminReports />} />
+          <Route path="/superadmin/certificates" element={<SuperAdminCertificates />} />
+          <Route path="/superadmin/integrations" element={<SuperAdminIntegrations />} />
+          <Route path="/superadmin/settings" element={<SuperAdminSettings />} />
+          <Route path="/superadmin/notifications" element={<SuperAdminNotifications />} />
 
           {/* Legacy redirect */}
           <Route path="/dashboard" element={<Navigate to="/student" replace />} />
