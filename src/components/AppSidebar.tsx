@@ -1,9 +1,10 @@
 import { LogOut, RefreshCw } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Logo from "@/components/Logo";
 import { useRole } from "@/hooks/useRole";
 import { Badge } from "@/components/ui/badge";
+import { studentData } from "@/data/studentData";
 
 import {
   Sidebar,
@@ -29,25 +30,31 @@ interface SidebarBadge {
   upsell?: string;
 }
 
-// Student-specific sidebar data with badges
-const studentSidebarData = {
-  profile: {
-    name: "Alex Rivera",
-    badge: "Pro Student",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
+// Create dynamic sidebar badges from studentData
+const getStudentBadges = (): Record<string, SidebarBadge> => ({
+  "/student/attendance": { 
+    text: `${studentData.attendance.percentage}%`, 
+    subtext: studentData.attendance.provider, 
+    variant: "success" 
   },
-  badges: {
-    "/student/attendance": { text: "94%", subtext: "Auto-sync active", variant: "success" } as SidebarBadge,
-    "/student/notifications": { count: 2 } as SidebarBadge,
-    "/student/wallet": { text: "Paid", subtext: "Next due: March 15" } as SidebarBadge,
-    "/student/certificates": { count: 2, label: "earned" } as SidebarBadge,
-    "/student/packages": { upsell: "Advance AI Mastery" } as SidebarBadge,
-  } as Record<string, SidebarBadge>,
-};
+  "/student/notifications": { 
+    count: studentData.notifications.filter(n => !n.is_read).length 
+  },
+  "/student/wallet": { 
+    text: studentData.wallet.status, 
+    subtext: `Next due: ${studentData.wallet.next_due.split(',')[0]}` 
+  },
+  "/student/certificates": { 
+    count: studentData.certificates.length, 
+    label: "earned" 
+  },
+  "/student/packages": { 
+    upsell: "Advance AI Mastery" 
+  },
+});
 
 export function AppSidebar() {
   const navigate = useNavigate();
-  const location = useLocation();
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
   const { role, navigation, displayInfo } = useRole();
@@ -60,14 +67,15 @@ export function AppSidebar() {
   // Get badge info for a nav item
   const getBadgeForPath = (path: string) => {
     if (role !== "student") return null;
-    return studentSidebarData.badges[path as keyof typeof studentSidebarData.badges] || null;
+    const badges = getStudentBadges();
+    return badges[path] || null;
   };
 
   // Render badge based on type
-  const renderBadge = (badgeData: any, isCollapsed: boolean) => {
+  const renderBadge = (badgeData: SidebarBadge | null, isCollapsed: boolean) => {
     if (!badgeData) return null;
 
-    if (badgeData.count !== undefined) {
+    if (badgeData.count !== undefined && badgeData.count > 0) {
       return (
         <span className="relative flex h-5 min-w-5 items-center justify-center">
           <span className="absolute inline-flex rounded-full h-2.5 w-2.5 bg-destructive animate-pulse" />
@@ -126,19 +134,19 @@ export function AppSidebar() {
       <SidebarContent className="p-2">
         {/* Profile Section (Student only) */}
         {role === "student" && !isCollapsed && (
-          <div className="px-3 py-4 mb-2 rounded-lg bg-gradient-to-br from-primary/5 to-accent/10 border border-primary/10">
+          <div className="px-3 py-4 mb-2 rounded-xl bg-gradient-to-br from-primary/5 to-accent/10 border border-primary/10">
             <div className="flex items-center gap-3">
               <img 
-                src={studentSidebarData.profile.avatar}
-                alt={studentSidebarData.profile.name}
+                src={studentData.profile.avatar}
+                alt={studentData.profile.name}
                 className="w-10 h-10 rounded-full border-2 border-primary/20"
               />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground truncate">
-                  {studentSidebarData.profile.name}
+                  {studentData.profile.name}
                 </p>
                 <Badge variant="secondary" className="text-xs bg-primary/10 text-primary mt-0.5">
-                  {studentSidebarData.profile.badge}
+                  {studentData.profile.tier}
                 </Badge>
               </div>
             </div>
@@ -172,7 +180,7 @@ export function AppSidebar() {
                       <NavLink
                         to={item.url}
                         end={item.url === navigation.baseUrl}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors group"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors group"
                         activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
                       >
                         <item.icon className="w-5 h-5 shrink-0" />
@@ -182,7 +190,7 @@ export function AppSidebar() {
                             {renderBadge(badgeData, isCollapsed)}
                           </>
                         )}
-                        {isCollapsed && badgeData?.count && (
+                        {isCollapsed && badgeData?.count && badgeData.count > 0 && (
                           <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] text-destructive-foreground">
                             {badgeData.count}
                           </span>
@@ -213,7 +221,7 @@ export function AppSidebar() {
                     >
                       <NavLink
                         to={item.url}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors relative"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors relative"
                         activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
                       >
                         <item.icon className="w-5 h-5 shrink-0" />
@@ -223,7 +231,7 @@ export function AppSidebar() {
                             {renderBadge(badgeData, isCollapsed)}
                           </>
                         )}
-                        {isCollapsed && badgeData?.count && (
+                        {isCollapsed && badgeData?.count && badgeData.count > 0 && (
                           <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] text-destructive-foreground">
                             {badgeData.count}
                           </span>
@@ -243,7 +251,7 @@ export function AppSidebar() {
         <div className="flex items-center gap-3">
           {role === "student" ? (
             <img 
-              src={studentSidebarData.profile.avatar}
+              src={studentData.profile.avatar}
               alt="Profile"
               className="w-9 h-9 rounded-full shrink-0"
             />
@@ -257,7 +265,7 @@ export function AppSidebar() {
           {!isCollapsed && (
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">
-                {role === "student" ? studentSidebarData.profile.name : "Alex Johnson"}
+                {role === "student" ? studentData.profile.name : "Alex Johnson"}
               </p>
               <p className="text-xs text-muted-foreground truncate">{displayInfo.label}</p>
             </div>
@@ -265,7 +273,7 @@ export function AppSidebar() {
           {!isCollapsed && (
             <button 
               onClick={handleLogout}
-              className="p-2 hover:bg-sidebar-accent rounded-lg transition-colors text-muted-foreground hover:text-foreground"
+              className="p-2 hover:bg-sidebar-accent rounded-xl transition-colors text-muted-foreground hover:text-foreground"
             >
               <LogOut className="w-4 h-4" />
             </button>
