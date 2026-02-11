@@ -1,255 +1,236 @@
+import { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
+import SuperAdminStatCard from "@/components/superadmin/SuperAdminStatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  BookOpen, 
-  Users, 
-  Video, 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  BookOpen,
+  Users,
+  Video,
   Clock,
   Calendar,
-  FileText,
+  ClipboardList,
   BarChart3,
-  DollarSign,
+  TrendingUp,
 } from "lucide-react";
+import {
+  tutorProfile,
+  getTodaysClasses,
+  getActiveAssignments,
+  getPendingSubmissions,
+  getAverageAttendance,
+  tutorAssignments,
+  gradebookEntries,
+} from "@/data/tutorData";
+import { toast } from "sonner";
 
 const TutorDashboard = () => {
-  const stats = {
-    totalStudents: 48,
-    classesToday: 3,
-    materialsUploaded: 24,
-    avgRating: 4.8,
+  const [meetModalOpen, setMeetModalOpen] = useState(false);
+  const [meetLink, setMeetLink] = useState("https://meet.google.com/");
+  const [meetSubject, setMeetSubject] = useState("");
+
+  const todaysClasses = getTodaysClasses();
+  const pendingToGrade = getPendingSubmissions().length;
+  const avgAttendance = getAverageAttendance();
+
+  const recentGraded = tutorAssignments
+    .flatMap((a) => a.submissions)
+    .filter((s) => s.status === "graded")
+    .slice(0, 4);
+
+  const handleStartClass = () => {
+    if (meetLink && meetSubject) {
+      toast.success(`Live class started for "${meetSubject}"`);
+      setMeetModalOpen(false);
+      setMeetLink("https://meet.google.com/");
+      setMeetSubject("");
+    }
   };
-
-  const todaysClasses = [
-    { id: 1, subject: "UX Design Fundamentals", time: "10:00 AM", students: 12, status: "upcoming" },
-    { id: 2, subject: "UI Development", time: "2:00 PM", students: 8, status: "upcoming" },
-    { id: 3, subject: "Design Systems", time: "4:30 PM", students: 15, status: "upcoming" },
-  ];
-
-  const recentEvaluations = [
-    { student: "Emma Wilson", assignment: "Mobile App Mockup", score: 92, date: "Today" },
-    { student: "James Chen", assignment: "Wireframe Exercise", score: 88, date: "Yesterday" },
-    { student: "Sofia Garcia", assignment: "User Flow Diagram", score: 95, date: "Yesterday" },
-  ];
 
   return (
     <DashboardLayout>
-      <div className="animate-fade-in">
-        {/* Welcome Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl lg:text-3xl font-semibold text-foreground tracking-tight">
-            Good morning, Sarah! 📚
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            You have {stats.classesToday} classes scheduled for today.
-          </p>
+      <div className="animate-fade-in space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-semibold text-foreground tracking-tight">
+              Good morning, {tutorProfile.name}! 📚
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              You have {todaysClasses.length} classes scheduled for today.
+            </p>
+          </div>
+          <Button onClick={() => setMeetModalOpen(true)} className="gap-2">
+            <Video className="w-4 h-4" />
+            Start Live Class
+          </Button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Stats Row */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-role-tutor/10 flex items-center justify-center">
-                      <Users className="w-5 h-5 text-role-tutor" />
-                    </div>
-                    <div>
-                      <p className="text-2xl font-semibold">{stats.totalStudents}</p>
-                      <p className="text-xs text-muted-foreground">Students</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+        {/* Stat cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <SuperAdminStatCard
+            title="Active Classes Today"
+            value={todaysClasses.length}
+            subtitle={`${todaysClasses.filter((c) => c.status === "scheduled").length} upcoming`}
+            icon={BookOpen}
+            trend={{ value: "On schedule", positive: true }}
+          />
+          <SuperAdminStatCard
+            title="Pending to Grade"
+            value={pendingToGrade}
+            subtitle="Submissions awaiting review"
+            icon={ClipboardList}
+            trend={{ value: pendingToGrade > 3 ? "Needs attention" : "Manageable", positive: pendingToGrade <= 3 }}
+          />
+          <SuperAdminStatCard
+            title="Avg. Attendance"
+            value={`${avgAttendance}%`}
+            subtitle="Across all courses"
+            icon={Users}
+            trend={{ value: "+2% vs last month", positive: true }}
+          />
+          <SuperAdminStatCard
+            title="Total Students"
+            value={gradebookEntries.length}
+            subtitle="Across all courses"
+            icon={TrendingUp}
+            trend={{ value: "+2 this month", positive: true }}
+          />
+        </div>
 
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-role-student/10 flex items-center justify-center">
-                      <BookOpen className="w-5 h-5 text-role-student" />
-                    </div>
-                    <div>
-                      <p className="text-2xl font-semibold">{stats.classesToday}</p>
-                      <p className="text-xs text-muted-foreground">Today</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-role-intern/10 flex items-center justify-center">
-                      <FileText className="w-5 h-5 text-role-intern" />
-                    </div>
-                    <div>
-                      <p className="text-2xl font-semibold">{stats.materialsUploaded}</p>
-                      <p className="text-xs text-muted-foreground">Materials</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-role-mentor/10 flex items-center justify-center">
-                      <BarChart3 className="w-5 h-5 text-role-mentor" />
-                    </div>
-                    <div>
-                      <p className="text-2xl font-semibold">{stats.avgRating}</p>
-                      <p className="text-xs text-muted-foreground">Rating</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Today's Classes */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Calendar className="w-5 h-5 text-primary" />
-                    Today's Classes
-                  </CardTitle>
-                  <Button variant="outline" size="sm">View Schedule</Button>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {todaysClasses.map((classItem) => (
-                  <div
-                    key={classItem.id}
-                    className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-muted/30 transition-colors"
-                  >
+        {/* Main content */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          {/* Today's Classes */}
+          <Card className="xl:col-span-2 border border-border/60 shadow-card">
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base font-semibold flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-primary" />
+                  Today's Classes
+                </CardTitle>
+                <Badge variant="secondary">{todaysClasses.length} sessions</Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {todaysClasses.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-8 text-center">No classes scheduled for today</p>
+              ) : (
+                todaysClasses.map((cls) => (
+                  <div key={cls.id} className="flex items-center justify-between p-4 rounded-xl border border-border/50 hover:bg-muted/30 transition-colors">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-role-tutor/10 flex items-center justify-center">
-                        <BookOpen className="w-6 h-6 text-role-tutor" />
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <BookOpen className="w-5 h-5 text-primary" />
                       </div>
                       <div>
-                        <p className="font-medium text-foreground">{classItem.subject}</p>
+                        <p className="font-medium text-foreground">{cls.subject}</p>
                         <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
                           <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            {classItem.time}
+                            <Clock className="w-3 h-3" /> {cls.time}
                           </span>
+                          <span>·</span>
+                          <span>{cls.duration}</span>
+                          <span>·</span>
                           <span className="flex items-center gap-1">
-                            <Users className="w-3 h-3" />
-                            {classItem.students} students
+                            <Users className="w-3 h-3" /> {cls.studentsEnrolled}
                           </span>
                         </div>
                       </div>
                     </div>
-                    <Button size="sm" className="gap-2">
-                      <Video className="w-4 h-4" />
-                      Start Class
+                    <Button size="sm" className="gap-2" onClick={() => { setMeetSubject(cls.subject); setMeetLink(cls.meetLink); setMeetModalOpen(true); }}>
+                      <Video className="w-4 h-4" /> Join
                     </Button>
                   </div>
-                ))}
-              </CardContent>
-            </Card>
+                ))
+              )}
+            </CardContent>
+          </Card>
 
-            {/* Recent Evaluations */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5 text-primary" />
-                    Recent Evaluations
-                  </CardTitle>
-                  <Button variant="outline" size="sm">View All</Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {recentEvaluations.map((evaluation, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-3 rounded-lg border"
-                    >
-                      <div>
-                        <p className="font-medium text-foreground">{evaluation.student}</p>
-                        <p className="text-sm text-muted-foreground">{evaluation.assignment}</p>
-                      </div>
-                      <div className="text-right">
-                        <Badge 
-                          variant="secondary"
-                          className={
-                            evaluation.score >= 90 
-                              ? "bg-green-500/10 text-green-600" 
-                              : "bg-amber-500/10 text-amber-600"
-                          }
-                        >
-                          {evaluation.score}%
-                        </Badge>
-                        <p className="text-xs text-muted-foreground mt-1">{evaluation.date}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Right Column */}
+          {/* Quick Actions + Recent Grades */}
           <div className="space-y-6">
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Quick Actions</CardTitle>
+            <Card className="border border-border/60 shadow-card">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-semibold">Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button variant="outline" className="w-full justify-start gap-2">
-                  <FileText className="w-4 h-4" />
-                  Upload Material
+                <Button variant="outline" className="w-full justify-start gap-2" onClick={() => setMeetModalOpen(true)}>
+                  <Video className="w-4 h-4" /> Start Live Class
                 </Button>
-                <Button variant="outline" className="w-full justify-start gap-2">
-                  <BookOpen className="w-4 h-4" />
-                  Create Assignment
+                <Button variant="outline" className="w-full justify-start gap-2" asChild>
+                  <a href="/tutor/materials">
+                    <BookOpen className="w-4 h-4" /> Upload Material
+                  </a>
                 </Button>
-                <Button variant="outline" className="w-full justify-start gap-2">
-                  <BarChart3 className="w-4 h-4" />
-                  Grade Submissions
+                <Button variant="outline" className="w-full justify-start gap-2" asChild>
+                  <a href="/tutor/assignments">
+                    <ClipboardList className="w-4 h-4" /> Create Assignment
+                  </a>
+                </Button>
+                <Button variant="outline" className="w-full justify-start gap-2" asChild>
+                  <a href="/tutor/evaluations">
+                    <BarChart3 className="w-4 h-4" /> Grade Submissions
+                  </a>
                 </Button>
               </CardContent>
             </Card>
 
-            {/* Salary Summary */}
-            <Card className="border-role-tutor/20 bg-gradient-to-br from-role-tutor/5 to-transparent">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <DollarSign className="w-5 h-5 text-role-tutor" />
-                  Salary Summary
-                </CardTitle>
+            <Card className="border border-border/60 shadow-card">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-semibold">Recent Grades</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">This Month</span>
-                    <span className="font-semibold text-foreground">$3,200</span>
+              <CardContent className="space-y-3">
+                {recentGraded.map((sub) => (
+                  <div key={sub.id} className="flex items-center justify-between py-2">
+                    <div>
+                      <p className="text-sm font-medium">{sub.studentName}</p>
+                      <p className="text-xs text-muted-foreground">{sub.submittedDate}</p>
+                    </div>
+                    <Badge variant="secondary" className={sub.grade && sub.grade >= 85 ? "bg-primary/10 text-primary border-0" : "bg-warning/10 text-warning border-0"}>
+                      {sub.grade}%
+                    </Badge>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Classes Taken</span>
-                    <span className="font-semibold text-foreground">28</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Bonus</span>
-                    <span className="font-semibold text-green-600">+$150</span>
-                  </div>
-                  <div className="pt-2 border-t">
-                    <Button variant="outline" size="sm" className="w-full">
-                      View Details
-                    </Button>
-                  </div>
-                </div>
+                ))}
               </CardContent>
             </Card>
           </div>
         </div>
       </div>
+
+      {/* Google Meet Modal */}
+      <Dialog open={meetModalOpen} onOpenChange={setMeetModalOpen}>
+        <DialogContent className="sm:max-w-[480px] rounded-xl">
+          <DialogHeader>
+            <DialogTitle>Start Live Class</DialogTitle>
+            <DialogDescription>Configure Google Meet for your class session</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label>Subject / Topic</Label>
+              <Input value={meetSubject} onChange={(e) => setMeetSubject(e.target.value)} placeholder="e.g. React Hooks Deep Dive" />
+            </div>
+            <div className="space-y-2">
+              <Label>Google Meet Link</Label>
+              <Input value={meetLink} onChange={(e) => setMeetLink(e.target.value)} placeholder="https://meet.google.com/xxx-xxxx-xxx" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setMeetModalOpen(false)}>Cancel</Button>
+            <Button onClick={handleStartClass} disabled={!meetSubject || !meetLink} className="gap-2">
+              <Video className="w-4 h-4" /> Start Class
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 };
