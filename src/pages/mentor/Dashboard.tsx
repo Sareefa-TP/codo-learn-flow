@@ -1,265 +1,201 @@
+import { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import SuperAdminStatCard from "@/components/superadmin/SuperAdminStatCard";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { 
-  Users, 
-  Briefcase, 
-  TrendingUp, 
-  Calendar, 
-  Clock,
-  MessageSquare,
+import {
+  Users,
+  Briefcase,
+  AlertTriangle,
+  UserCheck,
   ChevronRight,
-  Star,
-  FileText,
+  Clock,
+  Bell,
 } from "lucide-react";
+import {
+  mentorProfile,
+  mentees,
+  mentorActivityLog,
+  getAtRiskMentees,
+  getPendingTaskReviews,
+  getAttendanceAlerts,
+  getMenteesByType,
+} from "@/data/mentorData";
+
+const activityTypeIcon: Record<string, string> = {
+  task: "📋",
+  attendance: "📊",
+  progress: "🚀",
+  system: "⚙️",
+};
 
 const MentorDashboard = () => {
-  // Demo data with Indian names
-  const stats = {
-    totalStudents: 24,
-    totalInterns: 8,
-    pendingReviews: 5,
-    upcomingMeetings: 3,
-  };
+  const totalMentees = mentees.length;
+  const atRisk = getAtRiskMentees().length;
+  const attendanceAlerts = getAttendanceAlerts().length;
+  const pendingReviews = getPendingTaskReviews().length;
+  const students = getMenteesByType("student");
+  const interns = getMenteesByType("intern");
 
-  const assignedStudents = [
-    { id: 1, name: "Ananya Sharma", course: "UX Design", progress: 78, avatar: "" },
-    { id: 2, name: "Rohan Mehta", course: "Full Stack Dev", progress: 65, avatar: "" },
-    { id: 3, name: "Priya Patel", course: "Data Science", progress: 92, avatar: "" },
-    { id: 4, name: "Karthik Iyer", course: "UI Development", progress: 54, avatar: "" },
-  ];
-
-  const assignedInterns = [
-    { id: 1, name: "Deepak Kumar", task: "Dashboard Redesign", daysLeft: 3, status: "on-track" },
-    { id: 2, name: "Sneha Reddy", task: "API Integration", daysLeft: 1, status: "at-risk" },
-    { id: 3, name: "Vikram Singh", task: "Testing Module", daysLeft: 5, status: "ahead" },
-  ];
-
-  const upcomingMeetings = [
-    { id: 1, title: "1:1 with Ananya", time: "Today, 2:00 PM", type: "student" },
-    { id: 2, title: "Intern Review - Deepak", time: "Today, 4:30 PM", type: "intern" },
-    { id: 3, title: "Group Progress Call", time: "Tomorrow, 10:00 AM", type: "group" },
-  ];
-
-  const recentNotes = [
-    { id: 1, student: "Priya Patel", note: "Excellent progress on ML project. Ready for advanced topics.", date: "2 hours ago" },
-    { id: 2, student: "Rohan Mehta", note: "Needs additional support with React hooks concepts.", date: "Yesterday" },
-  ];
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "on-track": return "bg-emerald-100 text-emerald-700";
-      case "at-risk": return "bg-warning-muted text-warning";
-      case "ahead": return "bg-primary/10 text-primary";
-      default: return "bg-muted text-muted-foreground";
-    }
+  const statusColor = (status: string) => {
+    const map: Record<string, string> = {
+      "on-track": "bg-primary/10 text-primary",
+      "ahead": "bg-primary/15 text-primary",
+      "at-risk": "bg-destructive/10 text-destructive",
+      "needs-attention": "bg-warning/10 text-warning",
+    };
+    return map[status] || "bg-muted text-muted-foreground";
   };
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
-        {/* Header */}
-        <div className="opacity-0 animate-fade-in">
-          <h1 className="text-2xl font-semibold text-foreground">Good morning, Mentor! 👋</h1>
-          <p className="text-muted-foreground mt-1">Here's an overview of your mentees and upcoming activities.</p>
+      <div className="animate-fade-in space-y-6">
+        <div>
+          <h1 className="text-2xl lg:text-3xl font-semibold text-foreground tracking-tight">
+            Good morning, {mentorProfile.name}! 👋
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            You have {pendingReviews} task reviews pending and {atRisk} mentees at risk.
+          </p>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 opacity-0 animate-fade-in" style={{ animationDelay: "100ms" }}>
-          <Card className="bg-card border-border/50">
-            <CardContent className="p-6">
+        {/* Stat cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <SuperAdminStatCard
+            title="Total Mentees"
+            value={totalMentees}
+            subtitle={`${students.length} students, ${interns.length} interns`}
+            icon={Users}
+            trend={{ value: "+2 this month", positive: true }}
+          />
+          <SuperAdminStatCard
+            title="Interns At Risk"
+            value={atRisk}
+            subtitle="Low task completion or attendance"
+            icon={AlertTriangle}
+            trend={{ value: atRisk > 0 ? "Action needed" : "All clear", positive: atRisk === 0 }}
+          />
+          <SuperAdminStatCard
+            title="Attendance Alerts"
+            value={attendanceAlerts}
+            subtitle="Below 80% threshold"
+            icon={UserCheck}
+            trend={{ value: attendanceAlerts > 0 ? "Review needed" : "Healthy", positive: attendanceAlerts === 0 }}
+          />
+          <SuperAdminStatCard
+            title="Pending Reviews"
+            value={pendingReviews}
+            subtitle="Intern task submissions"
+            icon={Briefcase}
+            trend={{ value: pendingReviews > 2 ? "Backlog growing" : "Manageable", positive: pendingReviews <= 2 }}
+          />
+        </div>
+
+        {/* Main grid */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          {/* Mentee Overview */}
+          <Card className="xl:col-span-2 border border-border/60 shadow-card">
+            <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Assigned Students</p>
-                  <p className="text-2xl font-semibold mt-1">{stats.totalStudents}</p>
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-role-student/10 flex items-center justify-center">
-                  <Users className="w-6 h-6 text-role-student" />
-                </div>
+                <CardTitle className="text-base font-semibold">Mentee Overview</CardTitle>
+                <Badge variant="secondary">{totalMentees} total</Badge>
               </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {mentees.slice(0, 6).map((mentee) => (
+                <div key={mentee.id} className="flex items-center gap-4 p-3 rounded-xl border border-border/50 hover:bg-muted/30 transition-colors">
+                  <Avatar className="w-10 h-10">
+                    <AvatarFallback className={`${mentee.type === "intern" ? "bg-role-intern/10 text-role-intern" : "bg-primary/10 text-primary"} text-sm`}>
+                      {mentee.name.split(" ").map((n) => n[0]).join("")}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="font-medium text-sm truncate">{mentee.name}</p>
+                      <Badge variant="outline" className="text-[10px] h-5">{mentee.type}</Badge>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Progress value={mentee.progress} className="h-1.5 flex-1 max-w-[120px]" />
+                      <span className="text-xs text-muted-foreground">{mentee.progress}%</span>
+                      <span className="text-xs text-muted-foreground">·</span>
+                      <span className="text-xs text-muted-foreground">{mentee.course}</span>
+                    </div>
+                  </div>
+                  <Badge variant="secondary" className={`${statusColor(mentee.status)} border-0 text-xs capitalize`}>
+                    {mentee.status.replace("-", " ")}
+                  </Badge>
+                </div>
+              ))}
+              {totalMentees > 6 && (
+                <Button variant="ghost" size="sm" className="w-full text-primary" asChild>
+                  <a href="/mentor/students">View All <ChevronRight className="w-4 h-4 ml-1" /></a>
+                </Button>
+              )}
             </CardContent>
           </Card>
 
-          <Card className="bg-card border-border/50">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Assigned Interns</p>
-                  <p className="text-2xl font-semibold mt-1">{stats.totalInterns}</p>
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-role-intern/10 flex items-center justify-center">
-                  <Briefcase className="w-6 h-6 text-role-intern" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card border-border/50">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Pending Reviews</p>
-                  <p className="text-2xl font-semibold mt-1">{stats.pendingReviews}</p>
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center">
-                  <FileText className="w-6 h-6 text-warning" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card border-border/50">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Upcoming Meetings</p>
-                  <p className="text-2xl font-semibold mt-1">{stats.upcomingMeetings}</p>
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Calendar className="w-6 h-6 text-primary" />
-                </div>
+          {/* Activity Feed */}
+          <Card className="border border-border/60 shadow-card">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base font-semibold flex items-center gap-2">
+                <Bell className="w-4 h-4 text-primary" />
+                Mentee Activity
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-0 p-0">
+              <div className="divide-y divide-border max-h-[400px] overflow-y-auto">
+                {mentorActivityLog.map((log) => (
+                  <div key={log.id} className={`px-5 py-3 flex items-start gap-3 hover:bg-muted/30 transition-colors ${!log.read ? "bg-primary/5" : ""}`}>
+                    <span className="text-lg mt-0.5">{activityTypeIcon[log.type]}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-foreground">{log.message}</p>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Clock className="w-3 h-3" /> {log.timestamp}
+                      </p>
+                    </div>
+                    {!log.read && <span className="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0" />}
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Students Overview */}
-          <Card className="lg:col-span-2 opacity-0 animate-fade-in" style={{ animationDelay: "200ms" }}>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle className="text-lg">Student Progress</CardTitle>
-                <CardDescription>Track learning progress of your assigned students</CardDescription>
-              </div>
-              <Button variant="ghost" size="sm" className="text-primary">
-                View All <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
+        {/* At-Risk Alerts */}
+        {getAtRiskMentees().length > 0 && (
+          <Card className="border border-destructive/20 bg-destructive/5 shadow-card">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base font-semibold flex items-center gap-2 text-destructive">
+                <AlertTriangle className="w-4 h-4" /> Mentees Requiring Attention
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {assignedStudents.map((student) => (
-                  <div key={student.id} className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-                    <Avatar className="w-10 h-10">
-                      <AvatarImage src={student.avatar} />
-                      <AvatarFallback className="bg-role-student/10 text-role-student">
-                        {student.name.split(" ").map(n => n[0]).join("")}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {getAtRiskMentees().map((mentee) => (
+                  <div key={mentee.id} className="flex items-center gap-3 p-3 rounded-lg bg-card border border-border/50">
+                    <Avatar className="w-9 h-9">
+                      <AvatarFallback className="bg-destructive/10 text-destructive text-sm">
+                        {mentee.name.split(" ").map((n) => n[0]).join("")}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="font-medium text-sm truncate">{student.name}</p>
-                        <span className="text-sm text-muted-foreground">{student.progress}%</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Progress value={student.progress} className="h-2 flex-1" />
-                        <Badge variant="secondary" className="text-xs">{student.course}</Badge>
-                      </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{mentee.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {mentee.type === "intern" ? `${mentee.progress}% task completion` : `${mentee.attendance}% attendance`} · Last active: {mentee.lastActive}
+                      </p>
                     </div>
+                    <Badge variant="secondary" className="bg-destructive/10 text-destructive border-0 capitalize text-xs">
+                      {mentee.status.replace("-", " ")}
+                    </Badge>
                   </div>
                 ))}
               </div>
             </CardContent>
           </Card>
-
-          {/* Upcoming Meetings */}
-          <Card className="opacity-0 animate-fade-in" style={{ animationDelay: "250ms" }}>
-            <CardHeader>
-              <CardTitle className="text-lg">Upcoming Meetings</CardTitle>
-              <CardDescription>Your scheduled sessions</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {upcomingMeetings.map((meeting) => (
-                  <div key={meeting.id} className="p-3 rounded-lg border border-border/50 hover:border-primary/30 transition-colors">
-                    <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <Clock className="w-4 h-4 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-sm">{meeting.title}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">{meeting.time}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <Button variant="outline" className="w-full mt-4" size="sm">
-                <Calendar className="w-4 h-4 mr-2" />
-                View Calendar
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Bottom Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Intern Tasks */}
-          <Card className="opacity-0 animate-fade-in" style={{ animationDelay: "300ms" }}>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle className="text-lg">Intern Task Status</CardTitle>
-                <CardDescription>Current assignments and deadlines</CardDescription>
-              </div>
-              <Button variant="ghost" size="sm" className="text-primary">
-                View All <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {assignedInterns.map((intern) => (
-                  <div key={intern.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="w-9 h-9">
-                        <AvatarFallback className="bg-role-intern/10 text-role-intern text-sm">
-                          {intern.name.split(" ").map(n => n[0]).join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium text-sm">{intern.name}</p>
-                        <p className="text-xs text-muted-foreground">{intern.task}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge className={getStatusColor(intern.status)}>
-                        {intern.daysLeft}d left
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Recent Notes */}
-          <Card className="opacity-0 animate-fade-in" style={{ animationDelay: "350ms" }}>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle className="text-lg">Recent Guidance Notes</CardTitle>
-                <CardDescription>Your latest mentee observations</CardDescription>
-              </div>
-              <Button variant="ghost" size="sm" className="text-primary">
-                Add Note <MessageSquare className="w-4 h-4 ml-1" />
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {recentNotes.map((note) => (
-                  <div key={note.id} className="p-3 rounded-lg border border-border/50">
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="font-medium text-sm">{note.student}</p>
-                      <span className="text-xs text-muted-foreground">{note.date}</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{note.note}</p>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        )}
       </div>
     </DashboardLayout>
   );
