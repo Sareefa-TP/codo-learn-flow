@@ -52,20 +52,13 @@ export const studentNavigation: RoleNavigation = {
   baseUrl: "/student",
   mainNav: [
     { title: "Dashboard", url: "/student", icon: LayoutDashboard },
-    { title: "Profile", url: "/student/profile", icon: User },
-    { title: "Classes & Schedule", url: "/student/classes", icon: BookOpen },
-    { title: "Attendance", url: "/student/attendance", icon: UserCheck },
+    { title: "My Course", url: "/student/packages", icon: BookOpen },
+    { title: "Classes & Schedule", url: "/student/classes", icon: Calendar },
     { title: "Learning Materials", url: "/student/materials", icon: FileText },
-    { title: "Recorded Classes", url: "/student/recordings", icon: Video },
-    { title: "Assessments", url: "/student/assessments", icon: ClipboardList },
-    { title: "Package Recommendations", url: "/student/packages", icon: GraduationCap },
     { title: "Wallet & Payments", url: "/student/wallet", icon: Wallet },
-    { title: "Certificates", url: "/student/certificates", icon: Award },
+    { title: "Certificate", url: "/student/certificates", icon: Award },
   ],
-  secondaryNav: [
-    { title: "Notifications", url: "/student/notifications", icon: Bell },
-    { title: "Feedback", url: "/student/feedback", icon: MessageSquare },
-  ],
+  secondaryNav: [],
 };
 
 // Intern Navigation - Focus: tasks, growth, accountability
