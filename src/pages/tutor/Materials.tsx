@@ -1,156 +1,356 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
-import DataTable, { Column } from "@/components/superadmin/DataTable";
-import GenericModalForm from "@/components/superadmin/GenericModalForm";
-import DeleteConfirmDialog from "@/components/superadmin/DeleteConfirmDialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Pencil, Trash2, FileText, Video, FolderOpen, Link2 } from "lucide-react";
-import { TutorResource, tutorResources as initialResources } from "@/data/tutorData";
-import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { UploadCloud, FileText, Plus, X, Eye, Trash2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
-const defaultForm: Omit<TutorResource, "id"> = {
-  title: "", subject: "", type: "pdf", url: "", uploadedDate: new Date().toISOString().slice(0, 10), size: "",
-};
+// Demo Data
+const initialMaterials = [
+  { id: "M-001", fileName: "React_Hooks_Cheatsheet.pdf", batchName: "Jan 2026 Batch", fileType: "PDF", uploadedDate: "20 Feb 2026" },
+  { id: "M-002", fileName: "CSS_Grid_Presentation.ppt", batchName: "Oct 2025 Batch", fileType: "PPT", uploadedDate: "18 Feb 2026" },
+  { id: "M-003", fileName: "JS_Fundamentals_Guide.docx", batchName: "Jan 2026 Batch", fileType: "DOCX", uploadedDate: "15 Feb 2026" },
+  { id: "M-004", fileName: "API_Integration_Tutorial.mp4", batchName: "Feb 2026 Batch - Evening", fileType: "MP4", uploadedDate: "10 Feb 2026" },
+];
 
-const typeIcons: Record<string, React.ReactNode> = {
-  pdf: <FileText className="w-4 h-4 text-destructive" />,
-  video: <Video className="w-4 h-4 text-primary" />,
-  drive_folder: <FolderOpen className="w-4 h-4 text-warning" />,
-  link: <Link2 className="w-4 h-4 text-muted-foreground" />,
-};
+const availableBatches = [
+  "Jan 2026 Batch",
+  "Oct 2025 Batch",
+  "Feb 2026 Batch - Evening"
+];
 
 const TutorMaterials = () => {
-  const [resources, setResources] = useState<TutorResource[]>(() => JSON.parse(JSON.stringify(initialResources)));
-  const [modalOpen, setModalOpen] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [form, setForm] = useState(defaultForm);
+  const { toast } = useToast();
+  const [materials, setMaterials] = useState(initialMaterials);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const openAdd = () => { setForm(defaultForm); setEditingId(null); setModalOpen(true); };
-  const openEdit = (item: TutorResource) => { setForm({ ...item }); setEditingId(item.id); setModalOpen(true); };
-  const openDelete = (id: string) => { setDeleteId(id); setDeleteOpen(true); };
+  // Upload State
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedBatch, setSelectedBatch] = useState<string>("");
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleSave = () => {
-    if (editingId) {
-      setResources((prev) => prev.map((r) => (r.id === editingId ? { ...r, ...form } : r)));
-      toast.success("Resource updated successfully");
-    } else {
-      const newId = `RES${String(resources.length + 1).padStart(3, "0")}`;
-      setResources((prev) => [...prev, { id: newId, ...form } as TutorResource]);
-      toast.success("Resource uploaded successfully");
-    }
-    setModalOpen(false);
+  // Drag & Drop Handlers
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
   };
 
-  const handleDelete = () => {
-    if (deleteId) {
-      setResources((prev) => prev.filter((r) => r.id !== deleteId));
-      toast.success("Resource deleted");
-    }
-    setDeleteOpen(false);
+  const handleDragLeave = () => {
+    setIsDragging(false);
   };
 
-  const columns: Column<TutorResource>[] = [
-    { key: "type", header: "Type", render: (r) => <div className="flex items-center gap-2">{typeIcons[r.type]}<span className="text-xs uppercase text-muted-foreground">{r.type.replace("_", " ")}</span></div> },
-    { key: "title", header: "Title", sortable: true, accessor: (r) => r.title },
-    { key: "subject", header: "Subject", render: (r) => <Badge variant="outline" className="text-xs">{r.subject}</Badge> },
-    { key: "uploadedDate", header: "Uploaded", sortable: true, accessor: (r) => r.uploadedDate },
-    { key: "size", header: "Size", render: (r) => <span className="text-sm text-muted-foreground">{r.size || "—"}</span> },
-  ];
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      validateAndSetFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      validateAndSetFile(e.target.files[0]);
+    }
+  };
+
+  const validateAndSetFile = (file: File) => {
+    const validExtensions = ['.pdf', '.ppt', '.pptx', '.docx', '.mp4'];
+    const fileName = file.name.toLowerCase();
+    const isValid = validExtensions.some(ext => fileName.endsWith(ext));
+
+    if (!isValid) {
+      toast({
+        title: "Invalid File Type",
+        description: "Please upload .pdf, .ppt, .docx, or .mp4 files only.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSelectedFile(file);
+  };
+
+  const removeFile = () => {
+    setSelectedFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleShare = () => {
+    if (!selectedFile || !selectedBatch) {
+      toast({
+        title: "Missing Information",
+        description: "Please attach a file and select a target batch.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+    // Determine type string simply from extension
+    const ext = selectedFile.name.split('.').pop()?.toUpperCase() || "FILE";
+
+    const newMaterial = {
+      id: `M-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
+      fileName: selectedFile.name,
+      batchName: selectedBatch,
+      fileType: ext,
+      uploadedDate: formattedDate
+    };
+
+    setMaterials([newMaterial, ...materials]);
+
+    // Reset and Close
+    removeFile();
+    setSelectedBatch("");
+    setIsModalOpen(false);
+
+    toast({
+      title: "Material Shared",
+      description: "Successfully uploaded and shared with the selected cohort.",
+    });
+  };
+
+  // Mock Actions
+  const handleRemoveMaterial = (id: string) => {
+    setMaterials(materials.filter(m => m.id !== id));
+    toast({
+      title: "Material Removed",
+      description: "The resource is no longer available to students.",
+    });
+  };
 
   return (
     <DashboardLayout>
-      <div className="animate-fade-in space-y-6">
-        <div className="flex items-center justify-between">
+      <div className="animate-fade-in space-y-6 lg:space-y-8 max-w-6xl mx-auto">
+
+        {/* Header Section */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl lg:text-3xl font-semibold text-foreground tracking-tight">Resource Library</h1>
-            <p className="text-muted-foreground mt-1">Upload and manage course materials</p>
+            <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-foreground">
+              Learning Materials
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              Distribute documents, presentations, and recordings to your active batches.
+            </p>
           </div>
-          <Button onClick={openAdd} size="sm" className="gap-2">
-            <Plus className="w-4 h-4" /> Upload Resource
-          </Button>
+
+          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <DialogTrigger asChild>
+              <Button className="gap-2 shadow-sm">
+                <Plus className="w-4 h-4" />
+                Share Material
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>Share New Material</DialogTitle>
+                <DialogDescription>
+                  Upload a resource to distribute to an active Learning Phase cohort.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="grid gap-6 py-4">
+
+                {/* Drag & Drop Zone */}
+                <div className="grid gap-2">
+                  <Label className="text-sm font-medium">Upload File <span className="text-destructive">*</span></Label>
+
+                  {!selectedFile ? (
+                    <div
+                      className={`
+                        border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center text-center transition-all cursor-pointer
+                        ${isDragging ? 'border-primary bg-primary/5' : 'border-border/60 bg-muted/20 hover:bg-muted/40 hover:border-primary/50'}
+                      `}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        className="hidden"
+                        onChange={handleFileInput}
+                        accept=".pdf,.ppt,.pptx,.docx,.mp4"
+                      />
+                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                        <UploadCloud className="w-6 h-6 text-primary" />
+                      </div>
+                      <p className="text-sm font-medium text-foreground mb-1">
+                        Drag & drop your file here or click to browse
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Supported formats: .pdf, .ppt, .docx, .mp4 (Max 50MB)
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="border border-border/50 rounded-xl p-4 flex items-center justify-between bg-muted/10">
+                      <div className="flex items-center gap-3 overflow-hidden">
+                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                          <FileText className="w-5 h-5 text-primary" />
+                        </div>
+                        <div className="truncate">
+                          <p className="text-sm font-medium text-foreground truncate">{selectedFile.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
+                          </p>
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="icon" onClick={removeFile} className="shrink-0 text-muted-foreground hover:text-destructive">
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Batch Selection */}
+                <div className="grid gap-2">
+                  <Label className="text-sm font-medium">Target Batch <span className="text-destructive">*</span></Label>
+                  <Select
+                    value={selectedBatch}
+                    onValueChange={setSelectedBatch}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select cohort to share with..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableBatches.map(b => (
+                        <SelectItem key={b} value={b}>{b}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+              </div>
+
+              <DialogFooter>
+                <Button variant="outline" onClick={() => {
+                  setIsModalOpen(false);
+                  removeFile();
+                  setSelectedBatch("");
+                }}>
+                  Cancel
+                </Button>
+                <Button onClick={handleShare} className="gap-2">
+                  <UploadCloud className="w-4 h-4" />
+                  Share Resource
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
 
-        {/* Summary */}
-        <div className="flex items-center gap-4">
-          {Object.entries(resources.reduce((acc, r) => { acc[r.type] = (acc[r.type] || 0) + 1; return acc; }, {} as Record<string, number>)).map(([type, count]) => (
-            <Badge key={type} variant="secondary" className="gap-1.5 py-1.5 px-3">
-              {typeIcons[type]} {count} {type.replace("_", " ")}s
-            </Badge>
-          ))}
-        </div>
+        {/* Materials Table Card */}
+        <Card className="border-border/50 shadow-sm">
+          <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between pb-4">
+            <CardTitle className="text-lg font-semibold flex items-center gap-2">
+              <FileText className="w-5 h-5 text-primary" />
+              Shared Materials Repository
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader className="bg-muted/30">
+                  <TableRow>
+                    <TableHead className="pl-6 w-[350px]">File Name</TableHead>
+                    <TableHead>Batch</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Uploaded Date</TableHead>
+                    <TableHead className="pr-6 text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {materials.length > 0 ? (
+                    materials.map((material) => (
+                      <TableRow key={material.id} className="hover:bg-muted/20 transition-colors">
+                        <TableCell className="pl-6">
+                          <div className="flex items-center gap-3">
+                            <FileText className="w-4 h-4 text-muted-foreground shrink-0" />
+                            <span className="font-medium text-foreground line-clamp-1">
+                              {material.fileName}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="secondary" className="font-normal text-muted-foreground">
+                            {material.batchName}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="text-xs bg-muted text-muted-foreground">
+                            {material.fileType}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-sm">
+                          {material.uploadedDate}
+                        </TableCell>
+                        <TableCell className="pr-6 text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="w-8 h-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
+                              title="View Material"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="w-8 h-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                              onClick={() => handleRemoveMaterial(material.id)}
+                              title="Remove Material"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                        No materials have been shared yet.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
 
-        <DataTable
-          data={resources}
-          columns={columns}
-          searchPlaceholder="Search resources..."
-          searchKey={(r) => `${r.title} ${r.subject} ${r.type}`}
-          actions={(item) => (
-            <div className="flex gap-1">
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(item)}>
-                <Pencil className="w-4 h-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => openDelete(item.id)}>
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </div>
-          )}
-        />
-
-        <GenericModalForm
-          open={modalOpen}
-          onOpenChange={setModalOpen}
-          title={editingId ? "Edit Resource" : "Upload Resource"}
-          description={editingId ? "Update resource details" : "Add a new learning resource"}
-          onSubmit={handleSave}
-          isValid={!!form.title && !!form.subject && !!form.url}
-        >
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2 col-span-2">
-              <Label>Title</Label>
-              <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="React Hooks Cheat Sheet" />
-            </div>
-            <div className="space-y-2">
-              <Label>Subject</Label>
-              <Select value={form.subject} onValueChange={(v) => setForm({ ...form, subject: v })}>
-                <SelectTrigger><SelectValue placeholder="Select subject" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Full Stack Web Dev">Full Stack Web Dev</SelectItem>
-                  <SelectItem value="Data Science Mastery">Data Science Mastery</SelectItem>
-                  <SelectItem value="UI/UX Design Pro">UI/UX Design Pro</SelectItem>
-                  <SelectItem value="React Advanced">React Advanced</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Type</Label>
-              <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v as TutorResource["type"] })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pdf">PDF</SelectItem>
-                  <SelectItem value="video">Video</SelectItem>
-                  <SelectItem value="drive_folder">Drive Folder</SelectItem>
-                  <SelectItem value="link">Link</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2 col-span-2">
-              <Label>URL / Path</Label>
-              <Input value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} placeholder="https://..." />
-            </div>
-            <div className="space-y-2">
-              <Label>File Size (optional)</Label>
-              <Input value={form.size || ""} onChange={(e) => setForm({ ...form, size: e.target.value })} placeholder="2.4 MB" />
-            </div>
-          </div>
-        </GenericModalForm>
-
-        <DeleteConfirmDialog open={deleteOpen} onOpenChange={setDeleteOpen} title="Delete Resource" description="This will permanently remove this resource." onConfirm={handleDelete} />
       </div>
     </DashboardLayout>
   );

@@ -32,24 +32,24 @@ interface SidebarBadge {
 
 // Create dynamic sidebar badges from studentData
 const getStudentBadges = (): Record<string, SidebarBadge> => ({
-  "/student/attendance": { 
-    text: `${studentData.attendance.percentage}%`, 
-    subtext: studentData.attendance.provider, 
-    variant: "success" 
+  "/student/attendance": {
+    text: `${studentData.attendance.percentage}%`,
+    subtext: studentData.attendance.provider,
+    variant: "success"
   },
-  "/student/notifications": { 
-    count: studentData.notifications.filter(n => !n.is_read).length 
+  "/student/notifications": {
+    count: studentData.notifications.filter(n => !n.is_read).length
   },
-  "/student/wallet": { 
-    text: studentData.wallet.status, 
-    subtext: `Next due: ${studentData.wallet.next_due.split(',')[0]}` 
+  "/student/wallet": {
+    text: studentData.wallet.status,
+    subtext: `Next due: ${studentData.wallet.next_due.split(',')[0]}`
   },
-  "/student/certificates": { 
-    count: studentData.certificates.length, 
-    label: "earned" 
+  "/student/certificates": {
+    count: studentData.certificates.length,
+    label: "earned"
   },
-  "/student/packages": { 
-    upsell: "Advance AI Mastery" 
+  "/student/packages": {
+    upsell: "Advance AI Mastery"
   },
 });
 
@@ -91,7 +91,7 @@ export function AppSidebar() {
     if (badgeData.text && !isCollapsed) {
       return (
         <div className="flex flex-col items-end ml-auto">
-          <Badge 
+          <Badge
             variant={badgeData.variant === "success" ? "default" : "secondary"}
             className={`text-xs ${badgeData.variant === "success" ? "bg-primary/10 text-primary" : ""}`}
           >
@@ -136,7 +136,7 @@ export function AppSidebar() {
         {role === "student" && !isCollapsed && (
           <div className="px-3 py-4 mb-2 rounded-xl bg-gradient-to-br from-primary/5 to-accent/10 border border-primary/10">
             <div className="flex items-center gap-3">
-              <img 
+              <img
                 src={studentData.profile.avatar}
                 alt={studentData.profile.name}
                 className="w-10 h-10 rounded-full border-2 border-primary/20"
@@ -206,9 +206,11 @@ export function AppSidebar() {
 
         {/* Secondary navigation */}
         <SidebarGroup className="mt-4">
-          <SidebarGroupLabel className={isCollapsed ? "sr-only" : ""}>
-            More
-          </SidebarGroupLabel>
+          {role !== "tutor" && (
+            <SidebarGroupLabel className={isCollapsed ? "sr-only" : ""}>
+              More
+            </SidebarGroupLabel>
+          )}
           <SidebarGroupContent>
             <SidebarMenu>
               {navigation.secondaryNav.map((item) => {
@@ -250,7 +252,7 @@ export function AppSidebar() {
       <SidebarFooter className="p-3 border-t border-sidebar-border">
         <div className="flex items-center gap-3">
           {role === "student" ? (
-            <img 
+            <img
               src={studentData.profile.avatar}
               alt="Profile"
               className="w-9 h-9 rounded-full shrink-0"
@@ -271,7 +273,7 @@ export function AppSidebar() {
             </div>
           )}
           {!isCollapsed && (
-            <button 
+            <button
               onClick={handleLogout}
               className="p-2 hover:bg-sidebar-accent rounded-xl transition-colors text-muted-foreground hover:text-foreground"
             >

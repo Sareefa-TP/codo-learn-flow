@@ -55,6 +55,7 @@ export const studentNavigation: RoleNavigation = {
     { title: "My Course", url: "/student/packages", icon: BookOpen },
     { title: "Classes & Schedule", url: "/student/classes", icon: Calendar },
     { title: "Learning Materials", url: "/student/materials", icon: FileText },
+    { title: "Assignments", url: "/student/assignments", icon: ClipboardList },
     { title: "Wallet & Payments", url: "/student/wallet", icon: Wallet },
     { title: "Certificate", url: "/student/certificates", icon: Award },
   ],
@@ -81,25 +82,20 @@ export const internNavigation: RoleNavigation = {
   ],
 };
 
-// Tutor Navigation - Focus: teaching efficiency and evaluation clarity
+// Tutor Navigation - Focus: teaching efficiency and evaluation clarity for Learning Phase
 export const tutorNavigation: RoleNavigation = {
   role: "tutor",
   label: "Tutor",
   baseUrl: "/tutor",
   mainNav: [
     { title: "Dashboard", url: "/tutor", icon: LayoutDashboard },
-    { title: "Profile", url: "/tutor/profile", icon: User },
-    { title: "Classes", url: "/tutor/classes", icon: BookOpen },
-    { title: "Learning Materials", url: "/tutor/materials", icon: FileText },
+    { title: "My Batches", url: "/tutor/batches", icon: BookOpen },
+    { title: "Students", url: "/tutor/students", icon: Users },
     { title: "Assignments", url: "/tutor/assignments", icon: ClipboardList },
-    { title: "Evaluations", url: "/tutor/evaluations", icon: BarChart3 },
-    { title: "Student Performance", url: "/tutor/performance", icon: Users },
-    { title: "Salary", url: "/tutor/salary", icon: DollarSign },
+    { title: "Announcements", url: "/tutor/announcements", icon: Bell },
+    { title: "Learning Materials", url: "/tutor/materials", icon: FileText },
   ],
-  secondaryNav: [
-    { title: "Notifications", url: "/tutor/notifications", icon: Bell },
-    { title: "Feedback", url: "/tutor/feedback", icon: MessageSquare },
-  ],
+  secondaryNav: [],
 };
 
 // Mentor Navigation - Focus: guidance, oversight, insight
@@ -175,7 +171,8 @@ export const superadminNavigation: RoleNavigation = {
     { title: "Interns", url: "/superadmin/interns", icon: Briefcase },
     { title: "Tutors", url: "/superadmin/tutors", icon: BookOpen },
     { title: "Mentors", url: "/superadmin/mentors", icon: Users },
-    { title: "Courses & Packages", url: "/superadmin/courses", icon: Package },
+    { title: "Program Structure", url: "/superadmin/program", icon: Package },
+    { title: "Batches", url: "/superadmin/batches", icon: Users },
     { title: "Finance & Payroll", url: "/superadmin/finance", icon: CreditCard },
     { title: "Reports & Analytics", url: "/superadmin/reports", icon: PieChart },
     { title: "Certificates", url: "/superadmin/certificates", icon: Award },

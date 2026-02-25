@@ -14,6 +14,7 @@ import StudentProfile from "./pages/student/Profile";
 import StudentClasses from "./pages/student/Classes";
 import StudentAttendance from "./pages/student/Attendance";
 import StudentMaterials from "./pages/student/Materials";
+import StudentAssignments from "./pages/student/Assignments";
 import StudentRecordings from "./pages/student/Recordings";
 import StudentAssessments from "./pages/student/Assessments";
 import StudentPackages from "./pages/student/Packages";
@@ -35,15 +36,11 @@ import InternFeedback from "./pages/intern/Feedback";
 
 // Tutor Pages
 import TutorDashboard from "./pages/tutor/Dashboard";
-import TutorProfile from "./pages/tutor/Profile";
-import TutorClasses from "./pages/tutor/Classes";
-import TutorMaterials from "./pages/tutor/Materials";
+import TutorBatches from "./pages/tutor/Batches";
+import TutorStudents from "./pages/tutor/Students";
 import TutorAssignments from "./pages/tutor/Assignments";
-import TutorEvaluations from "./pages/tutor/Evaluations";
-import TutorPerformance from "./pages/tutor/Performance";
-import TutorSalary from "./pages/tutor/Salary";
-import TutorNotifications from "./pages/tutor/Notifications";
-import TutorFeedback from "./pages/tutor/Feedback";
+import TutorAnnouncements from "./pages/tutor/Announcements";
+import TutorMaterials from "./pages/tutor/Materials";
 
 // Mentor Pages
 import MentorDashboard from "./pages/mentor/Dashboard";
@@ -86,7 +83,8 @@ import SuperAdminStudents from "./pages/superadmin/Students";
 import SuperAdminInterns from "./pages/superadmin/Interns";
 import SuperAdminTutors from "./pages/superadmin/Tutors";
 import SuperAdminMentors from "./pages/superadmin/Mentors";
-import SuperAdminCourses from "./pages/superadmin/Courses";
+import SuperAdminProgram from "./pages/superadmin/Program";
+import SuperAdminBatches from "./pages/superadmin/Batches";
 import SuperAdminFinance from "./pages/superadmin/Finance";
 import SuperAdminReports from "./pages/superadmin/Reports";
 import SuperAdminCertificates from "./pages/superadmin/Certificates";
@@ -114,6 +112,7 @@ const App = () => (
           <Route path="/student/classes" element={<StudentClasses />} />
           <Route path="/student/attendance" element={<StudentAttendance />} />
           <Route path="/student/materials" element={<StudentMaterials />} />
+          <Route path="/student/assignments" element={<StudentAssignments />} />
           <Route path="/student/recordings" element={<StudentRecordings />} />
           <Route path="/student/assessments" element={<StudentAssessments />} />
           <Route path="/student/packages" element={<StudentPackages />} />
@@ -135,15 +134,11 @@ const App = () => (
 
           {/* Tutor Routes */}
           <Route path="/tutor" element={<TutorDashboard />} />
-          <Route path="/tutor/profile" element={<TutorProfile />} />
-          <Route path="/tutor/classes" element={<TutorClasses />} />
-          <Route path="/tutor/materials" element={<TutorMaterials />} />
+          <Route path="/tutor/batches" element={<TutorBatches />} />
+          <Route path="/tutor/students" element={<TutorStudents />} />
           <Route path="/tutor/assignments" element={<TutorAssignments />} />
-          <Route path="/tutor/evaluations" element={<TutorEvaluations />} />
-          <Route path="/tutor/performance" element={<TutorPerformance />} />
-          <Route path="/tutor/salary" element={<TutorSalary />} />
-          <Route path="/tutor/notifications" element={<TutorNotifications />} />
-          <Route path="/tutor/feedback" element={<TutorFeedback />} />
+          <Route path="/tutor/announcements" element={<TutorAnnouncements />} />
+          <Route path="/tutor/materials" element={<TutorMaterials />} />
 
           {/* Mentor Routes */}
           <Route path="/mentor" element={<MentorDashboard />} />
@@ -186,7 +181,8 @@ const App = () => (
           <Route path="/superadmin/interns" element={<SuperAdminInterns />} />
           <Route path="/superadmin/tutors" element={<SuperAdminTutors />} />
           <Route path="/superadmin/mentors" element={<SuperAdminMentors />} />
-          <Route path="/superadmin/courses" element={<SuperAdminCourses />} />
+          <Route path="/superadmin/program" element={<SuperAdminProgram />} />
+          <Route path="/superadmin/batches" element={<SuperAdminBatches />} />
           <Route path="/superadmin/finance" element={<SuperAdminFinance />} />
           <Route path="/superadmin/reports" element={<SuperAdminReports />} />
           <Route path="/superadmin/certificates" element={<SuperAdminCertificates />} />
