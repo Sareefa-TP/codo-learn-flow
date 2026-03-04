@@ -47,28 +47,64 @@ import {
   Repeat,
   ArrowRight,
   Power,
+  Trash2,
   FileText,
-  Download
+  Download,
+  UserPlus
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { AddStudentModal } from "@/components/admin/students/AddStudentModal";
 
 // Static mock data conforming to structure
-const mockAssignmentsA = [
-  { id: "A1", title: "React Fundamentals", submissionDate: "12 Feb 2026", status: "Graded", grade: 90, feedback: "Excellent use of hooks.", fileUrl: "#" },
-  { id: "A2", title: "State Management", submissionDate: "18 Feb 2026", status: "Submitted", grade: null, feedback: "", fileUrl: "#" },
-  { id: "A3", title: "API Integration", submissionDate: "-", status: "Missing", grade: null, feedback: "", fileUrl: null }
+const realisticAssignments = [
+  {
+    id: "1",
+    title: "HTML Fundamentals",
+    submissionDate: "2025-01-10",
+    status: "Graded",
+    grade: 85,
+    feedback: "Good structure and clean markup.",
+    fileUrl: "https://example.com/html-assignment.pdf"
+  },
+  {
+    id: "2",
+    title: "CSS Layout Design",
+    submissionDate: "2025-01-18",
+    status: "Graded",
+    grade: 78,
+    feedback: "Improve responsiveness and spacing.",
+    fileUrl: "https://example.com/css-assignment.pdf"
+  },
+  {
+    id: "3",
+    title: "JavaScript Basics",
+    submissionDate: "2025-01-25",
+    status: "Submitted",
+    grade: null,
+    feedback: "",
+    fileUrl: "https://example.com/js-assignment.pdf"
+  },
+  {
+    id: "4",
+    title: "React Mini Project",
+    submissionDate: null,
+    status: "Missing",
+    grade: null,
+    feedback: "",
+    fileUrl: null
+  }
 ];
+
 const mockAssignmentsB = [
-  { id: "A1", title: "React Fundamentals", submissionDate: "10 Feb 2026", status: "Graded", grade: 85, feedback: "Good job.", fileUrl: "#" },
-  { id: "A4", title: "Final Project Draft", submissionDate: "16 Feb 2026", status: "Late", grade: 70, feedback: "-10 marks for late submission.", fileUrl: "#" }
+  { id: "A1", title: "React Fundamentals", submissionDate: "10 Feb 2026", status: "Graded", grade: 85, feedback: "Good job.", fileUrl: "#" }
 ];
 
 const initialStudents = [
-  { id: "S1", name: "Ravi Kumar", email: "ravi@example.com", batch: "Jan 2026 Cohort", phase: "Learning", progress: 65, attendance: 85, status: "Active", mentor: "", internshipStatus: "", assignments: mockAssignmentsA },
-  { id: "S2", name: "Priya Singh", email: "priya@example.com", batch: "Oct 2025 Cohort", phase: "Learning", progress: 100, attendance: 92, status: "Active", mentor: "", internshipStatus: "", assignments: mockAssignmentsB },
+  { id: "S1", name: "Ravi Kumar", email: "ravi@example.com", batch: "Jan 2026 Cohort", phase: "Learning", progress: 65, attendance: 85, status: "Active", mentor: "", internshipStatus: "", assignments: realisticAssignments },
+  { id: "S2", name: "Priya Singh", email: "priya@example.com", batch: "Oct 2025 Cohort", phase: "Learning", progress: 100, attendance: 92, status: "Active", mentor: "", internshipStatus: "", assignments: realisticAssignments },
   { id: "S3", name: "Rahul Sharma", email: "rahul@example.com", batch: "Feb 2026 Python", phase: "Learning", progress: 40, attendance: 60, status: "Active", mentor: "", internshipStatus: "", assignments: [] },
   { id: "S4", name: "Neha Gupta", email: "neha@example.com", batch: "Jan 2026 Cohort", phase: "Learning", progress: 12, attendance: 30, status: "Inactive", mentor: "", internshipStatus: "", assignments: [] },
-  { id: "S5", name: "Amit Verma", email: "amit@example.com", batch: "Oct 2025 Cohort", phase: "Learning", progress: 100, attendance: 78, status: "Active", mentor: "", internshipStatus: "", assignments: mockAssignmentsA },
+  { id: "S5", name: "Amit Verma", email: "amit@example.com", batch: "Oct 2025 Cohort", phase: "Learning", progress: 100, attendance: 78, status: "Active", mentor: "", internshipStatus: "", assignments: realisticAssignments },
   { id: "S6", name: "Sara Khan", email: "sara@example.com", batch: "Feb 2026 Python", phase: "Learning", progress: 85, attendance: 55, status: "Active", mentor: "", internshipStatus: "", assignments: mockAssignmentsB },
   { id: "S7", name: "Ajay Dev", email: "ajay@example.com", batch: "Jul 2025 Evening", phase: "Internship", progress: 100, attendance: 95, status: "Active", mentor: "Arun", internshipStatus: "Placed", assignments: [] } // Intern - should not appear
 ];
@@ -92,10 +128,12 @@ const AdminStudents = () => {
   const [editStudent, setEditStudent] = useState<typeof initialStudents[0] | null>(null);
   const [changeBatchStudent, setChangeBatchStudent] = useState<typeof initialStudents[0] | null>(null);
   const [moveInternshipStudent, setMoveInternshipStudent] = useState<typeof initialStudents[0] | null>(null);
+  const [deleteStudent, setDeleteStudent] = useState<typeof initialStudents[0] | null>(null);
 
   // Forms state
   const [editForm, setEditForm] = useState({ name: "", email: "", batch: "", status: "" });
   const [newBatchValue, setNewBatchValue] = useState("");
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   // Base learning students
   const learningStudents = students.filter(s => s.phase === "Learning");
@@ -155,6 +193,23 @@ const AdminStudents = () => {
     toast({ title: "Status Updated", description: `Student marked as ${newStatus}.` });
   };
 
+  const handleSaveNewStudent = (newStudent: any) => {
+    // Merge new student at top of list
+    setStudents([newStudent, ...students]);
+    setIsAddModalOpen(false);
+    toast({
+      title: "Student Created",
+      description: `${newStudent.name} has been successfully enrolled.`
+    });
+  };
+
+  const handleConfirmDelete = () => {
+    if (!deleteStudent) return;
+    setStudents(students.filter(s => s.id !== deleteStudent.id));
+    toast({ title: "Student Deleted", description: "Student has been removed.", variant: "destructive" });
+    setDeleteStudent(null);
+  };
+
   // Summary Click Handlers
   const applyFilter = (type: "Total" | "Ready" | "Inactive") => {
     setSearchTerm("");
@@ -176,13 +231,19 @@ const AdminStudents = () => {
       <div className="animate-fade-in space-y-6 lg:space-y-8 max-w-7xl mx-auto pb-10">
 
         {/* Header */}
-        <div>
-          <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-foreground">
-            Learning Phase Students
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Manage students currently in the learning program.
-          </p>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-foreground">
+              Learning Phase Students
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              Manage students currently in the learning program.
+            </p>
+          </div>
+          <Button onClick={() => setIsAddModalOpen(true)}>
+            <UserPlus className="w-4 h-4 mr-2" />
+            Add Student
+          </Button>
         </div>
 
         {/* 1. Summary Cards */}
@@ -378,6 +439,13 @@ const AdminStudents = () => {
                               <Power className="w-4 h-4" />
                               {student.status === "Active" ? "Deactivate Student" : "Activate Student"}
                             </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="cursor-pointer gap-2 text-destructive focus:text-destructive focus:bg-destructive/10"
+                              onClick={() => setDeleteStudent(student)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              Delete
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -452,8 +520,8 @@ const AdminStudents = () => {
                         <Progress
                           value={viewStudent.attendance ?? 0}
                           className={`h-2 flex-1 ${(viewStudent.attendance ?? 0) >= 75 ? "[&>div]:bg-emerald-500" :
-                              (viewStudent.attendance ?? 0) >= 50 ? "[&>div]:bg-yellow-500" :
-                                "[&>div]:bg-destructive"
+                            (viewStudent.attendance ?? 0) >= 50 ? "[&>div]:bg-yellow-500" :
+                              "[&>div]:bg-destructive"
                             }`}
                         />
                         <span className="text-sm font-semibold">{viewStudent.attendance ?? 0}%</span>
@@ -492,7 +560,7 @@ const AdminStudents = () => {
                       <p className="font-semibold text-foreground">
                         {viewStudent.assignments?.filter(a => a.grade !== null).length
                           ? Math.round(viewStudent.assignments.filter(a => a.grade !== null).reduce((acc, curr) => acc + (curr.grade || 0), 0) / viewStudent.assignments.filter(a => a.grade !== null).length) + "%"
-                          : "--"}
+                          : "0%"}
                       </p>
                     </div>
                   </div>
@@ -516,12 +584,14 @@ const AdminStudents = () => {
                             viewStudent.assignments.map((assignment) => (
                               <TableRow key={assignment.id} className="hover:bg-muted/20">
                                 <TableCell className="font-medium text-xs">{assignment.title}</TableCell>
-                                <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{assignment.submissionDate}</TableCell>
+                                <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                                  {assignment.submissionDate ? assignment.submissionDate : "Not Submitted"}
+                                </TableCell>
                                 <TableCell>
                                   <Badge variant="outline" className={`text-[10px] px-1.5 py-0 h-5 ${assignment.status === 'Graded' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' :
-                                      assignment.status === 'Submitted' ? 'bg-blue-500/10 text-blue-600 border-blue-500/20' :
-                                        assignment.status === 'Late' ? 'bg-orange-500/10 text-orange-600 border-orange-500/20' :
-                                          'bg-destructive/10 text-destructive border-destructive/20'
+                                    assignment.status === 'Submitted' ? 'bg-blue-500/10 text-blue-600 border-blue-500/20' :
+                                      assignment.status === 'Late' ? 'bg-orange-500/10 text-orange-600 border-orange-500/20' :
+                                        'bg-destructive/10 text-destructive border-destructive/20'
                                     }`}>
                                     {assignment.status}
                                   </Badge>
@@ -653,6 +723,35 @@ const AdminStudents = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Delete Confirmation Modal */}
+        <Dialog open={!!deleteStudent} onOpenChange={(open) => !open && setDeleteStudent(null)}>
+          <DialogContent className="sm:max-w-[400px]">
+            <DialogHeader>
+              <DialogTitle className="text-destructive flex items-center gap-2">
+                <Trash2 className="w-5 h-5" /> Delete Student
+              </DialogTitle>
+              <DialogDescription className="text-base pt-2">
+                Are you sure you want to delete <span className="font-semibold text-foreground">{deleteStudent?.name}</span> ({deleteStudent?.email})?
+                <div className="mt-4 p-3 bg-destructive/10 text-destructive text-sm font-medium rounded-md">
+                  This action cannot be undone.
+                </div>
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => setDeleteStudent(null)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleConfirmDelete}>Confirm Delete</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Student Modal */}
+        <AddStudentModal
+          isOpen={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
+          onSave={handleSaveNewStudent}
+          availableBatches={BATCHES}
+        />
 
       </div>
     </DashboardLayout>

@@ -58,12 +58,17 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import AdminStudents from "./pages/admin/Students";
 import AdminInterns from "./pages/admin/Interns";
 import AdminTutors from "./pages/admin/Tutors";
+import AdminTutorDetails from "./pages/admin/TutorDetails";
 import AdminMentors from "./pages/admin/Mentors";
+import AdminMentorDetails from "./pages/admin/MentorDetails";
 import AdminCourses from "./pages/admin/Courses";
+import CoursePage from "./pages/admin/CoursePage";
+import AdminBatchManagement from "./pages/admin/BatchManagement";
 import AdminAttendance from "./pages/admin/Attendance";
 import AdminAssessments from "./pages/admin/Assessments";
-import AdminFinance from "./pages/admin/Finance";
-import AdminReports from "./pages/admin/Reports";
+import AdminFinance from "./pages/admin/FinanceOverview";
+import AdminFinanceBatchDetails from "./pages/admin/FinanceBatchDetails";
+import AdminReports from "./pages/admin/AdminReports";
 import AdminNotifications from "./pages/admin/Notifications";
 
 // Finance Pages
@@ -73,8 +78,17 @@ import FinanceWallets from "./pages/finance/Wallets";
 import FinanceStipends from "./pages/finance/Stipends";
 import FinanceTutorSalaries from "./pages/finance/TutorSalaries";
 import FinanceMentorSalaries from "./pages/finance/MentorSalaries";
-import FinanceReports from "./pages/finance/Reports";
+import FinanceReports from "./pages/finance/FinanceReports";
 import FinanceNotifications from "./pages/finance/Notifications";
+import WalletTopupRequests from "./pages/finance/WalletTopupRequests";
+import StudentWallets from "./pages/finance/StudentWallets";
+import WalletTransactions from "./pages/finance/WalletTransactions";
+import CoursePayments from "./pages/finance/CoursePayments";
+import TutorEarnings from "./pages/finance/TutorEarnings";
+import MentorEarnings from "./pages/finance/MentorEarnings";
+import InternEarnings from "./pages/finance/InternEarnings";
+import Payouts from "./pages/finance/Payouts";
+
 
 // Super Admin Pages
 import SuperAdminDashboard from "./pages/superadmin/Dashboard";
@@ -156,11 +170,16 @@ const App = () => (
           <Route path="/admin/students" element={<AdminStudents />} />
           <Route path="/admin/interns" element={<AdminInterns />} />
           <Route path="/admin/tutors" element={<AdminTutors />} />
+          <Route path="/admin/tutors/:id" element={<AdminTutorDetails />} />
           <Route path="/admin/mentors" element={<AdminMentors />} />
-          <Route path="/admin/courses" element={<AdminCourses />} />
+          <Route path="/admin/mentors/:id" element={<AdminMentorDetails />} />
+          <Route path="/admin/courses" element={<CoursePage />} />
+          <Route path="/admin/batch" element={<AdminBatchManagement />} />
           <Route path="/admin/attendance" element={<AdminAttendance />} />
           <Route path="/admin/assessments" element={<AdminAssessments />} />
+          <Route path="/admin/assignments" element={<AdminAssessments />} />
           <Route path="/admin/finance" element={<AdminFinance />} />
+          <Route path="/admin/finance/batch/:batchId" element={<AdminFinanceBatchDetails />} />
           <Route path="/admin/reports" element={<AdminReports />} />
           <Route path="/admin/notifications" element={<AdminNotifications />} />
 
@@ -173,6 +192,18 @@ const App = () => (
           <Route path="/finance/mentor-salaries" element={<FinanceMentorSalaries />} />
           <Route path="/finance/reports" element={<FinanceReports />} />
           <Route path="/finance/notifications" element={<FinanceNotifications />} />
+          <Route path="/finance/wallets/topup" element={<WalletTopupRequests />} />
+          <Route path="/finance/wallets/students" element={<StudentWallets />} />
+          <Route path="/finance/wallets/transactions" element={<WalletTransactions />} />
+          <Route path="/finance/revenue/course-payments" element={<CoursePayments />} />
+          <Route path="/finance/earnings/tutors" element={<TutorEarnings />} />
+          <Route path="/finance/earnings/tutor" element={<TutorEarnings />} />
+          <Route path="/finance/earnings/mentors" element={<MentorEarnings />} />
+          <Route path="/finance/earnings/mentor" element={<MentorEarnings />} />
+          <Route path="/finance/earnings/interns" element={<InternEarnings />} />
+          <Route path="/finance/earnings/intern" element={<InternEarnings />} />
+          <Route path="/finance/payouts" element={<Payouts />} />
+
 
           {/* Super Admin Routes */}
           <Route path="/superadmin" element={<SuperAdminDashboard />} />

@@ -27,6 +27,8 @@ import {
   PieChart,
   ScrollText,
   UserCog,
+  Layers,
+  ChevronDown,
 } from "lucide-react";
 
 export type UserRole = "student" | "intern" | "tutor" | "mentor" | "admin" | "finance" | "superadmin";
@@ -35,6 +37,7 @@ export interface NavItem {
   title: string;
   url: string;
   icon: LucideIcon;
+  children?: NavItem[];   // optional collapsible sub-items
 }
 
 export interface RoleNavigation {
@@ -129,15 +132,14 @@ export const adminNavigation: RoleNavigation = {
     { title: "Interns", url: "/admin/interns", icon: Briefcase },
     { title: "Tutors", url: "/admin/tutors", icon: BookOpen },
     { title: "Mentors", url: "/admin/mentors", icon: Users },
-    { title: "Classes & Courses", url: "/admin/courses", icon: Package },
+    { title: "Course", url: "/admin/courses", icon: Package },
+    { title: "Batch", url: "/admin/batch", icon: Layers },
+    { title: "Assignments", url: "/admin/assignments", icon: ClipboardList },
     { title: "Attendance", url: "/admin/attendance", icon: UserCheck },
-    { title: "Assessments & Performance", url: "/admin/assessments", icon: ClipboardList },
     { title: "Finance Overview", url: "/admin/finance", icon: Wallet },
     { title: "Reports", url: "/admin/reports", icon: FileBarChart },
   ],
-  secondaryNav: [
-    { title: "Notifications", url: "/admin/notifications", icon: Bell },
-  ],
+  secondaryNav: [],
 };
 
 // Finance Navigation - Focus: accuracy, trust, clean numbers
@@ -147,17 +149,41 @@ export const financeNavigation: RoleNavigation = {
   baseUrl: "/finance",
   mainNav: [
     { title: "Dashboard", url: "/finance", icon: LayoutDashboard },
-    { title: "Student Fees", url: "/finance/student-fees", icon: GraduationCap },
-    { title: "Wallet Management", url: "/finance/wallets", icon: Wallet },
-    { title: "Intern Stipends", url: "/finance/stipends", icon: Briefcase },
-    { title: "Tutor Salaries", url: "/finance/tutor-salaries", icon: BookOpen },
-    { title: "Mentor Salaries", url: "/finance/mentor-salaries", icon: Users },
-    { title: "Financial Reports", url: "/finance/reports", icon: FileBarChart },
+    {
+      title: "Wallet",
+      url: "/finance/wallets",
+      icon: Wallet,
+      children: [
+        { title: "Top-up Requests", url: "/finance/wallets/topup", icon: CreditCard },
+        { title: "Student Wallets", url: "/finance/wallets/students", icon: GraduationCap },
+        { title: "Wallet Transactions", url: "/finance/wallets/transactions", icon: BarChart3 },
+      ],
+    },
+    {
+      title: "Revenue",
+      url: "/finance/revenue",
+      icon: TrendingUp,
+      children: [
+        { title: "Course Payments", url: "/finance/revenue/course-payments", icon: DollarSign },
+      ],
+    },
+    {
+      title: "Earnings",
+      url: "/finance/earnings",
+      icon: PieChart,
+      children: [
+        { title: "Tutor Earnings", url: "/finance/earnings/tutor", icon: BookOpen },
+        { title: "Mentor Earnings", url: "/finance/earnings/mentor", icon: Users },
+        { title: "Intern Earnings", url: "/finance/earnings/intern", icon: Briefcase },
+      ],
+    },
+    { title: "Payouts", url: "/finance/payouts", icon: CreditCard },
+    { title: "Reports", url: "/finance/reports", icon: FileBarChart },
   ],
-  secondaryNav: [
-    { title: "Notifications", url: "/finance/notifications", icon: Bell },
-  ],
+  secondaryNav: [],
 };
+
+export { ChevronDown };
 
 // Super Admin Navigation - Focus: full control and governance
 export const superadminNavigation: RoleNavigation = {

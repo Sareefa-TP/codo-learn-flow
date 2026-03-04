@@ -1,4 +1,5 @@
-import { LogOut, RefreshCw } from "lucide-react";
+import { useState } from "react";
+import { LogOut, RefreshCw, ChevronDown } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate } from "react-router-dom";
 import Logo from "@/components/Logo";
@@ -15,10 +16,18 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
   SidebarFooter,
   SidebarHeader,
   useSidebar,
 } from "@/components/ui/sidebar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 // Badge data type
 interface SidebarBadge {
@@ -58,6 +67,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
   const { role, navigation, displayInfo } = useRole();
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
 
   const handleLogout = () => {
     sessionStorage.removeItem("selectedRole");
@@ -171,6 +181,61 @@ export function AppSidebar() {
             <SidebarMenu>
               {navigation.mainNav.map((item) => {
                 const badgeData = getBadgeForPath(item.url);
+
+                // ── Collapsible group (items with children) ──────────────
+                if (item.children && item.children.length > 0) {
+                  const isOpen = !!openGroups[item.title];
+                  return (
+                    <Collapsible
+                      key={item.title}
+                      open={isOpen}
+                      onOpenChange={(open) =>
+                        setOpenGroups(prev => ({ ...prev, [item.title]: open }))
+                      }
+                    >
+                      <SidebarMenuItem>
+                        <CollapsibleTrigger asChild>
+                          <SidebarMenuButton
+                            tooltip={item.title}
+                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors w-full"
+                          >
+                            <item.icon className="w-5 h-5 shrink-0" />
+                            {!isCollapsed && (
+                              <>
+                                <span className="flex-1 text-left">{item.title}</span>
+                                <ChevronDown
+                                  className={`w-4 h-4 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+                                    }`}
+                                />
+                              </>
+                            )}
+                          </SidebarMenuButton>
+                        </CollapsibleTrigger>
+
+                        <CollapsibleContent>
+                          <SidebarMenuSub>
+                            {item.children.map(child => (
+                              <SidebarMenuSubItem key={child.title}>
+                                <SidebarMenuSubButton asChild>
+                                  <NavLink
+                                    to={child.url}
+                                    className="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm"
+                                    activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                                  >
+                                    <child.icon className="w-4 h-4 shrink-0" />
+                                    {!isCollapsed && <span>{child.title}</span>}
+                                  </NavLink>
+                                </SidebarMenuSubButton>
+                              </SidebarMenuSubItem>
+                            ))}
+                          </SidebarMenuSub>
+                        </CollapsibleContent>
+                      </SidebarMenuItem>
+                    </Collapsible>
+                  );
+                }
+
+                // ── Flat item (no children) — original rendering ─────────
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
