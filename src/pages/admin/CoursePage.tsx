@@ -20,7 +20,7 @@ import {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type MaterialType = "PDF" | "PPT" | "VIDEO" | "LINK";
+type MaterialType = "PDF" | "PPT" | "VIDEO" | "LINK" | "DOC" | "IMAGE";
 
 interface Material {
     id: number;
@@ -73,6 +73,8 @@ const typeIcon: Record<MaterialType, React.ElementType> = {
     PPT: Presentation,
     VIDEO: FileVideo,
     LINK: Link2,
+    DOC: FileText,
+    IMAGE: FileText,
 };
 
 const typeColor: Record<MaterialType, string> = {
@@ -80,7 +82,24 @@ const typeColor: Record<MaterialType, string> = {
     PPT: "bg-amber-500/10 text-amber-600 border-amber-500/20",
     VIDEO: "bg-blue-500/10 text-blue-600 border-blue-500/20",
     LINK: "bg-violet-500/10 text-violet-600 border-violet-500/20",
+    DOC: "bg-sky-500/10 text-sky-600 border-sky-500/20",
+    IMAGE: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
 };
+
+// Detect type from file extension
+const detectType = (name: string): MaterialType => {
+    const ext = name.split(".").pop()?.toLowerCase() ?? "";
+    if (ext === "pdf") return "PDF";
+    if (["ppt", "pptx"].includes(ext)) return "PPT";
+    if (["mp4", "mov", "avi", "mkv"].includes(ext)) return "VIDEO";
+    if (["doc", "docx"].includes(ext)) return "DOC";
+    if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) return "IMAGE";
+    return "PDF"; // fallback
+};
+
+// Strip extension from filename to use as default title
+const nameWithoutExt = (name: string) =>
+    name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
 
 // ─── Add Material Modal ───────────────────────────────────────────────────────
 
@@ -95,15 +114,21 @@ const AddMaterialModal = ({ moduleTitle, onClose, onAdd }: AddMaterialModalProps
     const [type, setType] = useState<MaterialType>("PDF");
     const [fileName, setFileName] = useState("");
     const [link, setLink] = useState("");
+    const [mode, setMode] = useState<"file" | "link">("file");
     const fileRef = useRef<HTMLInputElement>(null);
 
-    const needsFile = type !== "LINK";
-    const needsLink = type === "LINK" || type === "VIDEO";
-    const isValid = title.trim() && (type === "LINK" ? link.trim() : fileName || link.trim());
+    const isValid =
+        title.trim() &&
+        (mode === "link" ? link.trim() : fileName.trim());
 
     const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
         const f = e.target.files?.[0];
-        if (f) setFileName(f.name);
+        if (!f) return;
+        const detected = detectType(f.name);
+        setType(detected);
+        setFileName(f.name);
+        // Auto-fill title only if blank
+        if (!title.trim()) setTitle(nameWithoutExt(f.name));
     };
 
     const handleAdd = () => {
@@ -111,8 +136,8 @@ const AddMaterialModal = ({ moduleTitle, onClose, onAdd }: AddMaterialModalProps
         onAdd({
             id: materialId++,
             title: title.trim(),
-            type,
-            fileName: needsFile ? fileName : "",
+            type: mode === "link" ? "LINK" : type,
+            fileName: mode === "file" ? fileName : "",
             link: link.trim(),
             uploadedDate: today(),
         });
@@ -138,6 +163,79 @@ const AddMaterialModal = ({ moduleTitle, onClose, onAdd }: AddMaterialModalProps
 
                 {/* Body */}
                 <div className="p-5 space-y-4">
+
+                    {/* Mode toggle */}
+                    <div className="flex gap-2 p-1 bg-muted rounded-lg">
+                        <button
+                            onClick={() => setMode("file")}
+                            className={`flex-1 text-xs py-1.5 rounded-md font-medium transition-colors ${mode === "file" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+                                }`}
+                        >
+                            Upload File
+                        </button>
+                        <button
+                            onClick={() => setMode("link")}
+                            className={`flex-1 text-xs py-1.5 rounded-md font-medium transition-colors ${mode === "link" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
+                                }`}
+                        >
+                            External Link
+                        </button>
+                    </div>
+
+                    {/* File Upload */}
+                    {mode === "file" && (
+                        <div className="space-y-1.5">
+                            <Label>Select File</Label>
+                            <div
+                                className={`border-2 border-dashed rounded-lg p-5 text-center cursor-pointer hover:bg-muted/30 transition-colors ${fileName ? "border-primary/40 bg-primary/5" : "border-border/50"
+                                    }`}
+                                onClick={() => fileRef.current?.click()}
+                            >
+                                <input
+                                    ref={fileRef}
+                                    type="file"
+                                    className="hidden"
+                                    accept=".pdf,.ppt,.pptx,.mp4,.mov,.avi,.mkv,.doc,.docx,.jpg,.jpeg,.png,.gif,.webp"
+                                    onChange={handleFile}
+                                />
+                                {fileName ? (
+                                    <>
+                                        <div className={`w-10 h-10 mx-auto rounded-full flex items-center justify-center border mb-2 ${typeColor[type]
+                                            }`}>
+                                            {(() => { const Icon = typeIcon[type]; return <Icon className="w-5 h-5" />; })()}
+                                        </div>
+                                        <p className="text-sm font-medium truncate">{fileName}</p>
+                                        <span className={`inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border ${typeColor[type]
+                                            }`}>{type}</span>
+                                        <p className="text-xs text-muted-foreground mt-1">Click to change file</p>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Upload className="w-7 h-7 mx-auto text-muted-foreground mb-2" />
+                                        <p className="text-sm font-medium">Click to browse</p>
+                                        <p className="text-xs text-muted-foreground mt-0.5">
+                                            PDF, PPT, Video, DOC, Image
+                                        </p>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* External Link */}
+                    {mode === "link" && (
+                        <div className="space-y-1.5">
+                            <Label htmlFor="mat-link">Video / External URL <span className="text-destructive">*</span></Label>
+                            <Input
+                                id="mat-link"
+                                placeholder="https://youtube.com/watch?v=..."
+                                value={link}
+                                onChange={e => setLink(e.target.value)}
+                                autoFocus
+                            />
+                        </div>
+                    )}
+
                     {/* Title */}
                     <div className="space-y-1.5">
                         <Label htmlFor="mat-title">Material Title <span className="text-destructive">*</span></Label>
@@ -148,53 +246,6 @@ const AddMaterialModal = ({ moduleTitle, onClose, onAdd }: AddMaterialModalProps
                             onChange={e => setTitle(e.target.value)}
                         />
                     </div>
-
-                    {/* Type */}
-                    <div className="space-y-1.5">
-                        <Label>Material Type <span className="text-destructive">*</span></Label>
-                        <Select value={type} onValueChange={v => { setType(v as MaterialType); setFileName(""); setLink(""); }}>
-                            <SelectTrigger>
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="PDF">PDF Document</SelectItem>
-                                <SelectItem value="PPT">Presentation (PPT)</SelectItem>
-                                <SelectItem value="VIDEO">Video File</SelectItem>
-                                <SelectItem value="LINK">External Video Link</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    {/* File Upload */}
-                    {needsFile && (
-                        <div className="space-y-1.5">
-                            <Label>Upload File</Label>
-                            <div
-                                className="border-2 border-dashed border-border/50 rounded-lg p-4 text-center cursor-pointer hover:bg-muted/30 transition-colors"
-                                onClick={() => fileRef.current?.click()}
-                            >
-                                <input ref={fileRef} type="file" className="hidden" onChange={handleFile}
-                                    accept={type === "PDF" ? ".pdf" : type === "PPT" ? ".ppt,.pptx" : ".mp4,.mov,.avi"} />
-                                <Upload className="w-5 h-5 mx-auto text-muted-foreground mb-1" />
-                                {fileName
-                                    ? <p className="text-sm font-medium truncate">{fileName}</p>
-                                    : <p className="text-sm text-muted-foreground">Click to browse file</p>}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* External Link */}
-                    {needsLink && (
-                        <div className="space-y-1.5">
-                            <Label htmlFor="mat-link">{type === "LINK" ? "Video URL *" : "External Link (optional)"}</Label>
-                            <Input
-                                id="mat-link"
-                                placeholder="https://youtube.com/..."
-                                value={link}
-                                onChange={e => setLink(e.target.value)}
-                            />
-                        </div>
-                    )}
                 </div>
 
                 {/* Footer */}
@@ -439,7 +490,8 @@ const ModuleRow = ({ module, onUpdate }: ModuleRowProps) => {
                                                 )}
                                                 <button
                                                     onClick={() => deleteMat(mat.id)}
-                                                    className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all flex-shrink-0"
+                                                    className="text-muted-foreground hover:text-destructive transition-colors flex-shrink-0"
+                                                    title="Delete material"
                                                 >
                                                     <Trash2 className="w-3.5 h-3.5" />
                                                 </button>
