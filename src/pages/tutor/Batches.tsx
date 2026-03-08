@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Users, Calendar, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 // Demo Data (Filtered for Learning Phase only)
 const tutorBatches = [
@@ -30,6 +31,7 @@ const tutorBatches = [
 ];
 
 const TutorBatches = () => {
+    const navigate = useNavigate();
     return (
         <DashboardLayout>
             <div className="animate-fade-in space-y-6 lg:space-y-8 max-w-6xl mx-auto">
@@ -85,7 +87,11 @@ const TutorBatches = () => {
 
                                 {/* Footer Action */}
                                 <div className="p-4 border-t border-border/50 bg-muted/20">
-                                    <Button variant="ghost" className="w-full justify-between hover:bg-primary/10 hover:text-primary">
+                                    <Button
+                                        variant="ghost"
+                                        className="w-full justify-between hover:bg-primary/10 hover:text-primary"
+                                        onClick={() => navigate(`/tutor/batches/${batch.id}/students`)}
+                                    >
                                         View Students
                                         <ArrowRight className="w-4 h-4" />
                                     </Button>

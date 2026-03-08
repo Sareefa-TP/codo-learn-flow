@@ -59,6 +59,7 @@ export const studentNavigation: RoleNavigation = {
     { title: "Classes & Schedule", url: "/student/classes", icon: Calendar },
     { title: "Learning Materials", url: "/student/materials", icon: FileText },
     { title: "Assignments", url: "/student/assignments", icon: ClipboardList },
+    { title: "Chat", url: "/student/chat", icon: MessageSquare },
     { title: "Wallet & Payments", url: "/student/wallet", icon: Wallet },
     { title: "Certificate", url: "/student/certificates", icon: Award },
   ],
@@ -72,17 +73,13 @@ export const internNavigation: RoleNavigation = {
   baseUrl: "/intern",
   mainNav: [
     { title: "Dashboard", url: "/intern", icon: LayoutDashboard },
-    { title: "Profile", url: "/intern/profile", icon: User },
     { title: "Tasks", url: "/intern/tasks", icon: ListTodo },
+    { title: "Weekly Report", url: "/intern/weekly-report", icon: FileText },
     { title: "Progress", url: "/intern/progress", icon: TrendingUp },
     { title: "Attendance", url: "/intern/attendance", icon: UserCheck },
-    { title: "Stipend", url: "/intern/stipend", icon: DollarSign },
     { title: "Certificates", url: "/intern/certificates", icon: Award },
   ],
-  secondaryNav: [
-    { title: "Notifications", url: "/intern/notifications", icon: Bell },
-    { title: "Feedback", url: "/intern/feedback", icon: MessageSquare },
-  ],
+  secondaryNav: [],
 };
 
 // Tutor Navigation - Focus: teaching efficiency and evaluation clarity for Learning Phase
@@ -94,6 +91,7 @@ export const tutorNavigation: RoleNavigation = {
     { title: "Dashboard", url: "/tutor", icon: LayoutDashboard },
     { title: "My Batches", url: "/tutor/batches", icon: BookOpen },
     { title: "Students", url: "/tutor/students", icon: Users },
+    { title: "Chat", url: "/tutor/chat", icon: MessageSquare },
     { title: "Assignments", url: "/tutor/assignments", icon: ClipboardList },
     { title: "Announcements", url: "/tutor/announcements", icon: Bell },
     { title: "Learning Materials", url: "/tutor/materials", icon: FileText },
@@ -108,17 +106,14 @@ export const mentorNavigation: RoleNavigation = {
   baseUrl: "/mentor",
   mainNav: [
     { title: "Dashboard", url: "/mentor", icon: LayoutDashboard },
-    { title: "Profile", url: "/mentor/profile", icon: User },
-    { title: "Students", url: "/mentor/students", icon: GraduationCap },
     { title: "Interns", url: "/mentor/interns", icon: Briefcase },
-    { title: "Progress Reports", url: "/mentor/progress", icon: TrendingUp },
-    { title: "Guidance & Notes", url: "/mentor/guidance", icon: ScrollText },
-    { title: "Salary", url: "/mentor/salary", icon: DollarSign },
+    { title: "Tasks", url: "/mentor/tasks", icon: ListTodo },
+    { title: "Task Reviews", url: "/mentor/task-reviews", icon: ClipboardList },
+    { title: "Weekly Reports", url: "/mentor/weekly-reports", icon: FileText },
+    { title: "Attendance", url: "/mentor/attendance", icon: UserCheck },
+    { title: "Performance", url: "/mentor/performance", icon: TrendingUp },
   ],
-  secondaryNav: [
-    { title: "Notifications", url: "/mentor/notifications", icon: Bell },
-    { title: "Feedback", url: "/mentor/feedback", icon: MessageSquare },
-  ],
+  secondaryNav: [],
 };
 
 // Admin Navigation - Focus: daily operations and coordination

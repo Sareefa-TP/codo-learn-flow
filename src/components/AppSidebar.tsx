@@ -270,47 +270,49 @@ export function AppSidebar() {
         </SidebarGroup>
 
         {/* Secondary navigation */}
-        <SidebarGroup className="mt-4">
-          {role !== "tutor" && (
-            <SidebarGroupLabel className={isCollapsed ? "sr-only" : ""}>
-              More
-            </SidebarGroupLabel>
-          )}
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {navigation.secondaryNav.map((item) => {
-                const badgeData = getBadgeForPath(item.url);
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      asChild
-                      tooltip={item.title}
-                    >
-                      <NavLink
-                        to={item.url}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors relative"
-                        activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+        {navigation.secondaryNav.length > 0 && (
+          <SidebarGroup className="mt-4">
+            {role !== "tutor" && (
+              <SidebarGroupLabel className={isCollapsed ? "sr-only" : ""}>
+                More
+              </SidebarGroupLabel>
+            )}
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {navigation.secondaryNav.map((item) => {
+                  const badgeData = getBadgeForPath(item.url);
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        tooltip={item.title}
                       >
-                        <item.icon className="w-5 h-5 shrink-0" />
-                        {!isCollapsed && (
-                          <>
-                            <span className="flex-1">{item.title}</span>
-                            {renderBadge(badgeData, isCollapsed)}
-                          </>
-                        )}
-                        {isCollapsed && badgeData?.count && badgeData.count > 0 && (
-                          <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] text-destructive-foreground">
-                            {badgeData.count}
-                          </span>
-                        )}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+                        <NavLink
+                          to={item.url}
+                          className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors relative"
+                          activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                        >
+                          <item.icon className="w-5 h-5 shrink-0" />
+                          {!isCollapsed && (
+                            <>
+                              <span className="flex-1">{item.title}</span>
+                              {renderBadge(badgeData, isCollapsed)}
+                            </>
+                          )}
+                          {isCollapsed && badgeData?.count && badgeData.count > 0 && (
+                            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] text-destructive-foreground">
+                              {badgeData.count}
+                            </span>
+                          )}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
       {/* Footer with user info */}

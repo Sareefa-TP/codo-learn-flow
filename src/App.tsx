@@ -15,6 +15,7 @@ import StudentClasses from "./pages/student/Classes";
 import StudentAttendance from "./pages/student/Attendance";
 import StudentMaterials from "./pages/student/Materials";
 import StudentAssignments from "./pages/student/Assignments";
+import StudentChat from "./pages/student/Chat";
 import StudentRecordings from "./pages/student/Recordings";
 import StudentAssessments from "./pages/student/Assessments";
 import StudentPackages from "./pages/student/Packages";
@@ -27,6 +28,9 @@ import StudentFeedback from "./pages/student/Feedback";
 import InternDashboard from "./pages/intern/Dashboard";
 import InternProfile from "./pages/intern/Profile";
 import InternTasks from "./pages/intern/Tasks";
+import TaskDetails from "./pages/intern/TaskDetails";
+import TaskSubmit from "./pages/intern/TaskSubmit";
+import WeeklyReport from "./pages/intern/WeeklyReport";
 import InternProgress from "./pages/intern/Progress";
 import InternAttendance from "./pages/intern/Attendance";
 import InternStipend from "./pages/intern/Stipend";
@@ -37,16 +41,26 @@ import InternFeedback from "./pages/intern/Feedback";
 // Tutor Pages
 import TutorDashboard from "./pages/tutor/Dashboard";
 import TutorBatches from "./pages/tutor/Batches";
+import TutorBatchStudents from "./pages/tutor/BatchStudents";
 import TutorStudents from "./pages/tutor/Students";
+import TutorStudentDashboard from "./pages/tutor/StudentDashboard";
+import TutorChat from "./pages/tutor/Chat";
 import TutorAssignments from "./pages/tutor/Assignments";
 import TutorAnnouncements from "./pages/tutor/Announcements";
 import TutorMaterials from "./pages/tutor/Materials";
+import TutorProfile from "./pages/tutor/Profile";
 
 // Mentor Pages
 import MentorDashboard from "./pages/mentor/Dashboard";
 import MentorProfile from "./pages/mentor/Profile";
 import MentorStudents from "./pages/mentor/Students";
 import MentorInterns from "./pages/mentor/Interns";
+import MentorTasks from "./pages/mentor/Tasks";
+import MentorTaskDetails from "./pages/mentor/TaskDetails";
+import MentorTaskReviews from "./pages/mentor/TaskReviews";
+import MentorWeeklyReports from "./pages/mentor/WeeklyReports";
+import MentorAttendance from "./pages/mentor/Attendance";
+import MentorPerformance from "./pages/mentor/Performance";
 import MentorProgress from "./pages/mentor/Progress";
 import MentorGuidance from "./pages/mentor/Guidance";
 import MentorSalary from "./pages/mentor/Salary";
@@ -70,6 +84,7 @@ import AdminFinance from "./pages/admin/FinanceOverview";
 import AdminFinanceBatchDetails from "./pages/admin/FinanceBatchDetails";
 import AdminReports from "./pages/admin/AdminReports";
 import AdminNotifications from "./pages/admin/Notifications";
+import AdminProfile from "./pages/admin/Profile";
 
 // Finance Pages
 import FinanceDashboard from "./pages/finance/Dashboard";
@@ -80,6 +95,7 @@ import FinanceTutorSalaries from "./pages/finance/TutorSalaries";
 import FinanceMentorSalaries from "./pages/finance/MentorSalaries";
 import FinanceReports from "./pages/finance/FinanceReports";
 import FinanceNotifications from "./pages/finance/Notifications";
+import FinanceProfile from "./pages/finance/Profile";
 import WalletTopupRequests from "./pages/finance/WalletTopupRequests";
 import StudentWallets from "./pages/finance/StudentWallets";
 import WalletTransactions from "./pages/finance/WalletTransactions";
@@ -105,6 +121,7 @@ import SuperAdminCertificates from "./pages/superadmin/Certificates";
 import SuperAdminIntegrations from "./pages/superadmin/Integrations";
 import SuperAdminSettings from "./pages/superadmin/Settings";
 import SuperAdminNotifications from "./pages/superadmin/Notifications";
+import SuperAdminProfile from "./pages/superadmin/Profile";
 
 const queryClient = new QueryClient();
 
@@ -127,6 +144,7 @@ const App = () => (
           <Route path="/student/attendance" element={<StudentAttendance />} />
           <Route path="/student/materials" element={<StudentMaterials />} />
           <Route path="/student/assignments" element={<StudentAssignments />} />
+          <Route path="/student/chat" element={<StudentChat />} />
           <Route path="/student/recordings" element={<StudentRecordings />} />
           <Route path="/student/assessments" element={<StudentAssessments />} />
           <Route path="/student/packages" element={<StudentPackages />} />
@@ -139,6 +157,9 @@ const App = () => (
           <Route path="/intern" element={<InternDashboard />} />
           <Route path="/intern/profile" element={<InternProfile />} />
           <Route path="/intern/tasks" element={<InternTasks />} />
+          <Route path="/intern/tasks/:taskId" element={<TaskDetails />} />
+          <Route path="/intern/tasks/:taskId/submit" element={<TaskSubmit />} />
+          <Route path="/intern/weekly-report" element={<WeeklyReport />} />
           <Route path="/intern/progress" element={<InternProgress />} />
           <Route path="/intern/attendance" element={<InternAttendance />} />
           <Route path="/intern/stipend" element={<InternStipend />} />
@@ -149,16 +170,26 @@ const App = () => (
           {/* Tutor Routes */}
           <Route path="/tutor" element={<TutorDashboard />} />
           <Route path="/tutor/batches" element={<TutorBatches />} />
+          <Route path="/tutor/batches/:batchId/students" element={<TutorBatchStudents />} />
           <Route path="/tutor/students" element={<TutorStudents />} />
+          <Route path="/tutor/students/:studentId" element={<TutorStudentDashboard />} />
+          <Route path="/tutor/chat" element={<TutorChat />} />
           <Route path="/tutor/assignments" element={<TutorAssignments />} />
           <Route path="/tutor/announcements" element={<TutorAnnouncements />} />
           <Route path="/tutor/materials" element={<TutorMaterials />} />
+          <Route path="/tutor/profile" element={<TutorProfile />} />
 
           {/* Mentor Routes */}
           <Route path="/mentor" element={<MentorDashboard />} />
           <Route path="/mentor/profile" element={<MentorProfile />} />
           <Route path="/mentor/students" element={<MentorStudents />} />
           <Route path="/mentor/interns" element={<MentorInterns />} />
+          <Route path="/mentor/tasks" element={<MentorTasks />} />
+          <Route path="/mentor/tasks/:taskId" element={<MentorTaskDetails />} />
+          <Route path="/mentor/task-reviews" element={<MentorTaskReviews />} />
+          <Route path="/mentor/weekly-reports" element={<MentorWeeklyReports />} />
+          <Route path="/mentor/attendance" element={<MentorAttendance />} />
+          <Route path="/mentor/performance" element={<MentorPerformance />} />
           <Route path="/mentor/progress" element={<MentorProgress />} />
           <Route path="/mentor/guidance" element={<MentorGuidance />} />
           <Route path="/mentor/salary" element={<MentorSalary />} />
@@ -182,6 +213,7 @@ const App = () => (
           <Route path="/admin/finance/batch/:batchId" element={<AdminFinanceBatchDetails />} />
           <Route path="/admin/reports" element={<AdminReports />} />
           <Route path="/admin/notifications" element={<AdminNotifications />} />
+          <Route path="/admin/profile" element={<AdminProfile />} />
 
           {/* Finance Routes */}
           <Route path="/finance" element={<FinanceDashboard />} />
@@ -192,6 +224,7 @@ const App = () => (
           <Route path="/finance/mentor-salaries" element={<FinanceMentorSalaries />} />
           <Route path="/finance/reports" element={<FinanceReports />} />
           <Route path="/finance/notifications" element={<FinanceNotifications />} />
+          <Route path="/finance/profile" element={<FinanceProfile />} />
           <Route path="/finance/wallets/topup" element={<WalletTopupRequests />} />
           <Route path="/finance/wallets/students" element={<StudentWallets />} />
           <Route path="/finance/wallets/transactions" element={<WalletTransactions />} />
@@ -220,6 +253,7 @@ const App = () => (
           <Route path="/superadmin/integrations" element={<SuperAdminIntegrations />} />
           <Route path="/superadmin/settings" element={<SuperAdminSettings />} />
           <Route path="/superadmin/notifications" element={<SuperAdminNotifications />} />
+          <Route path="/super-admin/profile" element={<SuperAdminProfile />} />
 
           {/* Legacy redirect */}
           <Route path="/dashboard" element={<Navigate to="/student" replace />} />
