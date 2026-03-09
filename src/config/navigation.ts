@@ -77,6 +77,7 @@ export const internNavigation: RoleNavigation = {
     { title: "Weekly Report", url: "/intern/weekly-report", icon: FileText },
     { title: "Progress", url: "/intern/progress", icon: TrendingUp },
     { title: "Attendance", url: "/intern/attendance", icon: UserCheck },
+    { title: "Chat", url: "/intern/chat", icon: MessageSquare },
     { title: "Certificates", url: "/intern/certificates", icon: Award },
   ],
   secondaryNav: [],

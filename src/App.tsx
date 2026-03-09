@@ -55,6 +55,7 @@ import MentorDashboard from "./pages/mentor/Dashboard";
 import MentorProfile from "./pages/mentor/Profile";
 import MentorStudents from "./pages/mentor/Students";
 import MentorInterns from "./pages/mentor/Interns";
+import MentorInternDetails from "./pages/mentor/InternDetails";
 import MentorTasks from "./pages/mentor/Tasks";
 import MentorTaskDetails from "./pages/mentor/TaskDetails";
 import MentorTaskReviews from "./pages/mentor/TaskReviews";
@@ -184,6 +185,7 @@ const App = () => (
           <Route path="/mentor/profile" element={<MentorProfile />} />
           <Route path="/mentor/students" element={<MentorStudents />} />
           <Route path="/mentor/interns" element={<MentorInterns />} />
+          <Route path="/mentor/interns/:internId" element={<MentorInternDetails />} />
           <Route path="/mentor/tasks" element={<MentorTasks />} />
           <Route path="/mentor/tasks/:taskId" element={<MentorTaskDetails />} />
           <Route path="/mentor/task-reviews" element={<MentorTaskReviews />} />

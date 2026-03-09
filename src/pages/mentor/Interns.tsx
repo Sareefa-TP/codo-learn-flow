@@ -9,34 +9,15 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from "@/components/ui/table";
 import { Search, Eye } from "lucide-react";
+import { mentees, Mentee } from "@/data/mentorData";
 
 // ─── Types & Mock Data ────────────────────────────────────────────────────────
 
-type InternStatus = "Active" | "Needs Attention" | "Inactive";
-
-interface Intern {
-  id: string;
-  name: string;
-  email: string;
-  batch: string;
-  tasksCompleted: string;
-  progress: number;
-  attendance: number;
-  status: InternStatus;
-}
-
-const mockInterns: Intern[] = [
-  { id: "INT-001", name: "Aarav Singh", email: "aarav.s@example.com", batch: "Full Stack - Mar 2026", tasksCompleted: "8 / 10", progress: 80, attendance: 95, status: "Active" },
-  { id: "INT-002", name: "Priya Sharma", email: "priya.s@example.com", batch: "Full Stack - Mar 2026", tasksCompleted: "4 / 10", progress: 40, attendance: 70, status: "Needs Attention" },
-  { id: "INT-003", name: "Rahul Mehta", email: "rahul.m@example.com", batch: "Full Stack - Mar 2026", tasksCompleted: "9 / 10", progress: 90, attendance: 100, status: "Active" },
-  { id: "INT-004", name: "Sneha Verma", email: "sneha.v@example.com", batch: "Full Stack - Mar 2026", tasksCompleted: "1 / 10", progress: 10, attendance: 40, status: "Inactive" },
-  { id: "INT-005", name: "Karan Nair", email: "karan.n@example.com", batch: "Full Stack - Mar 2026", tasksCompleted: "7 / 10", progress: 70, attendance: 85, status: "Active" },
-];
-
-const statusStyles: Record<InternStatus, string> = {
-  "Active": "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-  "Needs Attention": "bg-amber-500/10 text-amber-600 border-amber-500/20",
-  "Inactive": "bg-red-500/10 text-red-600 border-red-500/20",
+const statusStyles: Record<string, string> = {
+  "on-track": "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+  "ahead": "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  "at-risk": "bg-rose-500/10 text-rose-600 border-rose-500/20",
+  "needs-attention": "bg-amber-500/10 text-amber-600 border-amber-500/20",
 };
 
 // ─── Page Component ───────────────────────────────────────────────────────────
@@ -45,10 +26,10 @@ const MentorInterns = () => {
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
 
-  const filteredInterns = mockInterns.filter(intern =>
-    intern.name.toLowerCase().includes(search.toLowerCase()) ||
-    intern.email.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredInterns = mentees.filter(m => m.type === "intern" && (
+    m.name.toLowerCase().includes(search.toLowerCase()) ||
+    m.email.toLowerCase().includes(search.toLowerCase())
+  ));
 
   return (
     <DashboardLayout>
@@ -82,8 +63,8 @@ const MentorInterns = () => {
                   <TableRow className="bg-muted/30">
                     <TableHead className="text-xs font-semibold">Intern Name</TableHead>
                     <TableHead className="text-xs font-semibold">Email</TableHead>
-                    <TableHead className="text-xs font-semibold">Batch</TableHead>
-                    <TableHead className="text-xs font-semibold">Tasks Completed</TableHead>
+                    <TableHead className="text-xs font-semibold">Program</TableHead>
+                    <TableHead className="text-xs font-semibold">Joined Date</TableHead>
                     <TableHead className="text-xs font-semibold">Progress</TableHead>
                     <TableHead className="text-xs font-semibold">Attendance</TableHead>
                     <TableHead className="text-xs font-semibold">Status</TableHead>
@@ -101,10 +82,10 @@ const MentorInterns = () => {
                           {intern.email}
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
-                          {intern.batch}
+                          {intern.course}
                         </TableCell>
                         <TableCell className="text-sm font-medium">
-                          {intern.tasksCompleted}
+                          {intern.joinedDate}
                         </TableCell>
                         <TableCell className="text-sm font-medium">
                           {intern.progress}%
@@ -113,8 +94,8 @@ const MentorInterns = () => {
                           {intern.attendance}%
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline" className={`text-[10px] font-semibold ${statusStyles[intern.status]}`}>
-                            {intern.status}
+                          <Badge variant="outline" className={`text-[10px] font-semibold capitalize ${statusStyles[intern.status]}`}>
+                            {intern.status.replace("-", " ")}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">

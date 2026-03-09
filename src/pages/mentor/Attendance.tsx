@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { AttendanceDatePicker } from "@/components/mentor/AttendanceDatePicker";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -193,16 +194,11 @@ const MentorAttendance = () => {
 
                     <div className="flex items-center gap-3">
                         <Label className="font-semibold text-muted-foreground whitespace-nowrap">Date:</Label>
-                        <div className="relative">
-                            <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
-                            <Input
-                                type="date"
-                                className="pl-9 bg-background shadow-sm w-[160px]"
-                                value={selectedDate}
-                                onChange={(e) => handleDateChange(e.target.value)}
-                                max={today}
-                            />
-                        </div>
+                        <AttendanceDatePicker
+                            value={selectedDate}
+                            onChange={handleDateChange}
+                            className="w-[200px]"
+                        />
                     </div>
                 </div>
 

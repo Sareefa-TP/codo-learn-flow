@@ -22,6 +22,7 @@ import {
     AlertCircle, CheckCircle2, Clock, FileText,
 } from "lucide-react";
 import { toast } from "sonner";
+import { TaskDatePicker } from "@/components/mentor/TaskDatePicker";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -299,11 +300,10 @@ const MentorTasks = () => {
 
             <div className="space-y-2">
                 <Label className="font-semibold">Due Date <span className="text-destructive">*</span></Label>
-                <div className="relative">
-                    <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input type="date" className="pl-9" value={formData.dueDate}
-                        onChange={e => setFormData({ ...formData, dueDate: e.target.value })} />
-                </div>
+                <TaskDatePicker
+                    value={formData.dueDate}
+                    onChange={val => setFormData({ ...formData, dueDate: val })}
+                />
             </div>
 
             {/* Assign Interns */}
@@ -356,7 +356,7 @@ const MentorTasks = () => {
             <div className="space-y-2">
                 <Label className="font-semibold">Attach Materials</Label>
                 <div className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${isDragging ? "border-primary bg-primary/10" :
-                        formData.fileName ? "border-primary/40 bg-primary/5" : "border-border/60 hover:bg-muted/30"
+                    formData.fileName ? "border-primary/40 bg-primary/5" : "border-border/60 hover:bg-muted/30"
                     }`}
                     onClick={() => document.getElementById("mentor-task-upload")?.click()}
                     onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
