@@ -2,8 +2,10 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronUp, PlayCircle, BookOpen, Clock, CheckCircle2 } from "lucide-react";
+import { ChevronDown, ChevronUp, PlayCircle, BookOpen, Clock, CheckCircle2, FileText, ExternalLink, Eye } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 // Mock Data
 const courseData = {
@@ -21,6 +23,15 @@ const courseData = {
         "Tags & Structure",
         "Forms",
         "Semantic HTML"
+      ],
+      assignments: [
+        {
+          id: 1,
+          title: "HTML Portfolio Page",
+          description: "Build a simple HTML page using semantic tags.",
+          instructions: "Include a header, navigation, about section, projects section, and footer. Use HTML5 semantic elements correctly.",
+          dueDate: "10 March 2026"
+        }
       ]
     },
     {
@@ -32,7 +43,8 @@ const courseData = {
         "Flexbox",
         "Grid",
         "Responsive Layout"
-      ]
+      ],
+      assignments: []
     },
     {
       id: 3,
@@ -54,6 +66,15 @@ const courseData = {
         "State & Props",
         "Routing",
         "API Integration"
+      ],
+      assignments: [
+        {
+          id: 2,
+          title: "React Mini Project",
+          description: "Build a todo application utilizing React hooks.",
+          instructions: "The app should allow users to add, toggle, and delete tasks. Use useState and useEffect appropriately.",
+          dueDate: "20 March 2026"
+        }
       ]
     },
     {
@@ -75,6 +96,15 @@ const courseData = {
         "Models & Migrations",
         "Views & Templates",
         "REST API"
+      ],
+      assignments: [
+        {
+          id: 3,
+          title: "Django REST API",
+          description: "Develop a standard RESTful API for a blog platform.",
+          instructions: "Implement CRUD operations for posts and comments. Use Django REST Framework and proper serializers.",
+          dueDate: "30 March 2026"
+        }
       ]
     },
     {
@@ -102,7 +132,9 @@ const courseData = {
 };
 
 const StudentPackages = () => {
+  const navigate = useNavigate();
   const [openModuleId, setOpenModuleId] = useState<number | null>(1);
+  const [viewingAssignmentId, setViewingAssignmentId] = useState<number | null>(null);
 
   const toggleModule = (id: number) => {
     setOpenModuleId(openModuleId === id ? null : id);
@@ -172,10 +204,10 @@ const StudentPackages = () => {
                   >
                     <div className="flex items-center gap-3">
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isCompleted
-                          ? "bg-primary/10 text-primary"
-                          : isNotStarted
-                            ? "bg-muted text-muted-foreground"
-                            : "bg-primary/5 text-primary/70"
+                        ? "bg-primary/10 text-primary"
+                        : isNotStarted
+                          ? "bg-muted text-muted-foreground"
+                          : "bg-primary/5 text-primary/70"
                         }`}>
                         {isCompleted ? <CheckCircle2 className="w-5 h-5" /> : <BookOpen className="w-4 h-4" />}
                       </div>
@@ -202,22 +234,108 @@ const StudentPackages = () => {
                     </div>
                   </div>
 
-                  {/* Accordion Content (Lessons) */}
+                  {/* Accordion Content (Lessons & Assignments) */}
                   {isOpen && (
-                    <div className="bg-muted/10 border-t border-border/50 p-4 pl-[4.5rem]">
-                      <div className="space-y-2">
-                        {mod.lessons.map((lesson, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center gap-3 p-2.5 rounded-md hover:bg-muted/50 transition-colors group cursor-pointer"
-                          >
-                            <PlayCircle className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                            <span className="text-sm text-foreground/80 group-hover:text-foreground transition-colors">
-                              {lesson}
-                            </span>
-                          </div>
-                        ))}
+                    <div className="bg-muted/10 border-t border-border/50 p-6 pl-[4.5rem] space-y-6">
+                      {/* Lessons Section */}
+                      <div className="space-y-3">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-2">
+                          <PlayCircle className="w-3.5 h-3.5" />
+                          Video Lessons
+                        </h4>
+                        <div className="space-y-1">
+                          {mod.lessons.map((lesson, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center gap-3 p-2.5 rounded-md hover:bg-muted/50 transition-colors group cursor-pointer"
+                            >
+                              <PlayCircle className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                              <span className="text-sm text-foreground/80 group-hover:text-foreground transition-colors">
+                                {lesson}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
+
+                      {/* Assignments Section */}
+                      {mod.assignments && mod.assignments.length > 0 && (
+                        <div className="space-y-4 pt-2">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
+                            <FileText className="w-3.5 h-3.5" />
+                            Module Assignment
+                          </h4>
+                          <div className="space-y-3">
+                            {mod.assignments.map((assignment) => {
+                              const isViewing = viewingAssignmentId === assignment.id;
+
+                              return (
+                                <div key={assignment.id} className="space-y-3">
+                                  <div
+                                    className={`flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border transition-all ${isViewing ? "bg-primary/5 border-primary/30" : "bg-card border-border/50 hover:border-primary/20"
+                                      }`}
+                                  >
+                                    <div className="flex items-center gap-3 mb-3 sm:mb-0">
+                                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                                        <FileText className="w-5 h-5" />
+                                      </div>
+                                      <div>
+                                        <span className="text-sm font-semibold text-foreground block">
+                                          {assignment.title}
+                                        </span>
+                                        <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                          <Clock className="w-3 h-3" />
+                                          Due: {assignment.dueDate}
+                                        </span>
+                                      </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-8 text-[11px] gap-1.5"
+                                        onClick={() => setViewingAssignmentId(isViewing ? null : assignment.id)}
+                                      >
+                                        <Eye className="w-3.5 h-3.5" />
+                                        {isViewing ? "Hide" : "View Details"}
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        className="h-8 text-[11px] gap-1.5 bg-primary hover:bg-primary/90"
+                                        onClick={() => navigate(`/student/assignments?assignmentId=${assignment.id}`)}
+                                      >
+                                        <ExternalLink className="w-3.5 h-3.5" />
+                                        Submit
+                                      </Button>
+                                    </div>
+                                  </div>
+
+                                  {/* Inline Assignment Details */}
+                                  {isViewing && (
+                                    <div className="p-4 rounded-xl bg-muted/30 border border-border/50 animate-in fade-in slide-in-from-top-2 duration-200">
+                                      <div className="space-y-3">
+                                        <div>
+                                          <h5 className="text-xs font-bold text-foreground mb-1">Description</h5>
+                                          <p className="text-sm text-muted-foreground leading-relaxed italic">
+                                            {assignment.description}
+                                          </p>
+                                        </div>
+                                        <div>
+                                          <h5 className="text-xs font-bold text-foreground mb-1">Instructions</h5>
+                                          <p className="text-sm text-muted-foreground leading-relaxed">
+                                            {assignment.instructions}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </Card>

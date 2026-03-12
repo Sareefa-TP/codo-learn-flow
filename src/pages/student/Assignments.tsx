@@ -1,4 +1,5 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -59,6 +60,20 @@ const StudentAssignments = () => {
     const [dragActive, setDragActive] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const [searchParams] = useSearchParams();
+
+    // Handle deep linking from Course page
+    useEffect(() => {
+        const assignmentId = searchParams.get("assignmentId");
+        if (assignmentId) {
+            const id = parseInt(assignmentId);
+            const assignment = demoAssignments.find(a => a.id === id);
+            if (assignment) {
+                setSelectedAssignment(assignment);
+                setIsSubmitModalOpen(true);
+            }
+        }
+    }, [searchParams]);
 
     const getStatusBadge = (status: string) => {
         switch (status) {

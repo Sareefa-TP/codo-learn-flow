@@ -25,7 +25,7 @@ const StudentClasses = () => {
         {/* Header */}
         <div>
           <h1 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight">
-            Classes & Schedule
+            Live Sessions
           </h1>
           <p className="text-muted-foreground mt-2">
             Your live learning phase class schedule and upcoming sessions.

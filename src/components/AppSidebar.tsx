@@ -49,15 +49,11 @@ const getStudentBadges = (): Record<string, SidebarBadge> => ({
   "/student/notifications": {
     count: studentData.notifications.filter(n => !n.is_read).length
   },
-  "/student/wallet": {
-    text: studentData.wallet.status,
-    subtext: `Next due: ${studentData.wallet.next_due.split(',')[0]}`
-  },
   "/student/certificates": {
     count: studentData.certificates.length,
     label: "earned"
   },
-  "/student/packages": {
+  "/student/my-course": {
     upsell: "Advance AI Mastery"
   },
 });
@@ -317,15 +313,18 @@ export function AppSidebar() {
 
       {/* Footer with user info */}
       <SidebarFooter className="p-3 border-t border-sidebar-border">
-        <div className="flex items-center gap-3">
+        <div
+          onClick={() => navigate(role === "superadmin" ? "/super-admin/profile" : `/${role}/profile`)}
+          className="flex items-center gap-3 p-2 rounded-xl hover:bg-sidebar-accent transition-all cursor-pointer group/profile"
+        >
           {role === "student" ? (
             <img
               src={studentData.profile.avatar}
               alt="Profile"
-              className="w-9 h-9 rounded-full shrink-0"
+              className="w-9 h-9 rounded-full shrink-0 border border-transparent group-hover/profile:border-primary/30 transition-colors"
             />
           ) : (
-            <div className={`w-9 h-9 rounded-full ${displayInfo.color}/10 flex items-center justify-center shrink-0`}>
+            <div className={`w-9 h-9 rounded-full ${displayInfo.color}/10 flex items-center justify-center shrink-0 group-hover/profile:bg-primary/20 transition-colors`}>
               <span className="text-sm font-medium text-primary">
                 {displayInfo.label.charAt(0)}
               </span>
@@ -333,7 +332,7 @@ export function AppSidebar() {
           )}
           {!isCollapsed && (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">
+              <p className="text-sm font-medium truncate group-hover/profile:text-primary transition-colors">
                 {role === "student" ? studentData.profile.name : "Alex Johnson"}
               </p>
               <p className="text-xs text-muted-foreground truncate">{displayInfo.label}</p>
@@ -341,8 +340,12 @@ export function AppSidebar() {
           )}
           {!isCollapsed && (
             <button
-              onClick={handleLogout}
-              className="p-2 hover:bg-sidebar-accent rounded-xl transition-colors text-muted-foreground hover:text-foreground"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleLogout();
+              }}
+              className="p-2 hover:bg-primary/10 rounded-lg transition-colors text-muted-foreground hover:text-primary"
+              title="Logout"
             >
               <LogOut className="w-4 h-4" />
             </button>

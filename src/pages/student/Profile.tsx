@@ -53,6 +53,9 @@ const StudentProfile = () => {
     phone: "+91 98765 43210",
     dob: "12 May 2002",
     gender: "Male",
+    bloodGroup: "O+",
+    joinDate: "15 Jan 2026",
+    referralName: "John Mathew",
     address: "Block 4, Technopark Campus, Trivandrum, Kerala - 695581",
     avatar: studentData.profile.avatar,
   });
@@ -288,6 +291,24 @@ const StudentProfile = () => {
                   <Label className="text-xs text-muted-foreground uppercase tracking-wider font-bold">Gender</Label>
                   <p className="p-2.5 rounded-lg bg-muted/30 border border-transparent font-medium text-foreground">
                     {formData.gender}
+                  </p>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground uppercase tracking-wider font-bold">Blood Group</Label>
+                  <p className="p-2.5 rounded-lg bg-muted/30 border border-transparent font-medium text-foreground">
+                    {formData.bloodGroup}
+                  </p>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground uppercase tracking-wider font-bold">Join Date</Label>
+                  <p className="p-2.5 rounded-lg bg-muted/30 border border-transparent font-medium text-foreground">
+                    {formData.joinDate}
+                  </p>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground uppercase tracking-wider font-bold">Referral Name</Label>
+                  <p className="p-2.5 rounded-lg bg-muted/30 border border-transparent font-medium text-foreground">
+                    {formData.referralName}
                   </p>
                 </div>
                 <div className="space-y-1.5 sm:col-span-2">

@@ -29,6 +29,9 @@ import {
   UserCog,
   Layers,
   ChevronDown,
+  Gamepad2,
+  LifeBuoy,
+  PencilLine,
 } from "lucide-react";
 
 export type UserRole = "student" | "intern" | "tutor" | "mentor" | "admin" | "finance" | "superadmin";
@@ -55,13 +58,23 @@ export const studentNavigation: RoleNavigation = {
   baseUrl: "/student",
   mainNav: [
     { title: "Dashboard", url: "/student", icon: LayoutDashboard },
-    { title: "My Course", url: "/student/packages", icon: BookOpen },
-    { title: "Classes & Schedule", url: "/student/classes", icon: Calendar },
-    { title: "Learning Materials", url: "/student/materials", icon: FileText },
-    { title: "Assignments", url: "/student/assignments", icon: ClipboardList },
+    {
+      title: "My Course",
+      url: "#",
+      icon: BookOpen,
+      children: [
+        { title: "Course", url: "/student/my-course", icon: Layers },
+        { title: "Live Sessions", url: "/student/live-sessions", icon: Video },
+        { title: "Learning Materials", url: "/student/materials", icon: FileText },
+        { title: "Assignments", url: "/student/assignments", icon: ClipboardList },
+      ]
+    },
     { title: "Chat", url: "/student/chat", icon: MessageSquare },
-    { title: "Wallet & Payments", url: "/student/wallet", icon: Wallet },
+    { title: "Payments", url: "/student/wallet", icon: CreditCard },
+    { title: "Exam", url: "/student/exam", icon: PencilLine },
     { title: "Certificate", url: "/student/certificates", icon: Award },
+    { title: "Ticket Raise", url: "/student/tickets", icon: LifeBuoy },
+    { title: "Game", url: "/student/game", icon: Gamepad2 },
   ],
   secondaryNav: [],
 };

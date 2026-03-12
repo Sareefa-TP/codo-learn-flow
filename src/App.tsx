@@ -141,14 +141,14 @@ const App = () => (
           {/* Student Routes */}
           <Route path="/student" element={<StudentDashboard />} />
           <Route path="/student/profile" element={<StudentProfile />} />
-          <Route path="/student/classes" element={<StudentClasses />} />
+          <Route path="/student/live-sessions" element={<StudentClasses />} />
           <Route path="/student/attendance" element={<StudentAttendance />} />
           <Route path="/student/materials" element={<StudentMaterials />} />
           <Route path="/student/assignments" element={<StudentAssignments />} />
           <Route path="/student/chat" element={<StudentChat />} />
           <Route path="/student/recordings" element={<StudentRecordings />} />
           <Route path="/student/assessments" element={<StudentAssessments />} />
-          <Route path="/student/packages" element={<StudentPackages />} />
+          <Route path="/student/my-course" element={<StudentPackages />} />
           <Route path="/student/wallet" element={<StudentWallet />} />
           <Route path="/student/certificates" element={<StudentCertificates />} />
           <Route path="/student/notifications" element={<StudentNotifications />} />
