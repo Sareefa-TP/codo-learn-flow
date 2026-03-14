@@ -67,19 +67,30 @@ const TutorBatches = () => {
 
                                     <div>
                                         <h2 className="text-xl font-bold text-foreground line-clamp-1">{batch.name}</h2>
-                                        <p className="text-sm font-medium text-primary bg-primary/5 w-fit px-2 py-1 rounded mt-2">
-                                            Learning Phase
-                                        </p>
+                                        <div className="flex items-center gap-2 mt-2">
+                                            <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 font-bold uppercase text-[10px] tracking-wider">
+                                                Full Stack Development
+                                            </Badge>
+                                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider bg-muted px-2 py-0.5 rounded">
+                                                Learning Phase
+                                            </p>
+                                        </div>
                                     </div>
 
-                                    <div className="space-y-2 pt-2">
-                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <Calendar className="w-4 h-4 text-primary/70" />
-                                            Started: <span className="font-medium text-foreground">{batch.startDate}</span>
+                                    <div className="space-y-3 pt-2">
+                                        <div className="flex items-center justify-between text-sm">
+                                            <div className="flex items-center gap-2 text-muted-foreground">
+                                                <Calendar className="w-4 h-4 text-primary" />
+                                                <span>Start Date</span>
+                                            </div>
+                                            <span className="font-bold text-foreground">{batch.startDate}</span>
                                         </div>
-                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <Users className="w-4 h-4 text-emerald-600/70" />
-                                            Total Students: <span className="font-medium text-foreground">{batch.totalStudents}</span>
+                                        <div className="flex items-center justify-between text-sm">
+                                            <div className="flex items-center gap-2 text-muted-foreground">
+                                                <Users className="w-4 h-4 text-emerald-600" />
+                                                <span>Total Students</span>
+                                            </div>
+                                            <span className="font-bold text-foreground">{batch.totalStudents}</span>
                                         </div>
                                     </div>
 

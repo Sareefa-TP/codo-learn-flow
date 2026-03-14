@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LogOut, RefreshCw, ChevronDown } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Logo from "@/components/Logo";
 import { useRole } from "@/hooks/useRole";
 import { Badge } from "@/components/ui/badge";
 import { studentData } from "@/data/studentData";
+import { cn } from "@/lib/utils";
 
 import {
   Sidebar,
@@ -49,10 +50,6 @@ const getStudentBadges = (): Record<string, SidebarBadge> => ({
   "/student/notifications": {
     count: studentData.notifications.filter(n => !n.is_read).length
   },
-  "/student/certificates": {
-    count: studentData.certificates.length,
-    label: "earned"
-  },
   "/student/my-course": {
     upsell: "Advance AI Mastery"
   },
@@ -60,10 +57,53 @@ const getStudentBadges = (): Record<string, SidebarBadge> => ({
 
 export function AppSidebar() {
   const navigate = useNavigate();
-  const { state } = useSidebar();
+  const location = useLocation();
+  const { state, toggleSidebar } = useSidebar();
   const isCollapsed = state === "collapsed";
   const { role, navigation, displayInfo } = useRole();
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
+
+  // Initialize open groups based on current URL
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
+    const initialState: Record<string, boolean> = {};
+
+    // Find if current path is a child of any mainNav item
+    navigation.mainNav.forEach(item => {
+      if (item.children) {
+        const isActiveChild = item.children.some(child =>
+          location.pathname.startsWith(child.url) ||
+          (child.url === navigation.baseUrl && location.pathname === navigation.baseUrl)
+        );
+        if (isActiveChild) {
+          initialState[item.title] = true;
+        }
+      }
+    });
+
+    return initialState;
+  });
+
+  // Watch for route changes to keep relevant menus open
+  useEffect(() => {
+    setOpenGroups(prev => {
+      const newState = { ...prev };
+      let changed = false;
+
+      navigation.mainNav.forEach(item => {
+        if (item.children) {
+          const isActiveChild = item.children.some(child =>
+            location.pathname.startsWith(child.url) ||
+            (child.url === navigation.baseUrl && location.pathname === navigation.baseUrl)
+          );
+          if (isActiveChild && !prev[item.title]) {
+            newState[item.title] = true;
+            changed = true;
+          }
+        }
+      });
+
+      return changed ? newState : prev;
+    });
+  }, [location.pathname, navigation.mainNav, navigation.baseUrl]);
 
   const handleLogout = () => {
     sessionStorage.removeItem("selectedRole");
@@ -126,55 +166,33 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
-      {/* Header with logo */}
-      <SidebarHeader className="p-4 border-b border-sidebar-border">
-        {isCollapsed ? (
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-semibold text-sm">C</span>
-          </div>
-        ) : (
-          <Logo size="sm" />
-        )}
+      {/* Header with logo toggle */}
+      <SidebarHeader className="p-0 border-b border-sidebar-border">
+        <button
+          onClick={toggleSidebar}
+          className={cn(
+            "flex items-center justify-center w-full hover:bg-primary/5 transition-colors group/logo overflow-hidden h-12"
+          )}
+          title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+        >
+          {isCollapsed ? (
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0 group-hover/logo:scale-110 transition-transform">
+              <span className="text-primary-foreground font-semibold text-sm">C</span>
+            </div>
+          ) : (
+            <Logo size="sm" />
+          )}
+        </button>
       </SidebarHeader>
 
-      <SidebarContent className="p-2">
-        {/* Profile Section (Student only) */}
-        {role === "student" && !isCollapsed && (
-          <div className="px-3 py-4 mb-2 rounded-xl bg-gradient-to-br from-primary/5 to-accent/10 border border-primary/10">
-            <div className="flex items-center gap-3">
-              <img
-                src={studentData.profile.avatar}
-                alt={studentData.profile.name}
-                className="w-10 h-10 rounded-full border-2 border-primary/20"
-              />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">
-                  {studentData.profile.name}
-                </p>
-                <Badge variant="secondary" className="text-xs bg-primary/10 text-primary mt-0.5">
-                  {studentData.profile.tier}
-                </Badge>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Role indicator for non-students */}
-        {role !== "student" && !isCollapsed && (
-          <div className="px-3 py-2 mb-2">
-            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${displayInfo.color} text-white`}>
-              <span>{displayInfo.label} Portal</span>
-            </div>
-          </div>
-        )}
-
+      <SidebarContent className={cn(isCollapsed ? "p-0" : "p-2")}>
         {/* Main navigation */}
-        <SidebarGroup>
+        <SidebarGroup className={cn(isCollapsed && "p-0")}>
           <SidebarGroupLabel className={isCollapsed ? "sr-only" : ""}>
             Main Menu
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className={cn(isCollapsed ? "gap-5 items-center" : "gap-1")}>
               {navigation.mainNav.map((item) => {
                 const badgeData = getBadgeForPath(item.url);
 
@@ -189,13 +207,16 @@ export function AppSidebar() {
                         setOpenGroups(prev => ({ ...prev, [item.title]: open }))
                       }
                     >
-                      <SidebarMenuItem>
+                      <SidebarMenuItem className={isCollapsed ? "w-full flex justify-center" : ""}>
                         <CollapsibleTrigger asChild>
                           <SidebarMenuButton
                             tooltip={item.title}
-                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors w-full"
+                            className={cn(
+                              "flex items-center rounded-xl transition-colors w-full",
+                              isCollapsed ? "justify-center h-12 w-full p-0 !size-auto flex-col" : "gap-3 px-3 py-2.5"
+                            )}
                           >
-                            <item.icon className="w-5 h-5 shrink-0" />
+                            <item.icon className={cn("shrink-0", isCollapsed ? "w-5 h-5" : "w-5 h-5")} />
                             {!isCollapsed && (
                               <>
                                 <span className="flex-1 text-left">{item.title}</span>
@@ -218,7 +239,7 @@ export function AppSidebar() {
                                     className="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm"
                                     activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
                                   >
-                                    <child.icon className="w-4 h-4 shrink-0" />
+                                    <child.icon className={cn("shrink-0", isCollapsed ? "w-4 h-4" : "w-4 h-4")} />
                                     {!isCollapsed && <span>{child.title}</span>}
                                   </NavLink>
                                 </SidebarMenuSubButton>
@@ -233,18 +254,24 @@ export function AppSidebar() {
 
                 // ── Flat item (no children) — original rendering ─────────
                 return (
-                  <SidebarMenuItem key={item.title}>
+                  <SidebarMenuItem key={item.title} className={isCollapsed ? "w-full flex justify-center" : ""}>
                     <SidebarMenuButton
                       asChild
                       tooltip={item.title}
+                      className={cn(
+                        isCollapsed && "h-12 w-full p-0 flex items-center justify-center !size-auto"
+                      )}
                     >
                       <NavLink
                         to={item.url}
                         end={item.url === navigation.baseUrl}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors group"
+                        className={cn(
+                          "flex items-center rounded-xl transition-colors group relative",
+                          isCollapsed ? "justify-center h-full w-full p-0" : "gap-3 px-3 py-2.5"
+                        )}
                         activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
                       >
-                        <item.icon className="w-5 h-5 shrink-0" />
+                        <item.icon className={cn("shrink-0 w-5 h-5")} />
                         {!isCollapsed && (
                           <>
                             <span className="flex-1">{item.title}</span>
@@ -267,28 +294,34 @@ export function AppSidebar() {
 
         {/* Secondary navigation */}
         {navigation.secondaryNav.length > 0 && (
-          <SidebarGroup className="mt-4">
+          <SidebarGroup className={cn(isCollapsed ? "mt-2 p-0" : "mt-4")}>
             {role !== "tutor" && (
               <SidebarGroupLabel className={isCollapsed ? "sr-only" : ""}>
                 More
               </SidebarGroupLabel>
             )}
             <SidebarGroupContent>
-              <SidebarMenu>
+              <SidebarMenu className={cn(isCollapsed ? "gap-5 items-center" : "gap-1")}>
                 {navigation.secondaryNav.map((item) => {
                   const badgeData = getBadgeForPath(item.url);
                   return (
-                    <SidebarMenuItem key={item.title}>
+                    <SidebarMenuItem key={item.title} className={isCollapsed ? "w-full flex justify-center" : ""}>
                       <SidebarMenuButton
                         asChild
                         tooltip={item.title}
+                        className={cn(
+                          isCollapsed && "h-12 w-full p-0 flex items-center justify-center !size-auto"
+                        )}
                       >
                         <NavLink
                           to={item.url}
-                          className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors relative"
+                          className={cn(
+                            "flex items-center rounded-xl transition-colors relative",
+                            isCollapsed ? "justify-center h-full w-full p-0" : "gap-3 px-3 py-2.5"
+                          )}
                           activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
                         >
-                          <item.icon className="w-5 h-5 shrink-0" />
+                          <item.icon className={cn("shrink-0 w-5 h-5")} />
                           {!isCollapsed && (
                             <>
                               <span className="flex-1">{item.title}</span>

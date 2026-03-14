@@ -23,6 +23,10 @@ import StudentWallet from "./pages/student/Wallet";
 import StudentCertificates from "./pages/student/Certificates";
 import StudentNotifications from "./pages/student/Notifications";
 import StudentFeedback from "./pages/student/Feedback";
+import StudentExams from "@/pages/student/Exams";
+import StudentSupportTickets from "./pages/student/SupportTickets";
+import StudentWebinars from "./pages/student/Webinars";
+import WebinarDetails from "./pages/student/WebinarDetails";
 
 // Intern Pages
 import InternDashboard from "./pages/intern/Dashboard";
@@ -48,6 +52,7 @@ import TutorChat from "./pages/tutor/Chat";
 import TutorAssignments from "./pages/tutor/Assignments";
 import TutorAnnouncements from "./pages/tutor/Announcements";
 import TutorMaterials from "./pages/tutor/Materials";
+import TutorWallet from "@/pages/tutor/Wallet";
 import TutorProfile from "./pages/tutor/Profile";
 
 // Mentor Pages
@@ -153,6 +158,10 @@ const App = () => (
           <Route path="/student/certificates" element={<StudentCertificates />} />
           <Route path="/student/notifications" element={<StudentNotifications />} />
           <Route path="/student/feedback" element={<StudentFeedback />} />
+          <Route path="/student/exam" element={<StudentExams />} />
+          <Route path="/student/support-tickets" element={<StudentSupportTickets />} />
+          <Route path="/student/webinars" element={<StudentWebinars />} />
+          <Route path="/student/my-courses/webinars/:id" element={<WebinarDetails />} />
 
           {/* Intern Routes */}
           <Route path="/intern" element={<InternDashboard />} />
@@ -178,6 +187,7 @@ const App = () => (
           <Route path="/tutor/assignments" element={<TutorAssignments />} />
           <Route path="/tutor/announcements" element={<TutorAnnouncements />} />
           <Route path="/tutor/materials" element={<TutorMaterials />} />
+          <Route path="/tutor/wallet" element={<TutorWallet />} />
           <Route path="/tutor/profile" element={<TutorProfile />} />
 
           {/* Mentor Routes */}

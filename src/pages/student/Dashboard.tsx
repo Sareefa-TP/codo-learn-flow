@@ -293,11 +293,11 @@ const StudentDashboard = () => {
         {/* 6 & 7. Attendance & Assessments Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-6">
           {/* 6. Attendance */}
-          <Card className="border-primary/10 shadow-sm overflow-hidden h-full">
+          <Card className="border-primary/10 shadow-sm overflow-hidden h-full flex flex-col">
             <CardHeader className="pb-2 bg-slate-50/50">
               <CardTitle className="text-lg font-bold">Attendance</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6 pt-6">
+            <CardContent className="space-y-6 pt-6 flex-1">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Total Classes</p>
@@ -324,39 +324,43 @@ const StudentDashboard = () => {
           </Card>
 
           {/* 7. Assessments */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold flex items-center gap-2">
-              <Award className="w-5 h-5 text-primary" />
-              Assessments
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Pre Assessment */}
-              <Card className="border-primary/10 hover:border-primary/30 transition-colors shadow-sm">
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <Badge variant="secondary" className="bg-green-100 text-green-700 border-none">Pre Assessment</Badge>
-                    <span className="text-xs text-muted-foreground font-medium">{assessments.pre.date}</span>
-                  </div>
-                  <h3 className="font-bold text-lg mb-1">{assessments.pre.score}</h3>
-                  <p className="text-xs text-muted-foreground mb-3">{assessments.pre.status}</p>
-                  <Button variant="ghost" size="sm" className="w-full text-xs font-bold text-primary hover:bg-primary/5">View Report</Button>
-                </CardContent>
-              </Card>
+          <Card className="border-primary/10 shadow-sm overflow-hidden h-full flex flex-col">
+            <CardHeader className="pb-2 bg-slate-50/50">
+              <CardTitle className="text-lg font-bold flex items-center gap-2">
+                <Award className="w-5 h-5 text-primary" />
+                Assessments
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6 flex-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 h-full">
+                {/* Pre Assessment */}
+                <Card className="border-primary/10 hover:border-primary/30 transition-colors shadow-sm">
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <Badge variant="secondary" className="bg-green-100 text-green-700 border-none">Pre Assessment</Badge>
+                      <span className="text-xs text-muted-foreground font-medium">{assessments.pre.date}</span>
+                    </div>
+                    <h3 className="font-bold text-lg mb-1">{assessments.pre.score}</h3>
+                    <p className="text-xs text-muted-foreground mb-3">{assessments.pre.status}</p>
+                    <Button variant="ghost" size="sm" className="w-full text-xs font-bold text-primary hover:bg-primary/5">View Report</Button>
+                  </CardContent>
+                </Card>
 
-              {/* Post Assessment */}
-              <Card className="border-dashed border-2 bg-muted/5 opacity-80 relative overflow-hidden group">
-                <CardContent className="p-4 flex flex-col items-center justify-center text-center min-h-[140px] space-y-2">
-                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center group-hover:bg-muted/80 transition-colors">
-                    <Lock className="w-5 h-5 text-muted-foreground" />
-                  </div>
-                  <h3 className="font-bold text-sm">Post Assessment</h3>
-                  <p className="text-[10px] text-muted-foreground leading-tight px-4 font-medium uppercase tracking-tight">
-                    Complete the course to unlock Post Assessment
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+                {/* Post Assessment */}
+                <Card className="border-dashed border-2 bg-muted/5 opacity-80 relative overflow-hidden group">
+                  <CardContent className="p-4 flex flex-col items-center justify-center text-center min-h-[140px] space-y-2">
+                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center group-hover:bg-muted/80 transition-colors">
+                      <Lock className="w-5 h-5 text-muted-foreground" />
+                    </div>
+                    <h3 className="font-bold text-sm">Post Assessment</h3>
+                    <p className="text-[10px] text-muted-foreground leading-tight px-4 font-medium uppercase tracking-tight">
+                      Complete the course to unlock Post Assessment
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </DashboardLayout>

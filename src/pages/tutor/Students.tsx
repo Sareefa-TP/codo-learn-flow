@@ -1,6 +1,7 @@
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
     Table,
@@ -27,7 +28,8 @@ import {
     XCircle,
     Clock,
     User,
-    Mail
+    Mail,
+    ArrowRight
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -154,7 +156,8 @@ const TutorStudents = () => {
                                         <TableHead>Email</TableHead>
                                         <TableHead>Batch</TableHead>
                                         <TableHead className="w-[20%]">Progress</TableHead>
-                                        <TableHead className="pr-6">Status</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead className="pr-6 text-right">Action</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -183,12 +186,23 @@ const TutorStudents = () => {
                                                         <span className="text-xs font-medium text-muted-foreground w-8">{student.progress}%</span>
                                                     </div>
                                                 </TableCell>
-                                                <TableCell className="pr-6">
+                                                <TableCell>
                                                     {student.status === "Completed" ? (
                                                         <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">Completed</Badge>
                                                     ) : (
                                                         <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/20">Active</Badge>
                                                     )}
+                                                </TableCell>
+                                                <TableCell className="pr-6 text-right">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="text-primary hover:bg-primary/10 font-bold gap-2"
+                                                        onClick={() => setSelectedStudent(student)}
+                                                    >
+                                                        View Profile
+                                                        <ArrowRight className="w-4 h-4" />
+                                                    </Button>
                                                 </TableCell>
                                             </TableRow>
                                         ))
