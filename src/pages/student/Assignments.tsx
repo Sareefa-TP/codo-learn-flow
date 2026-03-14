@@ -24,8 +24,39 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+// Types
+interface Assignment {
+    id: number;
+    title: string;
+    description: string;
+    instructions: string;
+    dueDate: string;
+    status: string;
+    marks?: string;
+}
+
+interface Module {
+    id: number;
+    title: string;
+    progress: number;
+    lessons: string[];
+    assignments: Assignment[];
+}
+
+interface Course {
+    id: number;
+    title: string;
+    category: string;
+    duration: string;
+    status: string;
+    progress: number;
+    modules: Module[];
+    description: string;
+    mentor: string;
+}
+
 // Centralized Course Data (matching Packages.tsx)
-const coursesData = [
+const coursesData: Course[] = [
     {
         id: 1,
         title: "Full Stack Development",
