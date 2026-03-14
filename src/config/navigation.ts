@@ -59,21 +59,22 @@ export const studentNavigation: RoleNavigation = {
   mainNav: [
     { title: "Dashboard", url: "/student", icon: LayoutDashboard },
     {
-      title: "My Course",
+      title: "My Courses",
       url: "#",
       icon: BookOpen,
       children: [
-        { title: "Course", url: "/student/my-course", icon: Layers },
+        { title: "Courses", url: "/student/my-course", icon: Layers },
         { title: "Live Sessions", url: "/student/live-sessions", icon: Video },
         { title: "Learning Materials", url: "/student/materials", icon: FileText },
         { title: "Assignments", url: "/student/assignments", icon: ClipboardList },
+        { title: "Webinars", url: "/student/webinars", icon: Video },
       ]
     },
     { title: "Chat", url: "/student/chat", icon: MessageSquare },
     { title: "Payments", url: "/student/wallet", icon: CreditCard },
     { title: "Exam", url: "/student/exam", icon: PencilLine },
     { title: "Certificate", url: "/student/certificates", icon: Award },
-    { title: "Ticket Raise", url: "/student/tickets", icon: LifeBuoy },
+    { title: "Support Tickets", url: "/student/support-tickets", icon: LifeBuoy },
     { title: "Game", url: "/student/game", icon: Gamepad2 },
   ],
   secondaryNav: [],
@@ -109,6 +110,7 @@ export const tutorNavigation: RoleNavigation = {
     { title: "Assignments", url: "/tutor/assignments", icon: ClipboardList },
     { title: "Announcements", url: "/tutor/announcements", icon: Bell },
     { title: "Learning Materials", url: "/tutor/materials", icon: FileText },
+    { title: "Wallet", url: "/tutor/wallet", icon: Wallet },
   ],
   secondaryNav: [],
 };
