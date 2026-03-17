@@ -11,6 +11,20 @@ export interface Mentee {
   status: "on-track" | "at-risk" | "ahead" | "needs-attention";
   lastActive: string;
   joinedDate: string;
+  batch?: string;
+  assignedToMe?: boolean;
+  assignedMentor?: string;
+  assignedTutor?: string;
+  phone?: string;
+  dob?: string;
+  gender?: string;
+  address?: string;
+  startDate?: string;
+  duration?: string;
+  metrics?: {
+    tasks?: { total: number; completed: number; pending: number };
+    reportsSubmitted?: number;
+  };
 }
 
 export interface MenteeNote {
@@ -59,10 +73,26 @@ export const mentees: Mentee[] = [
   { id: "STU004", name: "Sneha Iyer", email: "sneha.i@gmail.com", type: "student", course: "Full Stack Web Dev", attendance: 96, progress: 85, status: "ahead", lastActive: "30 mins ago", joinedDate: "2024-11-20" },
   { id: "STU006", name: "Meera Bhat", email: "meera.b@gmail.com", type: "student", course: "React Advanced", attendance: 78, progress: 55, status: "needs-attention", lastActive: "3 days ago", joinedDate: "2025-01-20" },
   { id: "STU002", name: "Diya Krishnan", email: "diya.k@gmail.com", type: "student", course: "Data Science Mastery", attendance: 98, progress: 92, status: "ahead", lastActive: "1 hour ago", joinedDate: "2025-01-15" },
-  { id: "INT001", name: "Rahul Desai", email: "rahul.d@gmail.com", type: "intern", course: "Full Stack Internship", attendance: 90, progress: 72, status: "on-track", lastActive: "4 hours ago", joinedDate: "2025-01-05" },
-  { id: "INT002", name: "Ananya Pillai", email: "ananya.p@gmail.com", type: "intern", course: "Data Science Internship", attendance: 75, progress: 45, status: "at-risk", lastActive: "2 days ago", joinedDate: "2025-01-10" },
-  { id: "INT003", name: "Varun Choudhary", email: "varun.c@gmail.com", type: "intern", course: "UI/UX Internship", attendance: 94, progress: 88, status: "ahead", lastActive: "1 hour ago", joinedDate: "2024-12-15" },
-  { id: "INT005", name: "Siddharth Rao", email: "sid.r@gmail.com", type: "intern", course: "Backend Internship", attendance: 68, progress: 35, status: "at-risk", lastActive: "5 days ago", joinedDate: "2025-01-20" },
+  {
+    id: "INT001", name: "Rahul Desai", email: "rahul.d@gmail.com", type: "intern", course: "Full Stack Internship", attendance: 90, progress: 72, status: "on-track", lastActive: "4 hours ago", joinedDate: "2025-01-05", batch: "Jan 2026 Batch", assignedToMe: true, assignedMentor: "Deepa Nair", assignedTutor: "James Wilson",
+    phone: "+91 91234 56789", dob: "2002-05-15", gender: "Male", address: "Mumbai, Maharashtra", startDate: "2025-01-05", duration: "6 Months",
+    metrics: { tasks: { total: 15, completed: 12, pending: 3 }, reportsSubmitted: 6 }
+  },
+  {
+    id: "INT002", name: "Ananya Pillai", email: "ananya.p@gmail.com", type: "intern", course: "Data Science Internship", attendance: 75, progress: 45, status: "at-risk", lastActive: "2 days ago", joinedDate: "2025-01-10", batch: "Jan 2026 Batch", assignedToMe: true, assignedMentor: "Deepa Nair", assignedTutor: "Sarah Thompson",
+    phone: "+91 98765 43210", dob: "2003-08-22", gender: "Female", address: "Bangalore, Karnataka", startDate: "2025-01-10", duration: "6 Months",
+    metrics: { tasks: { total: 12, completed: 5, pending: 7 }, reportsSubmitted: 4 }
+  },
+  {
+    id: "INT003", name: "Varun Choudhary", email: "varun.c@gmail.com", type: "intern", course: "UI/UX Internship", attendance: 94, progress: 88, status: "ahead", lastActive: "1 hour ago", joinedDate: "2024-12-15", batch: "Dec 2025 Batch", assignedToMe: false, assignedMentor: "Elena Rodriguez", assignedTutor: "Michael Chen",
+    phone: "+91 90000 11111", dob: "2001-11-30", gender: "Male", address: "Pune, Maharashtra", startDate: "2024-12-15", duration: "6 Months",
+    metrics: { tasks: { total: 20, completed: 18, pending: 2 }, reportsSubmitted: 10 }
+  },
+  {
+    id: "INT005", name: "Siddharth Rao", email: "sid.r@gmail.com", type: "intern", course: "Backend Internship", attendance: 68, progress: 35, status: "at-risk", lastActive: "5 days ago", joinedDate: "2025-01-20", batch: "Feb 2026 Batch", assignedToMe: true, assignedMentor: "Deepa Nair", assignedTutor: "Dr. Sarah Mitchell",
+    phone: "+91 99988 77766", dob: "2002-01-12", gender: "Male", address: "Hyderabad, Telangana", startDate: "2025-01-20", duration: "6 Months",
+    metrics: { tasks: { total: 10, completed: 4, pending: 6 }, reportsSubmitted: 3 }
+  },
 ];
 
 // ========== MENTEE NOTES ==========

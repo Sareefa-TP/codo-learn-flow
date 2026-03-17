@@ -41,13 +41,13 @@ const calculateProgress = (graded: number, total: number) => {
 
 // Demo Data mapped with auto-calculated progress
 const initialStudentList = [
-    { id: 1, name: "Aarav Sharma", batch: "Jan 2026 Batch", email: "aarav.s@example.com", gradedAssignments: 4, totalAssignments: 5, avgMarks: 88 },
-    { id: 2, name: "Diya Patel", batch: "Oct 2025 Batch", email: "diya.p@example.com", gradedAssignments: 3, totalAssignments: 5, avgMarks: 75 },
-    { id: 3, name: "Kabir Singh", batch: "Jan 2026 Batch", email: "kabir.s@example.com", gradedAssignments: 2, totalAssignments: 5, avgMarks: 45 },
-    { id: 4, name: "Ananya Iyer", batch: "Oct 2025 Batch", email: "ananya.i@example.com", gradedAssignments: 5, totalAssignments: 5, avgMarks: 92 },
-    { id: 5, name: "Rohan Das", batch: "Feb 2026 Batch - Evening", email: "rohan.d@example.com", gradedAssignments: 4, totalAssignments: 5, avgMarks: 78 },
-    { id: 6, name: "Meera Reddy", batch: "Jan 2026 Batch", email: "meera.r@example.com", gradedAssignments: 1, totalAssignments: 5, avgMarks: 30 },
-    { id: 7, name: "Vikram Gupta", batch: "Oct 2025 Batch", email: "vikram.g@example.com", gradedAssignments: 5, totalAssignments: 5, avgMarks: 85 },
+    { id: 1, name: "Aarav Sharma", batch: "Jan 2026 Batch", email: "aarav.s@example.com", gradedAssignments: 4, totalAssignments: 5, avgMarks: 88, assignedTutor: "Dr. Sarah Mitchell" },
+    { id: 2, name: "Diya Patel", batch: "Oct 2025 Batch", email: "diya.p@example.com", gradedAssignments: 3, totalAssignments: 5, avgMarks: 75, assignedTutor: "Elena Rodriguez" },
+    { id: 3, name: "Kabir Singh", batch: "Jan 2026 Batch", email: "kabir.s@example.com", gradedAssignments: 2, totalAssignments: 5, avgMarks: 45, assignedTutor: "Not Assigned" },
+    { id: 4, name: "Ananya Iyer", batch: "Oct 2025 Batch", email: "ananya.i@example.com", gradedAssignments: 5, totalAssignments: 5, avgMarks: 92, assignedTutor: "Dr. Sarah Mitchell" },
+    { id: 5, name: "Rohan Das", batch: "Feb 2026 Batch - Evening", email: "rohan.d@example.com", gradedAssignments: 4, totalAssignments: 5, avgMarks: 78, assignedTutor: "James Wilson" },
+    { id: 6, name: "Meera Reddy", batch: "Jan 2026 Batch", email: "meera.r@example.com", gradedAssignments: 1, totalAssignments: 5, avgMarks: 30, assignedTutor: "James Wilson" },
+    { id: 7, name: "Vikram Gupta", batch: "Oct 2025 Batch", email: "vikram.g@example.com", gradedAssignments: 5, totalAssignments: 5, avgMarks: 85, assignedTutor: "Elena Rodriguez" },
 ].map((student) => {
     const progress = calculateProgress(student.gradedAssignments, student.totalAssignments);
     return {
@@ -155,6 +155,8 @@ const TutorStudents = () => {
                                         <TableHead className="pl-6 w-[250px]">Student Name</TableHead>
                                         <TableHead>Email</TableHead>
                                         <TableHead>Batch</TableHead>
+                                        <TableHead>Course</TableHead>
+                                        <TableHead>Assigned Tutor</TableHead>
                                         <TableHead className="w-[20%]">Progress</TableHead>
                                         <TableHead>Status</TableHead>
                                         <TableHead className="pr-6 text-right">Action</TableHead>
@@ -176,9 +178,13 @@ const TutorStudents = () => {
                                                     {student.email}
                                                 </TableCell>
                                                 <TableCell>
-                                                    <Badge variant="secondary" className="font-normal text-muted-foreground">
+                                                    <Badge variant="secondary" className="font-normal text-muted-foreground text-xs">
                                                         {student.batch}
                                                     </Badge>
+                                                </TableCell>
+                                                <TableCell className="text-sm">Full Stack Dev</TableCell>
+                                                <TableCell className="text-sm font-medium">
+                                                    {student.assignedTutor}
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="flex items-center gap-3">

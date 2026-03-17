@@ -122,12 +122,24 @@ export const mentorNavigation: RoleNavigation = {
   baseUrl: "/mentor",
   mainNav: [
     { title: "Dashboard", url: "/mentor", icon: LayoutDashboard },
-    { title: "Interns", url: "/mentor/interns", icon: Briefcase },
-    { title: "Tasks", url: "/mentor/tasks", icon: ListTodo },
-    { title: "Task Reviews", url: "/mentor/task-reviews", icon: ClipboardList },
-    { title: "Weekly Reports", url: "/mentor/weekly-reports", icon: FileText },
-    { title: "Attendance", url: "/mentor/attendance", icon: UserCheck },
-    { title: "Performance", url: "/mentor/performance", icon: TrendingUp },
+    { title: "Tutor", url: "/mentor/tutors", icon: GraduationCap },
+    { title: "Students", url: "/mentor/students", icon: GraduationCap },
+    {
+      title: "Interns",
+      url: "#",
+      icon: Briefcase,
+      children: [
+        { title: "Interns", url: "/mentor/interns", icon: Briefcase },
+        { title: "Tasks", url: "/mentor/tasks", icon: ListTodo },
+        { title: "Task Reviews", url: "/mentor/task-reviews", icon: ClipboardList },
+        { title: "Weekly Reports", url: "/mentor/weekly-reports", icon: FileText },
+        { title: "Attendance", url: "/mentor/attendance", icon: UserCheck },
+        { title: "Performance", url: "/mentor/performance", icon: TrendingUp },
+      ]
+    },
+    { title: "Live Sessions", url: "/mentor/live-sessions", icon: Video },
+    { title: "Batch", url: "/mentor/batches", icon: Layers },
+    { title: "Chat", url: "/mentor/chat", icon: MessageSquare },
   ],
   secondaryNav: [],
 };
