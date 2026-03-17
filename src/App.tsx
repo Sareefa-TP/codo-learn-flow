@@ -58,7 +58,7 @@ import TutorProfile from "./pages/tutor/Profile";
 // Mentor Pages
 import MentorDashboard from "./pages/mentor/Dashboard";
 import MentorProfile from "./pages/mentor/Profile";
-import MentorStudents from "./pages/mentor/Students";
+import StudentManagement from "./pages/mentor/StudentManagement";
 import MentorInterns from "./pages/mentor/Interns";
 import MentorInternDetails from "./pages/mentor/InternDetails";
 import MentorTasks from "./pages/mentor/Tasks";
@@ -72,6 +72,10 @@ import MentorGuidance from "./pages/mentor/Guidance";
 import MentorSalary from "./pages/mentor/Salary";
 import MentorNotifications from "./pages/mentor/Notifications";
 import MentorFeedback from "./pages/mentor/Feedback";
+import TutorManagement from "./pages/mentor/TutorManagement";
+import MentorLiveSessions from "./pages/mentor/LiveSessions";
+import MentorBatchManagement from "./pages/mentor/BatchManagement";
+import MentorChat from "./pages/mentor/Chat";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -193,7 +197,7 @@ const App = () => (
           {/* Mentor Routes */}
           <Route path="/mentor" element={<MentorDashboard />} />
           <Route path="/mentor/profile" element={<MentorProfile />} />
-          <Route path="/mentor/students" element={<MentorStudents />} />
+          <Route path="/mentor/students" element={<StudentManagement />} />
           <Route path="/mentor/interns" element={<MentorInterns />} />
           <Route path="/mentor/interns/:internId" element={<MentorInternDetails />} />
           <Route path="/mentor/tasks" element={<MentorTasks />} />
@@ -207,6 +211,10 @@ const App = () => (
           <Route path="/mentor/salary" element={<MentorSalary />} />
           <Route path="/mentor/notifications" element={<MentorNotifications />} />
           <Route path="/mentor/feedback" element={<MentorFeedback />} />
+          <Route path="/mentor/tutors" element={<TutorManagement />} />
+          <Route path="/mentor/live-sessions" element={<MentorLiveSessions />} />
+          <Route path="/mentor/batches" element={<MentorBatchManagement />} />
+          <Route path="/mentor/chat" element={<MentorChat />} />
 
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminDashboard />} />
