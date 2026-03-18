@@ -163,66 +163,72 @@ const TaskCard = ({ task, onView, onSubmit }: TaskCardProps) => {
   const StatusIcon = statusIcons[task.status];
 
   return (
-    <Card className="border-border/50 shadow-sm rounded-xl hover:shadow-md transition-shadow flex flex-col">
-      <CardContent className="pt-5 pb-4 flex flex-col flex-1 gap-4">
+    <Card className="border-border/50 shadow-sm rounded-xl hover:shadow-md transition-all duration-200 border-l-4 border-l-transparent hover:border-l-primary group">
+      <CardContent className="p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
 
-        {/* Top Row: Title + Priority */}
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="font-semibold text-sm leading-snug flex-1">{task.title}</h3>
-          <Badge variant="outline" className={`text-[10px] font-semibold flex-shrink-0 ${priorityStyles[task.priority]}`}>
-            {task.priority}
-          </Badge>
+        {/* Left Side: Task Info */}
+        <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="font-bold text-sm lg:text-base text-foreground truncate group-hover:text-primary transition-colors">
+              {task.title}
+            </h3>
+            <Badge variant="outline" className={`text-[10px] font-bold uppercase tracking-wider h-5 flex items-center ${priorityStyles[task.priority]}`}>
+              {task.priority}
+            </Badge>
+          </div>
+
+          <div className="flex items-center gap-4 text-xs text-muted-foreground font-medium flex-wrap">
+            <div className="flex items-center gap-1.5">
+              <ClipboardList className="w-3.5 h-3.5 text-primary/60" />
+              <span>{task.week}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-primary/60" />
+              <span className={task.status === "Overdue" ? "text-red-500 font-bold" : ""}>
+                {task.deadline}
+              </span>
+            </div>
+          </div>
         </div>
 
-        {/* Description */}
-        <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed -mt-1">
-          {task.description}
-        </p>
-
-        {/* Meta: Week + Deadline */}
-        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-          <div className="flex items-center gap-1.5">
-            <ClipboardList className="w-3.5 h-3.5" />
-            <span>{task.week}</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5" />
-            <span className={task.status === "Overdue" ? "text-red-500 font-medium" : ""}>{task.deadline}</span>
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div className="border-t border-border/30" />
-
-        {/* Bottom Row: Status + Actions */}
-        <div className="flex items-center justify-between gap-2 flex-wrap">
-          <Badge variant="outline" className={`text-[10px] font-semibold gap-1 ${statusStyles[task.status]}`}>
-            <StatusIcon className="w-3 h-3" />
+        {/* Right Side: Status + Actions Combined */}
+        <div className="flex items-center gap-3 sm:gap-4 flex-wrap md:flex-nowrap">
+          {/* Status Badge */}
+          <Badge
+            variant="outline"
+            className={`text-[11px] font-bold uppercase tracking-widest h-9 px-3 gap-2 flex-shrink-0 border-2 ${statusStyles[task.status]}`}
+          >
+            <StatusIcon className="w-4 h-4" />
             {task.status}
           </Badge>
 
-          <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-7 text-xs px-2.5 gap-1.5"
-              onClick={() => onView(task.id)}
-            >
-              <Eye className="w-3 h-3" />
-              View Task
-            </Button>
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2 flex-shrink-0">
             {(task.status === "Pending" || task.status === "Overdue") && (
               <Button
                 size="sm"
-                className="h-7 text-xs px-2.5 gap-1.5"
+                className="h-9 text-xs px-4 gap-2 rounded-lg shadow-sm shadow-primary/10"
                 onClick={() => onSubmit(task.id)}
               >
-                <Upload className="w-3 h-3" />
-                Submit Work
+                <Upload className="w-4 h-4" />
+                <span className="hidden sm:inline">Submit Work</span>
+                <span className="sm:hidden">Submit</span>
               </Button>
             )}
+
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-9 text-xs px-4 gap-2 rounded-lg border-border/60 hover:border-primary/40 hover:bg-primary/5"
+              onClick={() => onView(task.id)}
+            >
+              <Eye className="w-4 h-4 text-primary" />
+              <span className="hidden sm:inline">View Details</span>
+              <span className="sm:hidden">Details</span>
+            </Button>
           </div>
         </div>
+
       </CardContent>
     </Card>
   );
@@ -248,7 +254,7 @@ const InternTasks = () => {
 
   return (
     <DashboardLayout>
-      <div className="animate-fade-in space-y-6 max-w-6xl mx-auto pb-10">
+      <div className="animate-fade-in space-y-6 max-w-6xl mx-auto px-4 md:px-6 lg:px-8 pb-10">
 
         {/* ── Page Header ── */}
         <div>
@@ -328,7 +334,7 @@ const InternTasks = () => {
             <p className="text-xs mt-1">No {activeFilter.toLowerCase()} tasks at the moment.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="flex flex-col gap-3">
             {filtered.map(task => (
               <TaskCard
                 key={task.id}

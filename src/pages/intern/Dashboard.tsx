@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import {
   CheckCircle2, UserCheck, TrendingUp, User,
-  ListTodo, Clock, Award, Circle, Briefcase,
+  ListTodo, Clock, Briefcase,
 } from "lucide-react";
 
 // ─── Mock Data ────────────────────────────────────────────────────────────────
@@ -44,12 +44,6 @@ const currentTasks: Task[] = [
   { id: 5, title: "Submit intern feedback form", status: "pending", priority: "Medium", dueDate: "Mar 10" },
 ];
 
-const milestones = [
-  { name: "Onboarding Complete", completed: true },
-  { name: "First Project Delivered", completed: true },
-  { name: "Mid-Internship Review", completed: false },
-  { name: "Final Presentation", completed: false },
-];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -160,39 +154,39 @@ const InternDashboard = () => {
           />
         </div>
 
-        {/* ── Main Grid: Tasks + Sidebar ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* ── Main Content: Tasks + Progress (Full Width) ── */}
+        <div className="space-y-6">
 
-          {/* Left: Current Tasks + Progress */}
-          <div className="lg:col-span-2 space-y-5">
-
-            {/* Current Tasks */}
-            <Card className="border-border/50 shadow-sm rounded-xl">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base font-semibold flex items-center gap-2">
-                    <ListTodo className="w-4 h-4 text-primary" />
-                    Current Tasks
-                    <Badge variant="outline" className="text-xs font-normal ml-1">
-                      {currentTasks.filter(t => t.status !== "completed").length} pending
-                    </Badge>
-                  </CardTitle>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-7 text-xs px-2.5"
-                    onClick={() => navigate("/intern/tasks")}
-                  >
-                    View All
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-2 pt-0">
+          {/* Current Tasks */}
+          <Card className="border-border/50 shadow-sm rounded-xl">
+            <CardHeader className="pb-3 px-6 pt-5">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base font-semibold flex items-center gap-2 text-foreground">
+                  <ListTodo className="w-4 h-4 text-primary" />
+                  Current Tasks
+                  <Badge variant="outline" className="text-xs font-normal ml-1 bg-primary/5 text-primary border-primary/20">
+                    {currentTasks.filter(t => t.status !== "completed").length} pending
+                  </Badge>
+                </CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 text-xs px-3 font-semibold text-primary hover:bg-primary/5"
+                  onClick={() => navigate("/intern/tasks")}
+                >
+                  View All
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-2 pb-6 px-6 pt-0">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {currentTasks.slice(0, 4).map(task => (
                   <div
                     key={task.id}
-                    className="flex items-center gap-3 p-3 rounded-lg border border-border/40 bg-card hover:bg-muted/20 transition-colors"
+                    className="flex items-center gap-3 p-4 rounded-xl border border-border/40 bg-card hover:bg-muted/10 transition-all duration-200 group relative overflow-hidden"
                   >
+                    <div className="absolute top-0 left-0 w-1 h-full bg-primary/0 group-hover:bg-primary/40 transition-all" />
+
                     {/* Status dot */}
                     <div
                       className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${task.status === "in-progress"
@@ -207,10 +201,10 @@ const InternDashboard = () => {
 
                     {/* Title + deadline */}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{task.title}</p>
+                      <p className="text-sm font-semibold text-foreground truncate">{task.title}</p>
                       <div className="flex items-center gap-1.5 mt-0.5">
                         <Clock className="w-3 h-3 text-muted-foreground" />
-                        <span className={`text-xs ${task.dueDate === "Today" ? "text-red-500 font-medium" : "text-muted-foreground"
+                        <span className={`text-[11px] ${task.dueDate === "Today" ? "text-red-500 font-bold" : "text-muted-foreground font-medium"
                           }`}>
                           {task.dueDate}
                         </span>
@@ -220,137 +214,87 @@ const InternDashboard = () => {
                     {/* Priority badge */}
                     <Badge
                       variant="outline"
-                      className={`text-[10px] font-semibold flex-shrink-0 ${priorityStyles[task.priority]}`}
+                      className={`text-[10px] font-bold uppercase tracking-wider h-5 flex items-center justify-center ${priorityStyles[task.priority]}`}
                     >
                       {task.priority}
                     </Badge>
                   </div>
                 ))}
-              </CardContent>
-            </Card>
+              </div>
+            </CardContent>
+          </Card>
 
-            {/* Internship Progress */}
-            <Card className="border-border/50 shadow-sm rounded-xl">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base font-semibold flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-emerald-600" />
-                  Internship Progress
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-5 pt-0">
+          {/* Internship Progress */}
+          <Card className="border-border/50 shadow-sm rounded-xl overflow-hidden bg-card">
+            <CardHeader className="pb-4 px-6 pt-5 border-b border-border/20">
+              <CardTitle className="text-base font-semibold flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-emerald-600" />
+                Internship Progress Summary
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {/* Overall */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">Overall Completion</span>
-                    <span className="text-sm font-bold text-emerald-600">{stats.overallProgress}%</span>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-foreground">Overall Completion</span>
+                    <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 shadow-none font-bold">
+                      {stats.overallProgress}%
+                    </Badge>
                   </div>
-                  <div className="relative h-3 w-full overflow-hidden rounded-full bg-muted">
+                  <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-muted shadow-inner">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-700"
+                      className="h-full rounded-full bg-gradient-to-r from-emerald-600 to-emerald-400 transition-all duration-1000"
                       style={{ width: `${stats.overallProgress}%` }}
                     />
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1.5">
-                    {100 - stats.overallProgress}% remaining to complete your internship
+                  <p className="text-[11px] text-muted-foreground italic">
+                    Keep it up! {100 - stats.overallProgress}% left to reach your goal.
                   </p>
                 </div>
 
                 {/* Task completion */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">Tasks</span>
-                    <span className="text-sm text-muted-foreground">{stats.tasksCompleted} of {stats.totalTasks}</span>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-foreground">Task Mastery</span>
+                    <span className="text-xs font-bold text-violet-600 bg-violet-500/10 px-2 py-0.5 rounded-md">
+                      {stats.tasksCompleted} / {stats.totalTasks}
+                    </span>
                   </div>
                   <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
                     <div
-                      className="h-full rounded-full bg-violet-500 transition-all duration-700"
+                      className="h-full rounded-full bg-violet-500 transition-all duration-1000"
                       style={{ width: `${completionPct}%` }}
                     />
                   </div>
+                  <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                    Focusing on quality and delivery.
+                  </p>
                 </div>
 
                 {/* Attendance */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">Attendance</span>
-                    <span className="text-sm text-muted-foreground">{stats.attendance}%</span>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-foreground">Consistency</span>
+                    <span className="text-xs font-bold text-blue-600 bg-blue-500/10 px-2 py-0.5 rounded-md">
+                      {stats.attendance}% Presence
+                    </span>
                   </div>
                   <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
                     <div
-                      className="h-full rounded-full bg-blue-500 transition-all duration-700"
+                      className="h-full rounded-full bg-blue-500 transition-all duration-1000"
                       style={{ width: `${stats.attendance}%` }}
                     />
                   </div>
+                  <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                    <UserCheck className="w-3 h-3 text-emerald-500" />
+                    Excellent attendance rate.
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Right: Milestones + Info */}
-          <div className="space-y-5">
-
-            {/* Milestones */}
-            <Card className="border-border/50 shadow-sm rounded-xl">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base font-semibold flex items-center gap-2">
-                  <Award className="w-4 h-4 text-amber-500" />
-                  Milestones
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 pt-0">
-                {milestones.map((m, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    {m.completed ? (
-                      <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-                    ) : (
-                      <Circle className="w-5 h-5 text-border flex-shrink-0" />
-                    )}
-                    <span className={`text-sm ${m.completed ? "text-foreground font-medium" : "text-muted-foreground"}`}>
-                      {m.name}
-                    </span>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            {/* Intern Info Card */}
-            <Card className="border-border/50 shadow-sm rounded-xl bg-gradient-to-br from-emerald-500/5 to-transparent">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                  Internship Info
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 pt-1">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Name</span>
-                  <span className="font-medium">{intern.name}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Mentor</span>
-                  <span className="font-medium">{intern.mentor}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Batch</span>
-                  <span className="font-medium text-right max-w-[55%] truncate">{intern.batch.split("–")[0].trim()}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Duration</span>
-                  <span className="font-medium">{intern.startDate} – {intern.endDate}</span>
-                </div>
-                <div className="pt-2 border-t border-border/40">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full h-8 text-xs"
-                    onClick={() => navigate("/intern/profile")}
-                  >
-                    View Full Profile
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-          </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </DashboardLayout>

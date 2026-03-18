@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,15 +7,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import {
-    Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
-import {
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
     FileText, Plus, Eye, X, Upload, CheckCircle2,
     Clock, AlertCircle, MessageSquare,
 } from "lucide-react";
+import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+// ... (rest of the file remains same but I'll replace the relevant parts)
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -196,181 +199,12 @@ const ViewReportModal = ({ report, onClose }: ViewModalProps) => {
     );
 };
 
-// ─── Submit Report Modal ──────────────────────────────────────────────────────
-
-interface SubmitModalProps {
-    onClose: () => void;
-    onSubmit: (report: WeeklyReport) => void;
-    nextId: number;
-}
-
-const SubmitReportModal = ({ onClose, onSubmit, nextId }: SubmitModalProps) => {
-    const [week, setWeek] = useState("");
-    const [title, setTitle] = useState("");
-    const [summary, setSummary] = useState("");
-    const [challenges, setChallenges] = useState("");
-    const [learnings, setLearnings] = useState("");
-    const [fileName, setFileName] = useState("");
-    const fileRef = useRef<HTMLInputElement>(null);
-
-    const today = new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
-
-    const isValid = week && title.trim() && summary.trim();
-
-    const handleSubmit = () => {
-        if (!isValid) return;
-        onSubmit({
-            id: nextId,
-            week,
-            title: title.trim(),
-            submittedDate: today,
-            status: "Pending",
-            mentorFeedback: "—",
-            summary: summary.trim(),
-            challenges: challenges.trim(),
-            learnings: learnings.trim(),
-            fileName,
-        });
-        onClose();
-    };
-
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
-            <div
-                className="bg-background border border-border/50 rounded-xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] flex flex-col"
-                onClick={e => e.stopPropagation()}
-            >
-                {/* Header */}
-                <div className="flex items-center justify-between p-5 border-b border-border/50 flex-shrink-0">
-                    <div>
-                        <h2 className="text-base font-semibold">Submit Weekly Report</h2>
-                        <p className="text-xs text-muted-foreground mt-0.5">Fill in all required fields</p>
-                    </div>
-                    <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground">
-                        <X className="w-4 h-4" />
-                    </button>
-                </div>
-
-                {/* Scrollable Body */}
-                <div className="p-5 space-y-4 overflow-y-auto flex-1">
-
-                    {/* Week */}
-                    <div className="space-y-1.5">
-                        <Label>Week Number <span className="text-destructive">*</span></Label>
-                        <Select value={week} onValueChange={setWeek}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select week" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {weekOptions.map(w => (
-                                    <SelectItem key={w} value={w}>{w}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    {/* Title */}
-                    <div className="space-y-1.5">
-                        <Label htmlFor="rpt-title">Report Title <span className="text-destructive">*</span></Label>
-                        <Input
-                            id="rpt-title"
-                            placeholder="e.g. Frontend Development Progress"
-                            value={title}
-                            onChange={e => setTitle(e.target.value)}
-                        />
-                    </div>
-
-                    {/* Work Summary */}
-                    <div className="space-y-1.5">
-                        <Label htmlFor="rpt-summary">Work Summary <span className="text-destructive">*</span></Label>
-                        <textarea
-                            id="rpt-summary"
-                            rows={3}
-                            placeholder="Describe the work you completed this week..."
-                            value={summary}
-                            onChange={e => setSummary(e.target.value)}
-                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring resize-none"
-                        />
-                    </div>
-
-                    {/* Challenges */}
-                    <div className="space-y-1.5">
-                        <Label htmlFor="rpt-challenges">Challenges Faced</Label>
-                        <textarea
-                            id="rpt-challenges"
-                            rows={2}
-                            placeholder="Any blockers or difficulties you encountered..."
-                            value={challenges}
-                            onChange={e => setChallenges(e.target.value)}
-                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring resize-none"
-                        />
-                    </div>
-
-                    {/* Learning Outcomes */}
-                    <div className="space-y-1.5">
-                        <Label htmlFor="rpt-learnings">Learning Outcomes</Label>
-                        <textarea
-                            id="rpt-learnings"
-                            rows={2}
-                            placeholder="What did you learn or improve this week..."
-                            value={learnings}
-                            onChange={e => setLearnings(e.target.value)}
-                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring resize-none"
-                        />
-                    </div>
-
-                    {/* File Upload */}
-                    <div className="space-y-1.5">
-                        <Label>Attach Files <span className="text-muted-foreground font-normal">(optional)</span></Label>
-                        <div
-                            className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:bg-muted/20 transition-colors ${fileName ? "border-primary/40 bg-primary/5" : "border-border/40"
-                                }`}
-                            onClick={() => fileRef.current?.click()}
-                        >
-                            <input
-                                ref={fileRef}
-                                type="file"
-                                className="hidden"
-                                accept=".pdf,.doc,.docx,.ppt,.pptx,.zip,.jpg,.jpeg,.png,.webp,.mp4,.mov,.rar"
-                                onChange={e => {
-                                    const f = e.target.files?.[0];
-                                    if (f) setFileName(f.name);
-                                }}
-                            />
-                            <Upload className="w-5 h-5 mx-auto text-muted-foreground mb-1.5" />
-                            {fileName
-                                ? <p className="text-sm font-medium truncate">{fileName}</p>
-                                : <>
-                                    <p className="text-sm font-medium">Click to attach a file</p>
-                                    <p className="text-xs text-muted-foreground mt-0.5">PDF, DOC, PPT, ZIP, Images, Videos</p>
-                                </>
-                            }
-                        </div>
-                    </div>
-                </div>
-
-                {/* Footer */}
-                <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-border/50 flex-shrink-0">
-                    <Button variant="outline" size="sm" onClick={onClose}>Cancel</Button>
-                    <Button size="sm" onClick={handleSubmit} disabled={!isValid}>
-                        <FileText className="w-3.5 h-3.5 mr-1.5" />
-                        Submit Report
-                    </Button>
-                </div>
-            </div>
-        </div>
-    );
-};
-
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 const WeeklyReport = () => {
+    const navigate = useNavigate();
     const [reports, setReports] = useState<WeeklyReport[]>(initialReports);
-    const [showSubmitModal, setShowSubmitModal] = useState(false);
     const [viewingReport, setViewingReport] = useState<WeeklyReport | null>(null);
-
-    const addReport = (r: WeeklyReport) =>
-        setReports(prev => [r, ...prev]);
 
     return (
         <>
@@ -385,7 +219,10 @@ const WeeklyReport = () => {
                                 Submit and manage your internship weekly reports.
                             </p>
                         </div>
-                        <Button className="gap-2 flex-shrink-0" onClick={() => setShowSubmitModal(true)}>
+                        <Button
+                            className="gap-2 flex-shrink-0"
+                            onClick={() => navigate("/intern/weekly-report/submit-weekly-report")}
+                        >
                             <Plus className="w-4 h-4" />
                             Submit Weekly Report
                         </Button>
@@ -485,15 +322,6 @@ const WeeklyReport = () => {
 
                 </div>
             </DashboardLayout>
-
-            {/* ── Modals ── */}
-            {showSubmitModal && (
-                <SubmitReportModal
-                    onClose={() => setShowSubmitModal(false)}
-                    onSubmit={addReport}
-                    nextId={reports.length + 1}
-                />
-            )}
 
             {viewingReport && (
                 <ViewReportModal

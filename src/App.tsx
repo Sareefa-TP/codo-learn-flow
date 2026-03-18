@@ -174,6 +174,7 @@ const App = () => (
           <Route path="/intern/tasks/:taskId" element={<TaskDetails />} />
           <Route path="/intern/tasks/:taskId/submit" element={<TaskSubmit />} />
           <Route path="/intern/weekly-report" element={<WeeklyReport />} />
+          <Route path="/intern/weekly-report/submit-weekly-report" element={<WeeklyReport />} />
           <Route path="/intern/progress" element={<InternProgress />} />
           <Route path="/intern/attendance" element={<InternAttendance />} />
           <Route path="/intern/stipend" element={<InternStipend />} />
