@@ -476,7 +476,11 @@ const InternProfile = () => {
 
       {/* Update Profile Photo Modal */}
       <Dialog open={isPhotoModalOpen} onOpenChange={setIsPhotoModalOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent
+          className="sm:max-w-md"
+          onInteractOutside={e => e.preventDefault()}
+          onPointerDownOutside={e => e.preventDefault()}
+        >
           <DialogHeader>
             <DialogTitle>Update Profile Photo</DialogTitle>
             <DialogDescription>
