@@ -135,22 +135,44 @@ interface SummaryCardProps {
   iconBg: string;
   iconColor: string;
   valueColor?: string;
+  isActive?: boolean;
+  onClick?: () => void;
 }
 
-const SummaryCard = ({ label, value, icon: Icon, iconBg, iconColor, valueColor }: SummaryCardProps) => (
-  <Card className="border-border/50 shadow-sm rounded-xl">
-    <CardContent className="pt-5 pb-4">
-      <div className="flex items-center gap-3">
-        <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${iconBg}`}>
-          <Icon className={`w-5 h-5 ${iconColor}`} />
+const SummaryCard = ({ label, value, icon: Icon, iconBg, iconColor, valueColor, isActive, onClick }: SummaryCardProps) => (
+  <div
+    onClick={onClick}
+    className={`rounded-xl transition-all duration-200 ${
+      onClick ? "cursor-pointer" : ""
+    } ${
+      isActive
+        ? "ring-2 ring-emerald-500 ring-offset-1 shadow-lg scale-[1.02]"
+        : onClick ? "hover:shadow-md hover:scale-[1.01]" : ""
+    }`}
+  >
+    <Card className="border-border/50 shadow-sm rounded-xl select-none h-full">
+      <CardContent className="pt-5 pb-4">
+        <div className="flex items-center gap-3">
+          <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${iconBg}`}>
+            <Icon className={`w-5 h-5 ${iconColor}`} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className={`text-2xl font-bold leading-tight transition-colors ${
+              isActive ? "text-emerald-600" : (valueColor ?? "text-foreground")
+            }`}>{value}</p>
+            <p className={`text-xs mt-0.5 transition-colors ${
+              isActive ? "text-emerald-600/80 font-semibold" : "text-muted-foreground"
+            }`}>{label}</p>
+          </div>
+          {isActive && (
+            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-500/10 px-2 py-1 rounded-full border border-emerald-500/30 flex-shrink-0">
+              Active
+            </span>
+          )}
         </div>
-        <div>
-          <p className={`text-2xl font-bold leading-tight ${valueColor ?? "text-foreground"}`}>{value}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">{label}</p>
-        </div>
-      </div>
-    </CardContent>
-  </Card>
+      </CardContent>
+    </Card>
+  </div>
 );
 
 interface TaskCardProps {
@@ -237,7 +259,7 @@ const TaskCard = ({ task, onView, onSubmit }: TaskCardProps) => {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 const InternTasks = () => {
-  const [activeFilter, setActiveFilter] = useState<FilterTab>("All");
+  const [activeFilter, setActiveFilter] = useState<FilterTab | null>(null);
   const navigate = useNavigate();
 
   // Summary counts
@@ -247,8 +269,8 @@ const InternTasks = () => {
   const completed = tasks.filter(t => t.status === "Completed").length;
   const overdue = tasks.filter(t => t.status === "Overdue").length;
 
-  // Filtered list
-  const filtered = activeFilter === "All"
+  // Filtered list — null means show all
+  const filtered = activeFilter === null || activeFilter === "All"
     ? tasks
     : tasks.filter(t => t.status === activeFilter);
 
@@ -273,6 +295,8 @@ const InternTasks = () => {
             iconBg="bg-violet-500/10"
             iconColor="text-violet-600"
             valueColor="text-violet-600"
+            isActive={activeFilter === "All"}
+            onClick={() => setActiveFilter(prev => prev === "All" ? null : "All")}
           />
           <SummaryCard
             label="Pending"
@@ -280,6 +304,8 @@ const InternTasks = () => {
             icon={Clock}
             iconBg="bg-muted"
             iconColor="text-muted-foreground"
+            isActive={activeFilter === "Pending"}
+            onClick={() => setActiveFilter(prev => prev === "Pending" ? null : "Pending")}
           />
           <SummaryCard
             label="Submitted"
@@ -288,6 +314,8 @@ const InternTasks = () => {
             iconBg="bg-blue-500/10"
             iconColor="text-blue-600"
             valueColor="text-blue-600"
+            isActive={activeFilter === "Submitted"}
+            onClick={() => setActiveFilter(prev => prev === "Submitted" ? null : "Submitted")}
           />
           <SummaryCard
             label="Completed"
@@ -296,6 +324,8 @@ const InternTasks = () => {
             iconBg="bg-emerald-500/10"
             iconColor="text-emerald-600"
             valueColor="text-emerald-600"
+            isActive={activeFilter === "Completed"}
+            onClick={() => setActiveFilter(prev => prev === "Completed" ? null : "Completed")}
           />
         </div>
 

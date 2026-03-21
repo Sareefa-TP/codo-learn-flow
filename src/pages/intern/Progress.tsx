@@ -24,12 +24,10 @@ interface WeekReport {
 }
 
 const weeklyReports: WeekReport[] = [
-  { week: "Week 1", status: "Reviewed" },
-  { week: "Week 2", status: "Reviewed" },
-  { week: "Week 3", status: "Pending" },
-  { week: "Week 4", status: "Not Submitted" },
-  { week: "Week 5", status: "Not Submitted" },
-  { week: "Week 6", status: "Not Submitted" },
+  { week: "March – Week 1", status: "Reviewed" },
+  { week: "April – Week 2", status: "Reviewed" },
+  { week: "April – Week 3", status: "Pending" },
+  { week: "April – Week 4", status: "Not Submitted" },
 ];
 
 interface MentorFeedback {
@@ -38,9 +36,9 @@ interface MentorFeedback {
 }
 
 const mentorFeedback: MentorFeedback[] = [
-  { week: "Week 1", feedback: "Good start. Improve code structure and add more comments." },
-  { week: "Week 2", feedback: "Excellent dashboard implementation! Keep this momentum going." },
-  { week: "Week 3", feedback: "Report pending review — no feedback yet." },
+  { week: "March – Week 1", feedback: "Good start. Improve code structure and add more comments." },
+  { week: "April – Week 2", feedback: "Excellent dashboard implementation! Keep this momentum going." },
+  { week: "April – Week 3", feedback: "Your current task logic is coming along well. Keep it up!" },
 ];
 
 const attendance = {
@@ -88,7 +86,7 @@ const InternProgress = () => {
 
   return (
     <DashboardLayout>
-      <div className="animate-fade-in space-y-6 max-w-5xl mx-auto pb-10">
+      <div className="animate-fade-in space-y-6 max-w-6xl mx-auto px-4 md:px-6 lg:px-8 pb-10">
 
         {/* ── Page Header ── */}
         <div>
@@ -181,7 +179,7 @@ const InternProgress = () => {
           </CardHeader>
           <CardContent className="pt-0">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {weeklyReports.map(({ week, status }) => {
+              {weeklyReports.slice(0, 4).map(({ week, status }) => {
                 const Icon = weekStatusIcon[status];
                 return (
                   <div

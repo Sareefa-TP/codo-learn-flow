@@ -91,7 +91,7 @@ const InternDashboard = () => {
 
   return (
     <DashboardLayout>
-      <div className="animate-fade-in space-y-6 max-w-6xl mx-auto pb-10">
+      <div className="animate-fade-in space-y-6 max-w-6xl mx-auto px-4 md:px-6 lg:px-8 pb-10">
 
         {/* ── Welcome Section ── */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
