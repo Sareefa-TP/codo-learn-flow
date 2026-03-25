@@ -1,24 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Users,
-  BookOpen,
-  ClipboardList,
-  TrendingUp,
-  CheckCircle2,
   Video,
-  Plus,
-  Link2,
-  Calendar as CalendarIcon,
   Clock,
-  Pencil,
-  X
+  Calendar as CalendarIcon,
 } from "lucide-react";
 import {
   Table,
@@ -28,38 +18,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Progress } from "@/components/ui/progress";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 
 // Demo Data
-const recentActivity = [
-  { id: 1, name: "Aarav Sharma", batch: "Jan 2026 Batch", progress: 85, status: "Excellent" },
-  { id: 2, name: "Diya Patel", batch: "Oct 2025 Batch", progress: 62, status: "Good" },
-  { id: 3, name: "Kabir Singh", batch: "Jan 2026 Batch", progress: 40, status: "Needs Attention" },
-  { id: 4, name: "Ananya Iyer", batch: "Oct 2025 Batch", progress: 95, status: "Excellent" },
-];
-
-const availableBatches = [
-  "Jan 2026 Batch",
-  "Oct 2025 Batch",
-  "Feb 2026 Batch - Evening"
-];
-
 const initialLiveClasses = [
   { id: "LC-1", batch: "Jan 2026 Batch", topic: "Advanced React Hooks", date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }), time: "10:00 AM", link: "https://meet.google.com/abc-defg-hij", status: "Upcoming" },
   { id: "LC-2", batch: "Oct 2025 Batch", topic: "Redux State Management", date: "25 Feb 2026", time: "02:00 PM", link: "https://meet.google.com/xyz-abcd-efg", status: "Completed" },
@@ -69,83 +30,33 @@ const initialLiveClasses = [
 const TutorDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [liveClasses, setLiveClasses] = useState(initialLiveClasses);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    batch: "",
-    topic: "",
-    date: "",
-    time: "",
-    link: ""
-  });
+  const [liveClasses] = useState(initialLiveClasses);
+
+  const now = new Date();
+  const twentyFourHoursFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+  const parseSessionDateTime = (dateStr: string, timeStr: string) => {
+    try {
+      return new Date(`${dateStr} ${timeStr}`);
+    } catch (e) {
+      return new Date(0);
+    }
+  };
 
   const todayStr = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
   const todaysClasses = liveClasses.filter(lc => lc.date === todayStr && lc.status !== "Completed");
-  const upcomingClasses = liveClasses.filter(lc => lc.status === "Upcoming");
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSelectChange = (value: string) => {
-    setFormData(prev => ({ ...prev, batch: value }));
-  };
-
-  const handleScheduleClass = () => {
-    if (!formData.batch || !formData.topic || !formData.date || !formData.time || !formData.link) {
-      toast({
-        title: "Missing Fields",
-        description: "Please fill out all fields including the Google Meet link.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const formattedDate = new Date(formData.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-
-    // Format time (attempt logic from time value normally HH:mm)
-    let formattedTime = formData.time;
-    try {
-      if (formData.time.includes(":")) {
-        const [hour, minute] = formData.time.split(":");
-        const h = parseInt(hour, 10);
-        const ampm = h >= 12 ? 'PM' : 'AM';
-        const h12 = h % 12 || 12;
-        formattedTime = `${h12.toString().padStart(2, '0')}:${minute} ${ampm}`;
-      }
-    } catch (e) {
-      // Ignore format
-    }
-
-    const newClass = {
-      id: `LC-${Math.floor(Math.random() * 1000).toString()}`,
-      batch: formData.batch,
-      topic: formData.topic,
-      date: formattedDate !== "Invalid Date" ? formattedDate : formData.date,
-      time: formattedTime,
-      link: formData.link,
-      status: "Upcoming"
-    };
-
-    setLiveClasses([newClass, ...liveClasses]);
-
-    setFormData({ batch: "", topic: "", date: "", time: "", link: "" });
-    setIsModalOpen(false);
-
-    toast({
-      title: "Class Scheduled",
-      description: "The live session has been successfully added to the schedule.",
-    });
-  };
-
-  const cancelClass = (id: string) => {
-    setLiveClasses(liveClasses.filter(lc => lc.id !== id));
-    toast({
-      title: "Session Canceled",
-      description: "The live class has been removed.",
-    });
-  };
+  const upcomingClasses = liveClasses
+    .filter(lc => {
+      if (lc.status !== "Upcoming") return false;
+      const sessionTime = parseSessionDateTime(lc.date, lc.time);
+      return sessionTime >= now && sessionTime <= twentyFourHoursFromNow;
+    })
+    .sort((a, b) => {
+      const timeA = parseSessionDateTime(a.date, a.time).getTime();
+      const timeB = parseSessionDateTime(b.date, b.time).getTime();
+      return timeA - timeB;
+    })
+    .slice(0, 5);
 
   return (
     <DashboardLayout>
@@ -221,7 +132,6 @@ const TutorDashboard = () => {
                         <a href={lc.link} target="_blank" rel="noopener noreferrer" className="w-full">
                           <Button className="w-full sm:w-auto h-12 px-8 rounded-xl font-bold shadow-lg shadow-emerald-500/20 bg-emerald-600 hover:bg-emerald-700 gap-2">
                             Join Class
-                            <Plus className="w-4 h-4" />
                           </Button>
                         </a>
                       </div>
@@ -245,17 +155,11 @@ const TutorDashboard = () => {
 
         {/* 3. Upcoming Live Sessions */}
         <div className="space-y-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                <CalendarIcon className="w-4 h-4 text-blue-600" />
-              </div>
-              <h2 className="text-2xl font-bold text-foreground">Upcoming Live Sessions</h2>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+              <CalendarIcon className="w-4 h-4 text-blue-600" />
             </div>
-            <Button onClick={() => setIsModalOpen(true)} className="gap-2 rounded-xl h-11 px-6 shadow-md">
-              <Plus className="w-4 h-4" />
-              Schedule Live Class
-            </Button>
+            <h2 className="text-2xl font-bold text-foreground">Upcoming Sessions (Next 24 Hours)</h2>
           </div>
 
           <Card className="border-border/50 shadow-sm overflow-hidden rounded-2xl">
@@ -270,7 +174,6 @@ const TutorDashboard = () => {
                       <TableHead className="h-14 font-bold text-foreground">Time</TableHead>
                       <TableHead className="h-14 font-bold text-foreground">Meet Link</TableHead>
                       <TableHead className="h-14 font-bold text-foreground text-center">Status</TableHead>
-                      <TableHead className="pr-6 h-14 font-bold text-foreground text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -309,22 +212,12 @@ const TutorDashboard = () => {
                               {lc.status}
                             </Badge>
                           </TableCell>
-                          <TableCell className="pr-6 py-4 text-right">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg h-9 w-9 p-0"
-                              onClick={() => cancelClass(lc.id)}
-                            >
-                              <X className="w-4 h-4" />
-                            </Button>
-                          </TableCell>
                         </TableRow>
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center py-12 text-muted-foreground font-medium">
-                          No upcoming sessions found.
+                        <TableCell colSpan={6} className="text-center py-12 text-muted-foreground font-medium">
+                          No upcoming sessions found for the next 24 hours.
                         </TableCell>
                       </TableRow>
                     )}
@@ -334,101 +227,6 @@ const TutorDashboard = () => {
             </CardContent>
           </Card>
         </div>
-
-        {/* Schedule Class Modal */}
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogContent className="sm:max-w-[425px] rounded-3xl overflow-hidden border-border/50">
-            <DialogHeader className="pt-2">
-              <DialogTitle className="text-2xl font-black">Schedule Live Class</DialogTitle>
-              <DialogDescription className="font-medium">
-                Set up a new Google Meet session for a Learning Phase batch.
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="grid gap-5 py-6">
-              <div className="grid gap-2">
-                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Batch Selection <span className="text-destructive">*</span></Label>
-                <Select
-                  value={formData.batch}
-                  onValueChange={handleSelectChange}
-                >
-                  <SelectTrigger className="h-12 rounded-xl ring-offset-background focus-visible:ring-1 focus-visible:ring-primary">
-                    <SelectValue placeholder="Select batch" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl">
-                    {availableBatches.map(b => (
-                      <SelectItem key={b} value={b}>{b}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="topic" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Class Topic <span className="text-destructive">*</span></Label>
-                <Input
-                  id="topic"
-                  name="topic"
-                  placeholder="e.g. Intro to Node.js"
-                  className="h-12 rounded-xl bg-muted/30 border-transparent focus:border-primary/30 transition-all font-medium"
-                  value={formData.topic}
-                  onChange={handleInputChange}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="date" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Date <span className="text-destructive">*</span></Label>
-                  <Input
-                    id="date"
-                    name="date"
-                    type="date"
-                    className="h-12 rounded-xl bg-muted/30 border-transparent font-medium"
-                    value={formData.date}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="time" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Time <span className="text-destructive">*</span></Label>
-                  <Input
-                    id="time"
-                    name="time"
-                    type="time"
-                    className="h-12 rounded-xl bg-muted/30 border-transparent font-medium"
-                    value={formData.time}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="link" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Google Meet Link <span className="text-destructive">*</span></Label>
-                <div className="relative">
-                  <Link2 className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="link"
-                    name="link"
-                    type="url"
-                    placeholder="https://meet.google.com/..."
-                    className="pl-12 h-12 rounded-xl bg-muted/30 border-transparent font-medium"
-                    value={formData.link}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <DialogFooter className="gap-3 sm:gap-0">
-              <Button variant="ghost" onClick={() => setIsModalOpen(false)} className="rounded-xl h-12 flex-1 font-bold">
-                Cancel
-              </Button>
-              <Button onClick={handleScheduleClass} className="rounded-xl h-12 flex-1 font-bold gap-2">
-                <Video className="w-4 h-4" />
-                Schedule Class
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
       </div>
     </DashboardLayout>
   );

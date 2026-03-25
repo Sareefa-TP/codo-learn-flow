@@ -88,6 +88,10 @@ export const internNavigation: RoleNavigation = {
   mainNav: [
     { title: "Dashboard", url: "/intern", icon: LayoutDashboard },
     { title: "Tasks", url: "/intern/tasks", icon: ListTodo },
+    { title: "Meet", url: "/intern/meet", icon: Video },
+    { title: "Materials", url: "/intern/materials", icon: BookOpen },
+    { title: "Support Ticket", url: "/intern/support-ticket", icon: LifeBuoy },
+    { title: "Placement Updates", url: "/intern/placement-updates", icon: Briefcase },
     { title: "Weekly Report", url: "/intern/weekly-report", icon: FileText },
     { title: "Progress", url: "/intern/progress", icon: TrendingUp },
     { title: "Attendance", url: "/intern/attendance", icon: UserCheck },
