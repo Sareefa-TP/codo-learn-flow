@@ -11,6 +11,7 @@ const tutorBatches = [
         id: "B-001",
         name: "Jan 2026 Batch",
         startDate: "15 Jan 2026",
+        enrolledDate: "12 Jan 2026",
         totalStudents: 45,
         status: "Active"
     },
@@ -18,6 +19,7 @@ const tutorBatches = [
         id: "B-002",
         name: "Oct 2025 Batch",
         startDate: "10 Oct 2025",
+        enrolledDate: "05 Oct 2025",
         totalStudents: 38,
         status: "Active"
     },
@@ -25,6 +27,7 @@ const tutorBatches = [
         id: "B-005",
         name: "Feb 2026 Batch - Evening",
         startDate: "01 Feb 2026",
+        enrolledDate: "28 Jan 2026",
         totalStudents: 21,
         status: "Active"
     }
@@ -84,6 +87,13 @@ const TutorBatches = () => {
                                                 <span>Start Date</span>
                                             </div>
                                             <span className="font-bold text-foreground">{batch.startDate}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between text-sm">
+                                            <div className="flex items-center gap-2 text-muted-foreground">
+                                                <Calendar className="w-4 h-4 text-blue-600" />
+                                                <span>Enrolled Date</span>
+                                            </div>
+                                            <span className="font-bold text-foreground">{(batch as any).enrolledDate}</span>
                                         </div>
                                         <div className="flex items-center justify-between text-sm">
                                             <div className="flex items-center gap-2 text-muted-foreground">

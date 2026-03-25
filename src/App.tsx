@@ -41,6 +41,10 @@ import InternStipend from "./pages/intern/Stipend";
 import InternCertificates from "./pages/intern/Certificates";
 import InternNotifications from "./pages/intern/Notifications";
 import InternFeedback from "./pages/intern/Feedback";
+import InternMeet from "./pages/intern/Meet";
+import InternMaterials from "./pages/intern/Materials";
+import InternSupportTicket from "@/pages/intern/SupportTicket";
+import InternPlacementUpdates from "@/pages/intern/PlacementUpdates";
 
 // Tutor Pages
 import TutorDashboard from "./pages/tutor/Dashboard";
@@ -181,6 +185,11 @@ const App = () => (
           <Route path="/intern/certificates" element={<InternCertificates />} />
           <Route path="/intern/notifications" element={<InternNotifications />} />
           <Route path="/intern/feedback" element={<InternFeedback />} />
+          <Route path="/intern/meet" element={<InternMeet />} />
+          <Route path="/intern/meet/:tab" element={<InternMeet />} />
+          <Route path="/intern/materials" element={<InternMaterials />} />
+          <Route path="/intern/support-ticket" element={<InternSupportTicket />} />
+          <Route path="/intern/placement-updates" element={<InternPlacementUpdates />} />
 
           {/* Tutor Routes */}
           <Route path="/tutor" element={<TutorDashboard />} />

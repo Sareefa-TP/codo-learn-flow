@@ -27,7 +27,7 @@ import {
     PlusCircle,
     CheckCircle2,
     MessageSquare,
-    Activity
+    FileText
 } from "lucide-react";
 
 // Mock Data
@@ -57,13 +57,13 @@ const studentData: Record<string, any> = {
             total: 7
         },
         notes: [
-            { id: 1, text: "Good progress in CSS. Shows strong understanding of layouts.", date: "16 Feb 2026" },
-            { id: 2, text: "Needs improvement in JavaScript logic, particularly async/await concepts.", date: "28 Feb 2026" },
+            { id: 1, text: "Good progress in CSS. Shows strong understanding of layouts.", date: "16 Feb 2026", mentor: "Arjun Singh" },
+            { id: 2, text: "Needs improvement in JavaScript logic, particularly async/await concepts.", date: "28 Feb 2026", mentor: "Arjun Singh" },
         ],
-        activity: [
-            { text: "Logged in 2 hours ago", time: "2 hours ago", icon: Clock },
-            { text: "Submitted \"CSS Flexbox Task\"", time: "2 days ago", icon: CheckCircle2 },
-            { text: "Viewed \"React Basics Lesson\"", time: "3 days ago", icon: BookOpen },
+        assessments: [
+            { name: "React Basics Quiz", score: 85, status: "Passed" },
+            { name: "Node.js Fundamentals", score: 45, status: "Failed" },
+            { name: "Database Design", score: 92, status: "Passed" },
         ]
     }
 };
@@ -83,7 +83,8 @@ const StudentDashboard = () => {
         const note = {
             id: Date.now(),
             text: newNote,
-            date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+            date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+            mentor: "Arjun Singh"
         };
         setNotes([note, ...notes]);
         setNewNote("");
@@ -263,11 +264,18 @@ const StudentDashboard = () => {
                         <CardContent className="p-6 flex-1 space-y-6">
                             <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
                                 {notes.map((note: any) => (
-                                    <div key={note.id} className="p-4 rounded-lg bg-muted/30 border border-border/40 relative group">
-                                        <p className="text-sm text-foreground pr-10">{note.text}</p>
-                                        <span className="absolute top-4 right-4 text-[10px] uppercase font-bold text-muted-foreground opacity-50 group-hover:opacity-100 transition-opacity">
-                                            {note.date}
-                                        </span>
+                                    <div key={note.id} className="p-4 rounded-lg bg-muted/30 border border-border/40 space-y-3">
+                                        <p className="text-sm text-foreground leading-relaxed">
+                                            {note.text}
+                                        </p>
+                                        <div className="flex justify-between items-center pt-2 border-t border-border/20">
+                                            <span className="text-[10px] font-bold text-primary uppercase tracking-wider">
+                                                {note.mentor || "Mentor Name"}
+                                            </span>
+                                            <span className="text-[10px] uppercase font-bold text-muted-foreground">
+                                                {note.date}
+                                            </span>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -287,27 +295,46 @@ const StudentDashboard = () => {
                         </CardContent>
                     </Card>
 
-                    {/* Recent Activity */}
+                    {/* Assessment Section */}
                     <Card className="border-border/50 shadow-sm rounded-xl overflow-hidden">
                         <CardHeader className="border-b border-border/40 bg-muted/20 pb-4">
                             <CardTitle className="text-lg font-bold flex items-center gap-2">
-                                <Activity className="w-5 h-5 text-primary" />
-                                Recent Activity
+                                <FileText className="w-5 h-5 text-primary" />
+                                Assessment
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="p-6">
-                            <div className="space-y-8 relative before:absolute before:left-3.5 before:top-2 before:bottom-2 before:w-px before:bg-border/50">
-                                {student.activity.map((act: any, idx: number) => (
-                                    <div key={idx} className="flex gap-4 relative">
-                                        <div className="w-7 h-7 rounded-full bg-background border border-border flex items-center justify-center shrink-0 z-10 shadow-sm">
-                                            <act.icon className="w-3.5 h-3.5 text-primary" />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <p className="text-sm font-medium text-foreground">{act.text}</p>
-                                            <p className="text-xs text-muted-foreground">{act.time}</p>
-                                        </div>
-                                    </div>
-                                ))}
+                        <CardContent className="p-0">
+                            <div className="overflow-x-auto">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow className="bg-muted/30">
+                                            <TableHead className="font-semibold text-xs">Assessment Name</TableHead>
+                                            <TableHead className="font-semibold text-xs text-center">Score</TableHead>
+                                            <TableHead className="font-semibold text-xs text-right">Status</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {student.assessments.map((assessment: any) => (
+                                            <TableRow key={assessment.name} className="hover:bg-muted/10 transition-colors">
+                                                <TableCell className="font-medium text-sm">{assessment.name}</TableCell>
+                                                <TableCell className="text-center font-bold text-foreground text-sm">
+                                                    {assessment.score}%
+                                                </TableCell>
+                                                <TableCell className="text-right">
+                                                    {assessment.status === "Passed" ? (
+                                                        <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
+                                                            {assessment.status}
+                                                        </Badge>
+                                                    ) : (
+                                                        <Badge variant="outline" className="bg-red-500/10 text-red-600 border-red-500/20">
+                                                            {assessment.status}
+                                                        </Badge>
+                                                    )}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
                             </div>
                         </CardContent>
                     </Card>
