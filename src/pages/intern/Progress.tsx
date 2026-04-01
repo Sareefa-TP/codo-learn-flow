@@ -1,14 +1,22 @@
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 import {
   TrendingUp, CheckCircle2, Clock, ClipboardList,
-  UserCheck, MessageSquare, Calendar,
+  UserCheck, MessageSquare, Calendar, Eye, Download, FileText, X, ChevronDown
 } from "lucide-react";
+import { toast } from "sonner";
+import { useState, useEffect } from "react";
 
 // ─── Mock Data ────────────────────────────────────────────────────────────────
 
-const overallProgress = 45;
+const internshipDays = {
+  total: 90,
+  completed: 41,
+};
+const dayProgressPercentage = Math.round((internshipDays.completed / internshipDays.total) * 100);
 
 const taskData = {
   total: 20,
@@ -21,13 +29,45 @@ type WeekStatus = "Reviewed" | "Pending" | "Not Submitted";
 interface WeekReport {
   week: string;
   status: WeekStatus;
+  title: string;
+  summary: string;
+  challenges: string;
+  fileName: string;
 }
 
 const weeklyReports: WeekReport[] = [
-  { week: "March – Week 1", status: "Reviewed" },
-  { week: "April – Week 2", status: "Reviewed" },
-  { week: "April – Week 3", status: "Pending" },
-  { week: "April – Week 4", status: "Not Submitted" },
+  { 
+    week: "March – Week 1", 
+    status: "Reviewed",
+    title: "Onboarding & Environment Setup",
+    summary: "Completed internship orientation, set up development environment, and initialized the main project repository.",
+    challenges: "Initial issues with Node.js versions, resolved by using NVM.",
+    fileName: "onboarding-setup.pdf"
+  },
+  { 
+    week: "April – Week 2", 
+    status: "Reviewed",
+    title: "Dashboard UI Components",
+    summary: "Implemented reusable UI components like Cards, Badges, and progress bars using ShadCN and Tailwind CSS.",
+    challenges: "Aligning responsive grid layouts for mobile devices.",
+    fileName: "dashboard-components.zip"
+  },
+  { 
+    week: "April – Week 3", 
+    status: "Pending",
+    title: "Authentication Module",
+    summary: "Developed login and signup pages with client-side validation using Zod.",
+    challenges: "Handling persistent session state across page refreshes.",
+    fileName: "auth-module.png"
+  },
+  { 
+    week: "April – Week 4", 
+    status: "Not Submitted",
+    title: "",
+    summary: "",
+    challenges: "",
+    fileName: ""
+  },
 ];
 
 interface MentorFeedback {
@@ -78,45 +118,222 @@ const ProgressBar = ({ value, color = "bg-emerald-500", height = "h-3" }: Progre
     />
   </div>
 );
+// ─── View Report Modal ────────────────────────────────────────────────────────
+
+const ViewReportModal = ({ report, onClose }: { report: WeekReport; onClose: () => void }) => {
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, []);
+
+  const [month, currentWeek] = report.week.split(" – ");
+  const weeks = ["Week 1", "Week 2", "Week 3", "Week 4"];
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+      <div 
+        className="bg-background border border-border/50 rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col animate-in zoom-in duration-300 overflow-hidden"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="p-8 pb-6 relative">
+          <button onClick={onClose} className="absolute top-8 right-8 p-1.5 rounded-full hover:bg-muted transition-colors text-muted-foreground/60">
+            <X className="w-5 h-5" />
+          </button>
+          <h2 className="text-2xl font-bold tracking-tight text-foreground">Submit Weekly Report</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Fill in the details for your weekly progress.
+          </p>
+        </div>
+
+        {/* Scrollable Body */}
+        <div className="flex-1 overflow-y-auto px-8 pb-8 space-y-6">
+          
+          {/* Month */}
+          <div className="space-y-2">
+            <label className="text-sm font-semibold flex items-center gap-1 text-foreground/80">
+              Month <span className="text-destructive">*</span>
+            </label>
+            <div className="w-full px-4 py-3 rounded-xl bg-muted/30 border border-border/40 text-sm font-medium flex items-center justify-between text-foreground/70">
+              {month}
+              <ChevronDown className="w-4 h-4 text-muted-foreground/50" />
+            </div>
+          </div>
+
+          {/* Week */}
+          <div className="space-y-3">
+            <label className="text-sm font-semibold flex items-center gap-1 text-foreground/80">
+              Week <span className="text-destructive">*</span>
+            </label>
+            <div className="grid grid-cols-4 gap-3">
+              {weeks.map((w) => (
+                <div 
+                  key={w}
+                  className={`py-3 px-2 rounded-xl text-center text-sm font-medium border transition-all ${
+                    w === currentWeek 
+                      ? "bg-primary/5 border-primary/40 text-primary shadow-sm" 
+                      : "bg-background border-border/50 text-muted-foreground/60"
+                  }`}
+                >
+                  {w}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Report Title */}
+          <div className="space-y-2">
+            <label className="text-sm font-semibold flex items-center gap-1 text-foreground/80">
+              Report Title <span className="text-destructive">*</span>
+            </label>
+            <div className="w-full px-4 py-3 rounded-xl bg-background border border-border/50 text-sm placeholder:text-muted-foreground/40 min-h-[48px] flex items-center text-foreground/80 font-medium">
+              {report.title || <span className="text-muted-foreground/40 italic">e.g., UI Components & Auth Integration</span>}
+            </div>
+          </div>
+
+          {/* Tasks Completed */}
+          <div className="space-y-2">
+            <label className="text-sm font-semibold flex items-center gap-1 text-foreground/80">
+              Tasks Completed <span className="text-destructive">*</span>
+            </label>
+            <div className="w-full px-4 py-3 rounded-xl bg-background border border-border/50 text-sm text-foreground/80 leading-relaxed min-h-[140px] whitespace-pre-wrap">
+              {report.summary || <span className="text-muted-foreground/40 italic">Describe the tasks you completed this week...</span>}
+            </div>
+          </div>
+
+          {/* Challenges Faced */}
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-foreground/80">
+              Challenges Faced (Optional)
+            </label>
+            <div className="w-full px-4 py-3 rounded-xl bg-background border border-border/50 text-sm text-foreground/80 leading-relaxed min-h-[100px] whitespace-pre-wrap">
+              {report.challenges || <span className="text-muted-foreground/40 italic">Any blockers or difficulties...</span>}
+            </div>
+          </div>
+
+          {/* Attachments (View Only) */}
+          {report.fileName && (
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-foreground/80 border-t border-border/20 pt-6 mt-6 block">Attachments</label>
+              <div className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-muted/30 border border-border/40 group">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <FileText className="w-4 h-4 text-primary" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground/60 font-medium mb-0.5">Report Attachment</p>
+                    <p className="text-sm font-semibold truncate leading-tight text-foreground/80">{report.fileName}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => {
+                        const url = report.fileName.toLowerCase().endsWith('.pdf') 
+                            ? 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
+                            : 'https://images.unsplash.com/photo-1618477388954-7852f32655ec?q=80&w=1000&auto=format&fit=crop';
+                        window.open(url, '_blank');
+                    }}
+                    className="p-2 rounded-lg text-muted-foreground/60 hover:text-primary hover:bg-primary/10 transition-colors"
+                  >
+                    <Eye className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => toast.success(`Downloading ${report.fileName}...`)}
+                    className="p-2 rounded-lg text-muted-foreground/60 hover:text-primary hover:bg-primary/10 transition-colors"
+                  >
+                    <Download className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="px-8 py-6 border-t border-border/50 bg-muted/5 flex items-center justify-end gap-3">
+          <button 
+            onClick={onClose}
+            className="px-6 py-2.5 rounded-xl text-sm font-semibold border border-border/50 hover:bg-muted transition-colors bg-background text-foreground/70"
+          >
+            Cancel
+          </button>
+          <button 
+            disabled
+            className="px-6 py-2.5 rounded-xl text-sm font-bold bg-primary/20 text-primary border border-primary/20 cursor-not-allowed"
+          >
+            Submit Report
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 const InternProgress = () => {
+  const navigate = useNavigate();
+  const [viewingReport, setViewingReport] = useState<WeekReport | null>(null);
   const taskCompletion = Math.round((taskData.completed / taskData.total) * 100);
 
   return (
-    <DashboardLayout>
-      <div className="animate-fade-in space-y-6 max-w-6xl mx-auto px-4 md:px-6 lg:px-8 pb-10">
+    <>
+      <DashboardLayout>
+        <div className="animate-fade-in space-y-6 max-w-6xl mx-auto px-4 md:px-6 lg:px-8 pb-10">
 
-        {/* ── Page Header ── */}
-        <div>
-          <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-foreground">
-            Internship Progress
-          </h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Track your overall internship journey, tasks, reports, and attendance.
-          </p>
-        </div>
+          {/* ── Page Header ── */}
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-foreground">
+              Internship Progress
+            </h1>
+            <p className="text-muted-foreground mt-1 text-sm">
+              Track your overall internship journey, tasks, reports, and attendance.
+            </p>
+          </div>
+
+          {/* ... regular sections ... */}
 
         {/* ─────────────────────────────────────────────
             Section 1: Overall Internship Progress
         ───────────────────────────────────────────── */}
-        <Card className="border-border/50 shadow-sm rounded-xl">
-          <CardHeader className="pb-3">
+        <Card className="border-border/50 shadow-sm rounded-xl overflow-hidden">
+          <CardHeader className="pb-3 border-b border-border/50 bg-muted/5">
             <CardTitle className="text-base font-semibold flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-emerald-600" />
               Overall Internship Progress
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 pt-0">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Completion</span>
-              <span className="text-2xl font-bold text-emerald-600">{overallProgress}%</span>
+          <CardContent className="space-y-6 pt-6">
+            <div className="flex items-end justify-between">
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground font-medium">Internship Duration</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-bold text-foreground">{internshipDays.completed}</span>
+                  <span className="text-sm text-muted-foreground font-medium">/ {internshipDays.total} Days</span>
+                </div>
+              </div>
+              <div className="text-right space-y-1">
+                <p className="text-sm text-muted-foreground font-medium">Progress</p>
+                <span className="text-3xl font-bold text-emerald-600">{dayProgressPercentage}%</span>
+              </div>
             </div>
-            <ProgressBar value={overallProgress} color="bg-gradient-to-r from-emerald-500 to-emerald-400" />
-            <p className="text-xs text-muted-foreground">
-              {100 - overallProgress}% remaining — keep going! 🚀
-            </p>
+
+            <div className="space-y-2">
+              <ProgressBar 
+                value={dayProgressPercentage} 
+                color="bg-gradient-to-r from-emerald-500 to-emerald-400" 
+                height="h-4"
+              />
+              <div className="flex justify-between items-center text-xs text-muted-foreground font-medium px-1">
+                <span>Started</span>
+                <span>{internshipDays.total - internshipDays.completed} Days Remaining</span>
+                <span>Completed</span>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
@@ -179,23 +396,34 @@ const InternProgress = () => {
           </CardHeader>
           <CardContent className="pt-0">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {weeklyReports.slice(0, 4).map(({ week, status }) => {
-                const Icon = weekStatusIcon[status];
+              {weeklyReports.slice(0, 4).map((report) => {
+                const Icon = weekStatusIcon[report.status];
                 return (
                   <div
-                    key={week}
-                    className="flex items-center justify-between px-4 py-3 rounded-lg border border-border/40 bg-card hover:bg-muted/10 transition-colors"
+                    key={report.week}
+                    className="flex items-center justify-between px-4 py-3 rounded-lg border border-border/40 bg-card hover:bg-muted/10 transition-colors group"
                   >
                     <div className="flex items-center gap-2 text-sm font-medium">
                       <Icon className="w-4 h-4 text-muted-foreground" />
-                      {week}
+                      {report.week}
                     </div>
-                    <Badge
-                      variant="outline"
-                      className={`text-[10px] font-semibold ${weekStatusStyles[status]}`}
-                    >
-                      {status}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className={`text-[10px] font-semibold ${weekStatusStyles[report.status]}`}
+                      >
+                        {report.status}
+                      </Badge>
+                      {report.status !== "Not Submitted" && (
+                        <button
+                          onClick={() => setViewingReport(report)}
+                          className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors opacity-100 sm:opacity-0 group-hover:opacity-100"
+                          title="View Report Details"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 );
               })}
@@ -232,11 +460,19 @@ const InternProgress = () => {
             Section 5: Attendance Summary
         ───────────────────────────────────────────── */}
         <Card className="border-border/50 shadow-sm rounded-xl">
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-3 flex flex-row items-center justify-between">
             <CardTitle className="text-base font-semibold flex items-center gap-2">
               <UserCheck className="w-4 h-4 text-blue-600" />
               Attendance Summary
             </CardTitle>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 text-xs px-3 font-semibold text-primary hover:bg-primary/5"
+              onClick={() => navigate("/intern/attendance")}
+            >
+              View
+            </Button>
           </CardHeader>
           <CardContent className="pt-0 space-y-4">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -267,6 +503,15 @@ const InternProgress = () => {
 
       </div>
     </DashboardLayout>
+
+    {/* View Report Modal rendered outside DashboardLayout for full screen overlay */}
+    {viewingReport && (
+      <ViewReportModal 
+        report={viewingReport} 
+        onClose={() => setViewingReport(null)} 
+      />
+    )}
+    </>
   );
 };
 

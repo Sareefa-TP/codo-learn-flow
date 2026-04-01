@@ -16,6 +16,8 @@ const roleLabels: Record<string, string> = {
   admin: "Admin",
   finance: "Finance",
   superadmin: "Super Admin",
+  coordinator: "Coordinator",
+  advisor: "Advisor",
 };
 
 const roleColors: Record<string, string> = {
@@ -26,6 +28,8 @@ const roleColors: Record<string, string> = {
   admin: "bg-role-admin",
   finance: "bg-role-finance",
   superadmin: "bg-role-superadmin",
+  coordinator: "bg-role-coordinator",
+  advisor: "bg-role-advisor",
 };
 
 interface FormErrors {

@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import {
     FileText, Plus, Eye, X, Upload, CheckCircle2,
-    Clock, AlertCircle, MessageSquare, Loader2
+    Clock, AlertCircle, MessageSquare, Loader2, Download
 } from "lucide-react";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
@@ -283,7 +283,7 @@ const SubmitReportModal = ({ onClose, onSubmit, initialData }: SubmitModalProps)
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
+                <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
 
                     {/* Month + Week selector */}
                     <div className="space-y-4 p-4 rounded-xl bg-muted/30 border border-border/40">
@@ -542,7 +542,7 @@ const ViewReportModal = ({ report, onClose }: ViewModalProps) => {
                 </div>
 
                 {/* Body */}
-                <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
 
                     {/* Status + Meta row */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -606,13 +606,33 @@ const ViewReportModal = ({ report, onClose }: ViewModalProps) => {
                                         <div className="flex-1 min-w-0">
                                             <p className="text-sm font-medium truncate leading-tight">{name}</p>
                                         </div>
-                                        <button
-                                            type="button"
-                                            className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100"
-                                            title="Download file"
-                                        >
-                                            <Upload className="w-4 h-4 rotate-180" />
-                                        </button>
+                                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    // Simulate view: Open a placeholder
+                                                    const url = name.toLowerCase().endsWith('.pdf') 
+                                                        ? 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
+                                                        : 'https://images.unsplash.com/photo-1618477388954-7852f32655ec?q=80&w=1000&auto=format&fit=crop';
+                                                    window.open(url, '_blank');
+                                                    toast.info(`Opening preview for ${name}`);
+                                                }}
+                                                className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors flex-shrink-0"
+                                                title="View preview"
+                                            >
+                                                <Eye className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    toast.success(`Downloading ${name}...`);
+                                                }}
+                                                className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors flex-shrink-0"
+                                                title="Download file"
+                                            >
+                                                <Download className="w-4 h-4" />
+                                            </button>
+                                        </div>
                                     </li>
                                 ))}
                             </ul>

@@ -2,7 +2,8 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Users, Calendar, ArrowRight } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { BookOpen, Users, Calendar, ArrowRight, PlayCircle, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 // Demo Data (Filtered for Learning Phase only)
@@ -11,25 +12,28 @@ const tutorBatches = [
         id: "B-001",
         name: "Jan 2026 Batch",
         startDate: "15 Jan 2026",
-        enrolledDate: "12 Jan 2026",
         totalStudents: 45,
-        status: "Active"
+        status: "Active",
+        duration: "3 Months",
+        progress: 65
     },
     {
         id: "B-002",
         name: "Oct 2025 Batch",
         startDate: "10 Oct 2025",
-        enrolledDate: "05 Oct 2025",
         totalStudents: 38,
-        status: "Active"
+        status: "Active",
+        duration: "3 Months",
+        progress: 95
     },
     {
         id: "B-005",
         name: "Feb 2026 Batch - Evening",
         startDate: "01 Feb 2026",
-        enrolledDate: "28 Jan 2026",
         totalStudents: 21,
-        status: "Active"
+        status: "Active",
+        duration: "3 Months",
+        progress: 30
     }
 ];
 
@@ -80,41 +84,56 @@ const TutorBatches = () => {
                                         </div>
                                     </div>
 
-                                    <div className="space-y-3 pt-2">
-                                        <div className="flex items-center justify-between text-sm">
-                                            <div className="flex items-center gap-2 text-muted-foreground">
-                                                <Calendar className="w-4 h-4 text-primary" />
-                                                <span>Start Date</span>
+                                    <div className="space-y-4 pt-2">
+                                        <div className="flex items-center justify-between text-xs">
+                                            <div className="flex items-center gap-2 text-muted-foreground font-medium">
+                                                <Calendar className="w-3.5 h-3.5 text-primary" />
+                                                <span>Start Date:</span>
                                             </div>
                                             <span className="font-bold text-foreground">{batch.startDate}</span>
                                         </div>
-                                        <div className="flex items-center justify-between text-sm">
-                                            <div className="flex items-center gap-2 text-muted-foreground">
-                                                <Calendar className="w-4 h-4 text-blue-600" />
-                                                <span>Enrolled Date</span>
+                                        <div className="flex items-center justify-between text-xs">
+                                            <div className="flex items-center gap-2 text-muted-foreground font-medium">
+                                                <Clock className="w-3.5 h-3.5 text-blue-500" />
+                                                <span>Duration:</span>
                                             </div>
-                                            <span className="font-bold text-foreground">{(batch as any).enrolledDate}</span>
+                                            <span className="font-bold text-foreground">{batch.duration}</span>
                                         </div>
-                                        <div className="flex items-center justify-between text-sm">
-                                            <div className="flex items-center gap-2 text-muted-foreground">
-                                                <Users className="w-4 h-4 text-emerald-600" />
-                                                <span>Total Students</span>
+                                        <div className="flex items-center justify-between text-xs">
+                                            <div className="flex items-center gap-2 text-muted-foreground font-medium">
+                                                <Users className="w-3.5 h-3.5 text-emerald-500" />
+                                                <span>Students:</span>
                                             </div>
                                             <span className="font-bold text-foreground">{batch.totalStudents}</span>
+                                        </div>
+
+                                        <div className="space-y-2 pt-1">
+                                            <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                                                <span>Course Progress</span>
+                                                <span className="text-primary">{batch.progress}%</span>
+                                            </div>
+                                            <Progress value={batch.progress} className="h-1.5" />
                                         </div>
                                     </div>
 
                                 </div>
 
                                 {/* Footer Action */}
-                                <div className="p-4 border-t border-border/50 bg-muted/20">
+                                <div className="p-4 border-t border-border/50 bg-muted/20 flex flex-col gap-2">
                                     <Button
-                                        variant="ghost"
-                                        className="w-full justify-between hover:bg-primary/10 hover:text-primary"
+                                        className="w-full justify-center bg-primary hover:bg-primary/90 text-primary-foreground gap-2 font-bold shadow-sm"
+                                        onClick={() => navigate(`/tutor/batches/${batch.id}/teaching`)}
+                                    >
+                                        <PlayCircle className="w-4 h-4" />
+                                        Resume Teaching
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        className="w-full justify-center hover:bg-primary/10 hover:text-primary gap-2 font-bold border-border/60"
                                         onClick={() => navigate(`/tutor/batches/${batch.id}/students`)}
                                     >
+                                        <Users className="w-4 h-4" />
                                         View Students
-                                        <ArrowRight className="w-4 h-4" />
                                     </Button>
                                 </div>
                             </CardContent>

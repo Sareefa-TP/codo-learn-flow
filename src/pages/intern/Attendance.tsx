@@ -17,37 +17,30 @@ type AttendanceStatus = "Present" | "Absent" | "Late";
 interface AttendanceRecord {
   date: string;
   day: string;
+  checkIn: string;
+  checkOut: string;
+  duration: string;
   status: AttendanceStatus;
 }
 
 // ─── Mock Data ────────────────────────────────────────────────────────────────
 
 const attendanceRecords: AttendanceRecord[] = [
-  { date: "Mar 01, 2026", day: "Sunday", status: "Present" },
-  { date: "Mar 02, 2026", day: "Monday", status: "Present" },
-  { date: "Mar 03, 2026", day: "Tuesday", status: "Present" },
-  { date: "Mar 04, 2026", day: "Wednesday", status: "Absent" },
-  { date: "Mar 05, 2026", day: "Thursday", status: "Present" },
-  { date: "Mar 06, 2026", day: "Friday", status: "Late" },
-  { date: "Mar 07, 2026", day: "Saturday", status: "Present" },
-  { date: "Mar 08, 2026", day: "Sunday", status: "Present" },
-  { date: "Mar 09, 2026", day: "Monday", status: "Present" },
-  { date: "Mar 10, 2026", day: "Tuesday", status: "Absent" },
-  { date: "Mar 11, 2026", day: "Wednesday", status: "Present" },
-  { date: "Mar 12, 2026", day: "Thursday", status: "Present" },
-  { date: "Mar 13, 2026", day: "Friday", status: "Late" },
-  { date: "Mar 14, 2026", day: "Saturday", status: "Present" },
-  { date: "Mar 15, 2026", day: "Sunday", status: "Present" },
-  { date: "Mar 16, 2026", day: "Monday", status: "Present" },
-  { date: "Mar 17, 2026", day: "Tuesday", status: "Present" },
-  { date: "Mar 18, 2026", day: "Wednesday", status: "Absent" },
-  { date: "Mar 19, 2026", day: "Thursday", status: "Present" },
-  { date: "Mar 20, 2026", day: "Friday", status: "Present" },
-  { date: "Mar 21, 2026", day: "Saturday", status: "Present" },
-  { date: "Mar 22, 2026", day: "Sunday", status: "Absent" },
-  { date: "Mar 23, 2026", day: "Monday", status: "Present" },
-  { date: "Mar 24, 2026", day: "Tuesday", status: "Late" },
-  { date: "Mar 25, 2026", day: "Wednesday", status: "Present" },
+  { date: "Mar 25, 2026", day: "Wednesday", checkIn: "09:00 AM", checkOut: "05:00 PM", duration: "8h 0m", status: "Present" },
+  { date: "Mar 24, 2026", day: "Tuesday", checkIn: "09:05 AM", checkOut: "05:15 PM", duration: "8h 10m", status: "Late" },
+  { date: "Mar 23, 2026", day: "Monday", checkIn: "08:55 AM", checkOut: "05:00 PM", duration: "8h 5m", status: "Present" },
+  { date: "Mar 22, 2026", day: "Sunday", checkIn: "--", checkOut: "--", duration: "0h 0m", status: "Absent" },
+  { date: "Mar 21, 2026", day: "Saturday", checkIn: "09:00 AM", checkOut: "05:05 PM", duration: "8h 5m", status: "Present" },
+  { date: "Mar 20, 2026", day: "Friday", checkIn: "08:50 AM", checkOut: "05:10 PM", duration: "8h 20m", status: "Present" },
+  { date: "Mar 19, 2026", day: "Thursday", checkIn: "09:02 AM", checkOut: "05:00 PM", duration: "7h 58m", status: "Present" },
+  { date: "Mar 18, 2026", day: "Wednesday", checkIn: "--", checkOut: "--", duration: "0h 0m", status: "Absent" },
+  { date: "Mar 17, 2026", day: "Tuesday", checkIn: "08:58 AM", checkOut: "05:15 PM", duration: "8h 17m", status: "Present" },
+  { date: "Mar 16, 2026", day: "Monday", checkIn: "09:10 AM", checkOut: "05:30 PM", duration: "8h 20m", status: "Present" },
+  { date: "Mar 15, 2026", day: "Sunday", checkIn: "09:00 AM", checkOut: "05:00 PM", duration: "8h 0m", status: "Present" },
+  { date: "Mar 14, 2026", day: "Saturday", checkIn: "08:55 AM", checkOut: "05:05 PM", duration: "8h 10m", status: "Present" },
+  { date: "Mar 13, 2026", day: "Friday", checkIn: "09:15 AM", checkOut: "05:45 PM", duration: "8h 30m", status: "Late" },
+  { date: "Mar 12, 2026", day: "Thursday", checkIn: "09:00 AM", checkOut: "05:00 PM", duration: "8h 0m", status: "Present" },
+  { date: "Mar 11, 2026", day: "Wednesday", checkIn: "08:50 AM", checkOut: "05:10 PM", duration: "8h 20m", status: "Present" },
 ];
 
 // ─── Style Maps ───────────────────────────────────────────────────────────────
@@ -58,7 +51,7 @@ const statusStyles: Record<AttendanceStatus, string> = {
   Late: "bg-amber-500/10 text-amber-600 border-amber-500/20",
 };
 
-const sorted = [...attendanceRecords].reverse();
+const sorted = [...attendanceRecords];
 
 const PAGE_SIZE = 10;
 
@@ -83,15 +76,22 @@ const InternAttendance = () => {
       <div className="animate-fade-in space-y-6 max-w-5xl mx-auto pb-10">
 
         {/* ── Page Header ── */}
-        <div>
-          <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-foreground">Attendance</h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            View your internship attendance records. This page is read-only.
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <CalendarDays className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-foreground">Attendance History</h1>
+              <p className="text-muted-foreground text-sm mt-0.5">
+                View your detailed internship attendance records and session durations.
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* ── Summary Cards ── */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             { label: "Total Working Days", value: total, icon: CalendarDays, bg: "bg-violet-500/10", color: "text-violet-600" },
             { label: "Days Present", value: present, icon: UserCheck, bg: "bg-emerald-500/10", color: "text-emerald-600" },
@@ -119,9 +119,9 @@ const InternAttendance = () => {
           <CardContent className="pt-5 pb-5 space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold">Attendance Rate</p>
+                <p className="text-sm font-semibold">Attendance Performance</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Based on {total} working days recorded
+                  Overall status based on {total} recorded working days
                 </p>
               </div>
               <span className={`text-3xl font-bold ${rate >= 85 ? "text-emerald-600" : rate >= 70 ? "text-amber-600" : "text-red-600"}`}>
@@ -141,7 +141,7 @@ const InternAttendance = () => {
             </div>
 
             {/* Legend */}
-            <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground pt-1">
+            <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground pt-1 text-center sm:text-left">
               <span className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
                 Present: {present}
@@ -160,14 +160,14 @@ const InternAttendance = () => {
 
         {/* ── Attendance History Table ── */}
         <Card className="border-border/50 shadow-sm rounded-xl overflow-hidden">
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-3 border-b border-border/20">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base font-semibold flex items-center gap-2">
                 <CalendarDays className="w-4 h-4 text-primary" />
-                Attendance History
+                Attendance Log
               </CardTitle>
-              <span className="text-xs text-muted-foreground">
-                {total} records · Page {page} of {totalPages}
+              <span className="text-[10px] sm:text-xs font-medium text-muted-foreground bg-muted/50 px-2 py-1 rounded-md border border-border/40">
+                 {total} records · Page {page} of {totalPages}
               </span>
             </div>
           </CardHeader>
@@ -176,27 +176,42 @@ const InternAttendance = () => {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/30">
-                    <TableHead className="text-xs font-semibold w-12 text-center">#</TableHead>
-                    <TableHead className="text-xs font-semibold">Date</TableHead>
-                    <TableHead className="text-xs font-semibold">Day</TableHead>
-                    <TableHead className="text-xs font-semibold">Status</TableHead>
+                    <TableHead className="text-[10px] font-bold uppercase tracking-wider w-12 text-center">#</TableHead>
+                    <TableHead className="text-[10px] font-bold uppercase tracking-wider">Date</TableHead>
+                    <TableHead className="text-[10px] font-bold uppercase tracking-wider">Session Time</TableHead>
+                    <TableHead className="text-[10px] font-bold uppercase tracking-wider">Duration</TableHead>
+                    <TableHead className="text-[10px] font-bold uppercase tracking-wider">Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {paginated.map((record, idx) => (
                     <TableRow
                       key={record.date}
-                      className="hover:bg-muted/10 transition-colors"
+                      className="hover:bg-muted/10 transition-colors border-b border-border/10 last:border-0"
                     >
                       <TableCell className="text-xs text-muted-foreground text-center">
                         {(page - 1) * PAGE_SIZE + idx + 1}
                       </TableCell>
-                      <TableCell className="text-sm font-medium">{record.date}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{record.day}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-semibold text-foreground leading-tight">{record.date}</span>
+                          <span className="text-[10px] text-muted-foreground font-medium">{record.day}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2 text-sm">
+                           <span className="text-emerald-600 font-medium">{record.checkIn}</span>
+                           <span className="text-muted-foreground/30">|</span>
+                           <span className="text-orange-600 font-medium">{record.checkOut}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm font-bold text-foreground font-mono">
+                         {record.duration}
+                      </TableCell>
                       <TableCell>
                         <Badge
                           variant="outline"
-                          className={`text-[10px] font-semibold ${statusStyles[record.status]}`}
+                          className={`text-[10px] font-bold uppercase tracking-wide h-6 ${statusStyles[record.status]}`}
                         >
                           {record.status}
                         </Badge>
@@ -209,39 +224,41 @@ const InternAttendance = () => {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-between px-4 py-3 border-t border-border/40">
-                <p className="text-xs text-muted-foreground">
+              <div className="flex items-center justify-between px-4 py-3 border-t border-border/40 bg-muted/5">
+                <p className="hidden sm:block text-[11px] text-muted-foreground font-medium">
                   Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} of {total}
                 </p>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 mx-auto sm:mx-0">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-7 w-7 p-0"
+                    className="h-8 w-8 p-0 rounded-lg"
                     onClick={() => setPage(p => Math.max(1, p - 1))}
                     disabled={page === 1}
                   >
-                    <ChevronLeft className="w-3.5 h-3.5" />
+                    <ChevronLeft className="w-4 h-4" />
                   </Button>
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-                    <Button
-                      key={p}
-                      variant={p === page ? "default" : "outline"}
-                      size="sm"
-                      className="h-7 w-7 p-0 text-xs"
-                      onClick={() => setPage(p)}
-                    >
-                      {p}
-                    </Button>
-                  ))}
+                  <div className="flex items-center gap-1 px-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                      <Button
+                        key={p}
+                        variant={p === page ? "default" : "ghost"}
+                        size="sm"
+                        className={`h-8 w-8 p-0 text-xs rounded-lg ${p === page ? "shadow-md bg-primary text-primary-foreground hover:bg-primary/90" : "text-muted-foreground"}`}
+                        onClick={() => setPage(p)}
+                      >
+                        {p}
+                      </Button>
+                    ))}
+                  </div>
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-7 w-7 p-0"
+                    className="h-8 w-8 p-0 rounded-lg"
                     onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                     disabled={page === totalPages}
                   >
-                    <ChevronRight className="w-3.5 h-3.5" />
+                    <ChevronRight className="w-4 h-4" />
                   </Button>
                 </div>
               </div>

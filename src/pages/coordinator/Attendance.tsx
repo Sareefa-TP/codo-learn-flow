@@ -1,5 +1,4 @@
 import { useState, useMemo } from "react";
-import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -71,7 +70,7 @@ const statusStyles: Record<AttendanceStatus, string> = {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-const MentorAttendance = () => {
+const CoordinatorAttendance = () => {
     const today = format(new Date(), "yyyy-MM-dd");
     const [selectedDate, setSelectedDate] = useState(today);
 
@@ -96,8 +95,7 @@ const MentorAttendance = () => {
     const absentCount = records.filter(r => r.status === "Absent").length;
 
     return (
-        <DashboardLayout>
-            <div className="animate-fade-in space-y-6 max-w-6xl mx-auto px-4 md:px-6 lg:px-8 pb-10">
+        <div className="animate-fade-in space-y-6 max-w-6xl mx-auto px-4 md:px-6 lg:px-8 pb-10">
 
                 {/* ── Page Header ── */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -213,8 +211,7 @@ const MentorAttendance = () => {
                 </Card>
 
             </div>
-        </DashboardLayout>
     );
 };
 
-export default MentorAttendance;
+export default CoordinatorAttendance;

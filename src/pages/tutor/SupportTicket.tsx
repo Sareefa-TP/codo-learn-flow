@@ -34,11 +34,11 @@ import { cn } from "@/lib/utils";
 // Types
 type TicketStatus = "Open" | "In Progress" | "Resolved" | "Closed";
 type TicketPriority = "Low" | "Medium" | "High" | "Urgent";
-type TicketCategory = "Technical Issue" | "Assignment Problem" | "Payment Issue" | "Live Class Issue" | "Certificate Issue" | "Other";
+type TicketCategory = "Technical Issue" | "Assignments" | "Students" | "Materials" | "Other";
 
 interface Message {
     id: string;
-    sender: "Student" | "Support";
+    sender: "Tutor" | "Support";
     text: string;
     timestamp: string;
     attachment_url?: string;
@@ -59,8 +59,8 @@ interface Ticket {
 // Mock Data
 const INITIAL_TICKETS: Ticket[] = [
     {
-        id: "TIC-8421",
-        subject: "Cannot access Module 4 video",
+        id: "TUT-8421",
+        subject: "Batch Assignment Error",
         category: "Technical Issue",
         priority: "High",
         status: "In Progress",
@@ -69,46 +69,21 @@ const INITIAL_TICKETS: Ticket[] = [
         messages: [
             {
                 id: "m1",
-                sender: "Student",
-                text: "Hi, I'm trying to watch the video for Module 4, but it says 'Video not available' for me. I've tried clearing my cache.",
+                sender: "Tutor",
+                text: "Hi, I'm trying to view student progress for Batch B3, but the data is not loading. It shows 'Data Error'.",
                 timestamp: "12 March 2026, 10:30 AM"
             },
             {
                 id: "m2",
                 sender: "Support",
-                text: "Hello! We are looking into this. It seems to be a temporary CDN issue in your region. Please allow us an hour to resolve it.",
+                text: "Hello! We are looking into this. It seems to be a sync issue between the student list and your portal. Should be fixed shortly.",
                 timestamp: "12 March 2026, 11:15 AM"
-            }
-        ]
-    },
-    {
-        id: "TIC-7590",
-        subject: "Payment confirmation pending",
-        category: "Payment Issue",
-        priority: "Medium",
-        status: "Resolved",
-        date: "10 March 2026",
-        lastUpdate: "Yesterday",
-        messages: [
-            {
-                id: "m1",
-                sender: "Student",
-                text: "I paid for the React Mastery course yesterday but my dashboard still shows 'Payment Pending'. Attached the screenshot.",
-                timestamp: "10 March 2026, 02:00 PM",
-                attachment_url: "/uploads/tickets/receipt.png",
-                attachment_name: "receipt.png"
-            },
-            {
-                id: "m2",
-                sender: "Support",
-                text: "Your payment has been verified. You should now have full access to the course. Happy learning!",
-                timestamp: "11 March 2026, 09:00 AM"
             }
         ]
     }
 ];
 
-const SupportTickets = () => {
+const TutorSupportTicket = () => {
     const [view, setView] = useState<"list" | "create" | "details">("list");
     const [tickets, setTickets] = useState<Ticket[]>(INITIAL_TICKETS);
     const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
@@ -170,10 +145,10 @@ const SupportTickets = () => {
 
     const getPriorityColor = (priority: TicketPriority) => {
         switch (priority) {
-            case "Urgent": return "text-destructive";
-            case "High": return "text-orange-600";
-            case "Medium": return "text-amber-600";
-            case "Low": return "text-blue-600";
+            case "Urgent": return "text-destructive font-black";
+            case "High": return "text-orange-600 font-bold";
+            case "Medium": return "text-amber-600 font-medium";
+            case "Low": return "text-blue-600 font-normal";
             default: return "";
         }
     };
@@ -203,7 +178,7 @@ const SupportTickets = () => {
     const handleCreateTicket = (e: React.FormEvent) => {
         e.preventDefault();
         const ticket: Ticket = {
-            id: `TIC-${Math.floor(1000 + Math.random() * 9000)}`,
+            id: `TUT-${Math.floor(1000 + Math.random() * 9000)}`,
             subject: newTicket.subject,
             category: newTicket.category,
             priority: newTicket.priority,
@@ -212,7 +187,7 @@ const SupportTickets = () => {
             lastUpdate: "Just now",
             messages: [{
                 id: "m1",
-                sender: "Student",
+                sender: "Tutor",
                 text: newTicket.message,
                 timestamp: new Date().toLocaleString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
                 attachment_url: selectedFile ? `/uploads/tickets/${selectedFile.name}` : undefined,
@@ -238,7 +213,7 @@ const SupportTickets = () => {
         setTimeout(() => {
             const newMessage: Message = {
                 id: Date.now().toString(),
-                sender: "Student",
+                sender: "Tutor",
                 text: replyText,
                 timestamp: new Date().toLocaleString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
                 attachment_url: replyFile ? `/uploads/tickets/${replyFile.name}` : undefined,
@@ -264,7 +239,6 @@ const SupportTickets = () => {
     };
 
     const handleDownload = (url: string, filename: string) => {
-        // Simulated download
         toast.info(`Downloading ${filename}...`);
         console.log(`Downloading from ${url}`);
     };
@@ -277,10 +251,10 @@ const SupportTickets = () => {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="space-y-1">
                             <h1 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight">
-                                Support Tickets
+                                Tutor Support Tickets
                             </h1>
                             <p className="text-muted-foreground text-sm font-medium">
-                                Need help? Raise a ticket and track its resolution.
+                                Raise a ticket for any issues regarding batch management, students, or system tools.
                             </p>
                         </div>
                         {view === "list" && (
@@ -295,7 +269,6 @@ const SupportTickets = () => {
                 {/* 1️⃣ Ticket List View */}
                 {view === "list" && (
                     <div className="space-y-6">
-                        {/* Search Bar - New Full-Width Position */}
                         <div className="relative mb-10 group animate-in fade-in slide-in-from-top-4 duration-700 delay-100">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-all duration-300" />
                             <input
@@ -387,24 +360,23 @@ const SupportTickets = () => {
                                         <label className="text-sm font-semibold">Subject</label>
                                         <Input
                                             required
-                                            placeholder="e.g. Video not loading in Module 2"
+                                            placeholder="Briefly describe your issue..."
                                             value={newTicket.subject}
                                             onChange={e => setNewTicket({ ...newTicket, subject: e.target.value })}
                                         />
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-sm font-semibold">Category</label>
+                                        <label className="text-sm font-semibold">Related Module (Optional)</label>
                                         <Select required onValueChange={v => setNewTicket({ ...newTicket, category: v as TicketCategory })}>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select category" />
+                                                <SelectValue placeholder="Select one" />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="Technical Issue">Technical Issue</SelectItem>
-                                                <SelectItem value="Assignment Problem">Assignment Problem</SelectItem>
-                                                <SelectItem value="Payment Issue">Payment Issue</SelectItem>
-                                                <SelectItem value="Live Class Issue">Live Class Issue</SelectItem>
-                                                <SelectItem value="Certificate Issue">Certificate Issue</SelectItem>
+                                                <SelectItem value="Assignments">Assignments</SelectItem>
+                                                <SelectItem value="Students">Students</SelectItem>
+                                                <SelectItem value="Materials">Materials</SelectItem>
                                                 <SelectItem value="Other">Other</SelectItem>
                                             </SelectContent>
                                         </Select>
@@ -467,7 +439,7 @@ const SupportTickets = () => {
                                                                 className="h-4 w-4 text-muted-foreground hover:text-destructive"
                                                                 onClick={() => setSelectedFile(null)}
                                                             >
-                                                                <X className="w-3 h-3" />
+                                                                 <X className="w-3 h-3" />
                                                             </Button>
                                                         </div>
                                                     )}
@@ -476,7 +448,7 @@ const SupportTickets = () => {
                                                     Max 10MB. Supported: PDF, JPG, PNG, DOC, DOCX, ZIP
                                                 </p>
                                             </div>
-                                            <Button type="submit" className="w-full sm:w-auto gap-2">
+                                            <Button type="submit" className="w-full sm:w-auto gap-2 font-bold tracking-tight">
                                                 Submit Ticket
                                                 <Send className="w-4 h-4" />
                                             </Button>
@@ -511,6 +483,10 @@ const SupportTickets = () => {
                                             </Badge>
                                         </div>
                                         <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground mt-2">
+                                            <span className="flex items-center gap-1.5 font-bold">
+                                                <ShieldQuestion className="w-4 h-4" />
+                                                Role: Tutor
+                                            </span>
                                             <span className="flex items-center gap-1.5">
                                                 <ShieldQuestion className="w-4 h-4" />
                                                 Category: {selectedTicket.category}
@@ -529,16 +505,15 @@ const SupportTickets = () => {
                             </CardHeader>
 
                             <CardContent className="p-0">
-                                {/* Conversation Body */}
                                 <div className="max-h-[500px] overflow-y-auto p-6 space-y-6 bg-muted/5">
                                     {selectedTicket.messages.map((msg, idx) => (
                                         <div key={msg.id} className={cn(
                                             "flex flex-col max-w-[85%] sm:max-w-[70%]",
-                                            msg.sender === "Student" ? "ml-auto items-end" : "mr-auto items-start"
+                                            msg.sender === "Tutor" ? "ml-auto items-end" : "mr-auto items-start"
                                         )}>
                                             <div className={cn(
                                                 "rounded-2xl p-4 shadow-sm text-sm leading-relaxed",
-                                                msg.sender === "Student"
+                                                msg.sender === "Tutor"
                                                     ? "bg-primary text-primary-foreground rounded-tr-none"
                                                     : "bg-card border border-border rounded-tl-none text-foreground"
                                             )}>
@@ -546,7 +521,7 @@ const SupportTickets = () => {
                                                 {msg.attachment_url && (
                                                     <div className={cn(
                                                         "mt-3 p-3 rounded-lg border flex items-center gap-3 bg-muted/50 border-border/50 transition-all hover:bg-muted",
-                                                        msg.sender === "Student" ? "bg-white/10 border-white/20 hover:bg-white/20" : "bg-card hover:border-primary/30"
+                                                        msg.sender === "Tutor" ? "bg-white/10 border-white/20 hover:bg-white/20" : "bg-card hover:border-primary/30"
                                                     )}>
                                                         <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center shrink-0">
                                                             <Paperclip className="w-4 h-4 text-primary" />
@@ -570,35 +545,34 @@ const SupportTickets = () => {
                                                     </div>
                                                 )}
                                             </div>
-                                            <span className="text-[10px] text-muted-foreground mt-1 px-1">
-                                                {msg.sender === "Support" ? "Support Executive" : "You"} • {msg.timestamp}
+                                            <span className="text-[10px] text-muted-foreground mt-1 px-1 font-medium">
+                                                {msg.sender === "Support" ? "Support Executive" : "You (Tutor)"} • {msg.timestamp}
                                             </span>
                                         </div>
                                     ))}
 
                                     {selectedTicket.status === "Resolved" && (
                                         <div className="flex items-center justify-center p-4">
-                                            <div className="bg-green-500/10 text-green-600 border border-green-200 rounded-full px-6 py-2 flex items-center gap-2 text-sm font-medium">
+                                            <div className="bg-green-500/10 text-green-600 border border-green-200 rounded-full px-6 py-2 flex items-center gap-2 text-sm font-bold uppercase tracking-tight">
                                                 <CheckCircle2 className="w-4 h-4" />
-                                                This ticket has been marked as resolved
+                                                Ticket Resolved Successfully
                                             </div>
                                         </div>
                                     )}
                                     <div ref={messagesEndRef} />
                                 </div>
 
-                                {/* Reply Section */}
                                 {selectedTicket.status !== "Closed" && (
                                     <div className="p-6 border-t bg-card">
                                         <div className="space-y-4">
                                             <div className="flex items-center gap-2 mb-2">
                                                 <MessageSquare className="w-4 h-4 text-primary" />
-                                                <h4 className="text-sm font-bold">Reply to Support</h4>
+                                                <h4 className="text-sm font-bold tracking-tight">Reply to Support Team</h4>
                                             </div>
                                             <div className="relative">
                                                 <Textarea
                                                     placeholder="Type your reply..."
-                                                    className="min-h-[100px] pb-12 resize-none focus:ring-primary/20"
+                                                    className="min-h-[100px] pb-12 resize-none focus:ring-primary/20 font-medium"
                                                     value={replyText}
                                                     onChange={e => setReplyText(e.target.value)}
                                                 />
@@ -612,7 +586,7 @@ const SupportTickets = () => {
                                                     />
                                                     <div className="flex items-center gap-2">
                                                         {replyFile && (
-                                                            <div className="flex items-center gap-2 bg-muted px-2 py-1 rounded-md text-[10px] animate-in fade-in slide-in-from-right-2">
+                                                            <div className="flex items-center gap-2 bg-muted px-2 py-1 rounded-md text-[10px] animate-in fade-in slide-in-from-right-2 border font-medium">
                                                                 <span className="max-w-[100px] truncate">{replyFile.name}</span>
                                                                 <Button
                                                                     variant="ghost"
@@ -627,7 +601,7 @@ const SupportTickets = () => {
                                                         <Button
                                                             variant="outline"
                                                             size="icon"
-                                                            className={cn("h-9 w-9", replyFile && "border-primary text-primary bg-primary/5")}
+                                                            className={cn("h-9 w-9 shadow-sm", replyFile && "border-primary text-primary bg-primary/5")}
                                                             onClick={() => replyFileInputRef.current?.click()}
                                                         >
                                                             <Paperclip className="w-4 h-4" />
@@ -636,14 +610,11 @@ const SupportTickets = () => {
                                                     <Button 
                                                         onClick={handleSendReply} 
                                                         size="sm" 
-                                                        className="h-9 gap-2 min-w-[120px]" 
+                                                        className="h-9 gap-2 min-w-[120px] font-bold tracking-tight" 
                                                         disabled={isSending || (!replyText.trim() && !replyFile)}
                                                     >
                                                         {isSending ? (
-                                                            <>
-                                                                <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                                                                Sending...
-                                                            </>
+                                                            <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
                                                         ) : (
                                                             <>
                                                                 Send Reply
@@ -665,4 +636,4 @@ const SupportTickets = () => {
     );
 };
 
-export default SupportTickets;
+export default TutorSupportTicket;
