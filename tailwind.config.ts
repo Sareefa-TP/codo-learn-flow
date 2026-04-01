@@ -79,6 +79,8 @@ export default {
           admin: "hsl(var(--role-admin))",
           finance: "hsl(var(--role-finance))",
           superadmin: "hsl(var(--role-superadmin))",
+          coordinator: "hsl(var(--role-coordinator))",
+          advisor: "hsl(var(--role-advisor))",
         },
       },
       borderRadius: {

@@ -52,9 +52,9 @@ const attendanceStatusStyles = {
     Late: "bg-amber-500/10 text-amber-600 border-amber-500/20",
 };
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 5;
 
-const InternDetails = () => {
+const CoordinatorInternDetails = () => {
     const { internId } = useParams<{ internId: string }>();
     const navigate = useNavigate();
     const [page, setPage] = useState(1);
@@ -73,10 +73,10 @@ const InternDetails = () => {
                     <div>
                         <h2 className="text-2xl font-bold">Intern Not Found</h2>
                         <p className="text-muted-foreground mt-1">
-                            The intern you're looking for doesn't exist or is not assigned to you.
+                            The intern you're looking for doesn't exist or is not available.
                         </p>
                     </div>
-                    <Button onClick={() => navigate("/mentor/interns")} variant="outline" className="gap-2">
+                    <Button onClick={() => navigate("/coordinator/interns")} variant="outline" className="gap-2">
                         <ArrowLeft className="w-4 h-4" /> Back to Interns
                     </Button>
                 </div>
@@ -87,7 +87,7 @@ const InternDetails = () => {
     const internStatusStyles = {
         "on-track": "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
         "ahead": "bg-blue-500/10 text-blue-600 border-blue-500/20",
-        "at-risk": "bg-rose-500/10 text-rose-600 border-rose-500/20",
+        "at-risk": "bg-rose-500/10 text-red-600 border-rose-500/20",
         "needs-attention": "bg-amber-500/10 text-amber-600 border-amber-500/20",
     };
 
@@ -111,14 +111,13 @@ const InternDetails = () => {
     const paginatedRecords = detailedAttendanceRecords.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
     return (
-        <DashboardLayout>
-            <div className="animate-fade-in space-y-6 max-w-7xl mx-auto pb-10 px-4 md:px-0">
+        <div className="animate-fade-in space-y-6 max-w-6xl mx-auto px-4 md:px-6 lg:px-8 pb-10">
                 {/* ── Breadcrumbs & Actions ── */}
                 <div className="flex items-center justify-between">
                     <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => navigate("/mentor/interns")}
+                        onClick={() => navigate("/coordinator/interns")}
                         className="gap-2 text-muted-foreground hover:text-foreground"
                     >
                         <ArrowLeft className="w-4 h-4" /> Back to List
@@ -194,6 +193,45 @@ const InternDetails = () => {
                             </CardContent>
                         </Card>
 
+                        {/* Performance Score Card (Replacement for bar chart) */}
+                        <Card className="border-border/50 shadow-sm rounded-xl">
+                            <CardContent className="pt-5 pb-5 space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <TrendingUp className="w-4 h-4 text-primary" />
+                                        <p className="text-sm font-semibold">Attendance Rate</p>
+                                    </div>
+                                    <span className={`text-2xl font-bold ${attendanceRate >= 85 ? "text-emerald-600" : attendanceRate >= 70 ? "text-amber-600" : "text-red-600"}`}>
+                                        {attendanceRate}%
+                                    </span>
+                                </div>
+
+                                <div className="relative h-4 w-full overflow-hidden rounded-full bg-muted">
+                                    <div
+                                        className={`h-full rounded-full transition-all duration-700 ${attendanceRate >= 85 ? "bg-gradient-to-r from-emerald-500 to-emerald-400"
+                                            : attendanceRate >= 70 ? "bg-amber-500"
+                                                : "bg-red-500"
+                                            }`}
+                                        style={{ width: `${attendanceRate}%` }}
+                                    />
+                                </div>
+
+                                <div className="flex justify-between text-[11px] text-muted-foreground pt-1 text-center sm:text-left">
+                                    <span className="flex items-center gap-1.5 font-medium">
+                                        <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+                                        Present: {presentCount}
+                                    </span>
+                                    <span className="flex items-center gap-1.5 font-medium">
+                                        <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
+                                        Late: {lateCount}
+                                    </span>
+                                    <span className="flex items-center gap-1.5 font-medium">
+                                        <span className="w-2 h-2 rounded-full bg-red-500 inline-block" />
+                                        Absent: {absentCount}
+                                    </span>
+                                </div>
+                            </CardContent>
+                        </Card>
                     </div>
 
                     {/* ── Task List ── */}
@@ -257,21 +295,19 @@ const InternDetails = () => {
 
                 {/* ── Detailed Attendance History (Full Width) ── */}
                 <div className="space-y-6">
-                    {/* ── Page Header ── */}
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                            <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                                <CalendarDays className="w-5 h-5 text-primary" />
-                            </div>
-                            <div>
-                                <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-foreground">Attendance History - {intern.name}</h1>
-                                <p className="text-muted-foreground text-sm mt-0.5">
-                                    View detailed internship attendance records and session durations for this intern.
-                                </p>
-                            </div>
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 border border-primary/20">
+                            <CalendarDays className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-bold tracking-tight text-foreground">Attendance History - {intern.name}</h2>
+                            <p className="text-muted-foreground text-xs mt-0.5">
+                                Full breakdown of internship attendance records and session timings.
+                            </p>
                         </div>
                     </div>
 
+                    {/* Summary Cards */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         {[
                             { label: "Total Working Days", value: total, icon: CalendarDays, bg: "bg-violet-500/10", color: "text-violet-600" },
@@ -279,15 +315,16 @@ const InternDetails = () => {
                             { label: "Days Absent", value: absentCount, icon: UserX, bg: "bg-red-500/10", color: "text-red-600" },
                             { label: "Days Late", value: lateCount, icon: TrendingUp, bg: "bg-amber-500/10", color: "text-amber-600" },
                         ].map(({ label, value, icon: Icon, bg, color }) => (
-                            <Card key={label} className="border-border/50 shadow-sm rounded-xl">
-                                <CardContent className="pt-5 pb-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${bg}`}>
+                            <Card key={label} className={`border-border/50 shadow-sm rounded-xl overflow-hidden relative group transition-all hover:shadow-md`}>
+                                <div className={`absolute top-0 left-0 w-1 h-full ${bg.replace("/10", "").replace("bg-", "bg-")}`} />
+                                <CardContent className="pt-5 pb-4 px-5">
+                                    <div className="flex items-center gap-4">
+                                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${bg}`}>
                                             <Icon className={`w-5 h-5 ${color}`} />
                                         </div>
                                         <div>
                                             <p className={`text-2xl font-bold ${color}`}>{value}</p>
-                                            <p className="text-xs text-muted-foreground mt-0.5">{label}</p>
+                                            <p className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground mt-0.5">{label}</p>
                                         </div>
                                     </div>
                                 </CardContent>
@@ -295,60 +332,17 @@ const InternDetails = () => {
                         ))}
                     </div>
 
-                    {/* ── Attendance Performance Card ── */}
-                    <Card className="border-border/50 shadow-sm rounded-xl">
-                        <CardContent className="pt-5 pb-5 space-y-3">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm font-semibold">Attendance Performance</p>
-                                    <p className="text-xs text-muted-foreground mt-0.5">
-                                        Overall status based on {total} recorded working days
-                                    </p>
-                                </div>
-                                <span className={`text-3xl font-bold ${attendanceRate >= 85 ? "text-emerald-600" : attendanceRate >= 70 ? "text-amber-600" : "text-red-600"}`}>
-                                    {attendanceRate}%
-                                </span>
-                            </div>
-
-                            {/* Progress bar */}
-                            <div className="relative h-4 w-full overflow-hidden rounded-full bg-muted">
-                                <div
-                                    className={`h-full rounded-full transition-all duration-700 ${attendanceRate >= 85 ? "bg-gradient-to-r from-emerald-500 to-emerald-400"
-                                        : attendanceRate >= 70 ? "bg-amber-500"
-                                            : "bg-red-500"
-                                        }`}
-                                    style={{ width: `${attendanceRate}%` }}
-                                />
-                            </div>
-
-                            {/* Legend */}
-                            <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground pt-1 text-center sm:text-left">
-                                <span className="flex items-center gap-1.5">
-                                    <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
-                                    Present: {presentCount}
-                                </span>
-                                <span className="flex items-center gap-1.5">
-                                    <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
-                                    Late: {lateCount}
-                                </span>
-                                <span className="flex items-center gap-1.5">
-                                    <span className="w-2 h-2 rounded-full bg-red-500 inline-block" />
-                                    Absent: {absentCount}
-                                </span>
-                            </div>
-                        </CardContent>
-                    </Card>
-
+                    {/* Attendance Table */}
                     <Card className="border-border/50 shadow-sm rounded-xl overflow-hidden">
-                        <CardHeader className="pb-3 border-b border-border/20">
+                        <CardHeader className="pb-3 border-b border-border/20 bg-muted/20">
                             <div className="flex items-center justify-between">
                                 <CardTitle className="text-base font-semibold flex items-center gap-2">
                                     <CalendarDays className="w-4 h-4 text-primary" />
-                                    Attendance Log
+                                    Daily Attendance Log
                                 </CardTitle>
-                                <span className="text-[10px] sm:text-xs font-medium text-muted-foreground bg-muted/50 px-2 py-1 rounded-md border border-border/40">
-                                    {total} records · Page {page} of {totalPages}
-                                </span>
+                                <Badge variant="secondary" className="px-2 py-0.5 text-[10px] font-medium bg-muted/50 border border-border/40">
+                                    {total} Records · Page {page} of {totalPages}
+                                </Badge>
                             </div>
                         </CardHeader>
                         <CardContent className="p-0">
@@ -379,7 +373,7 @@ const InternDetails = () => {
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <div className="flex items-center gap-2 text-sm">
+                                                    <div className="flex items-center gap-2 text-sm font-mono">
                                                         <span className="text-emerald-600 font-medium">{record.checkIn}</span>
                                                         <span className="text-muted-foreground/30">|</span>
                                                         <span className="text-orange-600 font-medium">{record.checkOut}</span>
@@ -391,7 +385,7 @@ const InternDetails = () => {
                                                 <TableCell>
                                                     <Badge
                                                         variant="outline"
-                                                        className={`text-[10px] font-bold uppercase tracking-wide h-6 ${attendanceStatusStyles[record.status as keyof typeof attendanceStatusStyles]}`}
+                                                        className={`text-[10px] font-bold uppercase tracking-wide h-6 px-3 ${attendanceStatusStyles[record.status as keyof typeof attendanceStatusStyles]}`}
                                                     >
                                                         {record.status}
                                                     </Badge>
@@ -447,8 +441,7 @@ const InternDetails = () => {
                     </Card>
                 </div>
             </div>
-        </DashboardLayout>
     );
 };
 
-export default InternDetails;
+export default CoordinatorInternDetails;

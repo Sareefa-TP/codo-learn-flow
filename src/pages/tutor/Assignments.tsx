@@ -3,6 +3,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -43,7 +44,8 @@ import {
   ChevronRight,
   Users,
   GraduationCap,
-  Clock
+  Clock,
+  PlayCircle
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -159,16 +161,20 @@ const TutorAssignments = () => {
     result: "" as Submission["result"]
   });
 
-  // Filtered Courses
-  const filteredCourses = useMemo(() => {
-    return courses.filter(c => c.name.toLowerCase().includes(courseSearch.toLowerCase()));
-  }, [courseSearch]);
-
-  // Materials for selected course
-  const courseAssignments = useMemo(() => {
-    if (!selectedCourse) return [];
-    return assignments.filter(a => a.courseId === selectedCourse.id);
-  }, [assignments, selectedCourse]);
+  // Derived list of all assignments with course data
+  const allAssignments = useMemo(() => {
+    return assignments.map(asg => {
+      const course = courses.find(c => c.id === asg.courseId);
+      return {
+        ...asg,
+        courseName: course?.name || "Unknown Course",
+        courseStudents: course?.studentCount || 0
+      };
+    }).filter(asg => 
+      asg.title.toLowerCase().includes(courseSearch.toLowerCase()) ||
+      asg.courseName.toLowerCase().includes(courseSearch.toLowerCase())
+    );
+  }, [assignments, courseSearch]);
 
   // Submissions for selected assignment
   const currentSubmissions = useMemo(() => {
@@ -208,23 +214,25 @@ const TutorAssignments = () => {
     <DashboardLayout>
       <div className="animate-fade-in space-y-6 lg:space-y-8 max-w-6xl mx-auto pb-10">
 
-        {/* View 1: Course Selection */}
-        {!selectedCourse && (
+        {/* Unified View: Assignment Cards Grid */}
+        {!selectedAssignment && (
           <div className="space-y-8">
-            <div>
-              <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
-                <ClipboardList className="w-8 h-8 text-primary" />
-                Assignments
-              </h1>
-              <p className="text-muted-foreground mt-2">
-                Manage assignments and review student work across your assigned courses.
-              </p>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div>
+                <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
+                  <ClipboardList className="w-8 h-8 text-primary" />
+                  Assignments
+                </h1>
+                <p className="text-muted-foreground mt-2">
+                  Review and manage student work across all your assigned batches.
+                </p>
+              </div>
             </div>
 
             <div className="relative max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search courses..."
+                placeholder="Search assignments or courses..."
                 className="pl-10 h-11 bg-card"
                 value={courseSearch}
                 onChange={(e) => setCourseSearch(e.target.value)}
@@ -232,121 +240,95 @@ const TutorAssignments = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredCourses.map((course) => (
-                <Card
-                  key={course.id}
-                  className="group overflow-hidden hover:border-primary/50 transition-all hover:shadow-xl cursor-pointer"
-                  onClick={() => setSelectedCourse(course)}
-                >
-                  <div className="aspect-video overflow-hidden relative">
-                    <img src={course.image} alt={course.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-                    <div className="absolute bottom-4 left-4 right-4 text-white">
-                      <h3 className="text-lg font-bold line-clamp-1">{course.name}</h3>
-                      <div className="flex items-center gap-3 mt-1 text-xs text-white/80">
-                        <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {course.studentCount} Students</span>
-                        <span className="flex items-center gap-1"><Layers className="w-3 h-3" /> {course.moduleCount} Modules</span>
-                      </div>
-                    </div>
-                  </div>
-                  <CardContent className="p-5">
-                    <Button className="w-full gap-2 font-bold group-hover:bg-primary transition-colors">
-                      View Assignments
-                      <ChevronRight className="w-4 h-4" />
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* View 2: Module-Grouped Assignments */}
-        {selectedCourse && !selectedAssignment && (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <Button variant="ghost" size="icon" onClick={() => setSelectedCourse(null)} className="h-10 w-10 rounded-full hover:bg-primary/10">
-                  <ArrowLeft className="w-5 h-5" />
-                </Button>
-                <div>
-                  <h1 className="text-xl lg:text-2xl font-bold tracking-tight text-foreground">
-                    {selectedCourse.name}
-                  </h1>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    Assignments Repository • <span className="text-primary font-medium">{courseAssignments.length} Global Tasks</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-8">
-              {modules.filter(m => m.courseId === selectedCourse.id).map((module) => {
-                const moduleAssignments = courseAssignments.filter(a => a.moduleId === module.id);
+              {allAssignments.map((asg) => {
+                const submissionProgress = Math.round((asg.totalSubmissions / asg.courseStudents) * 100);
                 return (
-                  <div key={module.id} className="space-y-4">
-                    <div className="flex items-center justify-between border-b pb-2">
-                      <h2 className="text-lg font-bold flex items-center gap-2">
-                        <div className="w-2 h-6 bg-primary rounded-full" />
-                        {module.name}
-                      </h2>
-                      <Badge variant="secondary" className="font-normal">{moduleAssignments.length} Assignments</Badge>
-                    </div>
+                  <Card key={asg.id} className="border-border/50 hover:border-primary/50 transition-all hover:shadow-md overflow-hidden flex flex-col">
+                    <CardContent className="p-0 flex flex-col h-full">
+                      <div className="p-6 flex-1 space-y-4">
+                        <div className="flex justify-between items-start gap-4">
+                          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                            <ClipboardList className="w-6 h-6 text-primary" />
+                          </div>
+                          <Badge variant="outline" className={cn(
+                            "border-primary/20 font-bold",
+                            asg.status === "Active" ? "bg-emerald-50 text-emerald-600 border-emerald-200" : "bg-muted text-muted-foreground"
+                          )}>
+                            {asg.status}
+                          </Badge>
+                        </div>
 
-                    {moduleAssignments.length > 0 ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {moduleAssignments.map((asg) => (
-                          <Card key={asg.id} className="hover:border-primary/40 transition-all shadow-sm">
-                            <CardContent className="p-5 space-y-4">
-                              <div className="space-y-1">
-                                <h3 className="font-bold text-base leading-tight">{asg.title}</h3>
-                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                  <CalendarIcon className="w-3 h-3" />
-                                  Due: {asg.dueDate}
-                                </div>
-                              </div>
+                        <div>
+                          <h2 className="text-xl font-bold text-foreground line-clamp-1">{asg.title}</h2>
+                          <div className="flex items-center gap-2 mt-2">
+                            <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 font-bold uppercase text-[10px] tracking-wider">
+                              {asg.courseName}
+                            </Badge>
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider bg-muted px-2 py-0.5 rounded">
+                              Jan 2026 Batch
+                            </p>
+                          </div>
+                        </div>
 
-                              <div className="grid grid-cols-2 gap-3 py-3 border-y border-dashed">
-                                <div className="space-y-0.5">
-                                  <p className="text-[10px] uppercase font-bold text-muted-foreground">Status</p>
-                                  <Badge variant="outline" className={cn(
-                                    "text-[10px] h-5",
-                                    asg.status === "Active" ? "bg-emerald-50 text-emerald-600 border-emerald-200" : "bg-muted text-muted-foreground"
-                                  )}>
-                                    {asg.status}
-                                  </Badge>
-                                </div>
-                                <div className="space-y-0.5">
-                                  <p className="text-[10px] uppercase font-bold text-muted-foreground">Submissions</p>
-                                  <p className="text-sm font-bold">{asg.totalSubmissions}</p>
-                                </div>
-                              </div>
+                        <div className="space-y-4 pt-2">
+                          <div className="flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-2 text-muted-foreground font-medium">
+                              <CalendarIcon className="w-3.5 h-3.5 text-primary" />
+                              <span>Due Date:</span>
+                            </div>
+                            <span className="font-bold text-foreground">{asg.dueDate}</span>
+                          </div>
+                          <div className="flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-2 text-muted-foreground font-medium">
+                              <Users className="w-3.5 h-3.5 text-blue-500" />
+                              <span>Total Students:</span>
+                            </div>
+                            <span className="font-bold text-foreground">{asg.courseStudents}</span>
+                          </div>
+                          <div className="flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-2 text-muted-foreground font-medium">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                              <span>Submitted:</span>
+                            </div>
+                            <span className="font-bold text-foreground">{asg.totalSubmissions}</span>
+                          </div>
 
-                              <Button
-                                variant="outline"
-                                className="w-full font-bold group"
-                                onClick={() => setSelectedAssignment(asg)}
-                              >
-                                Review Submissions
-                                <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                              </Button>
-                            </CardContent>
-                          </Card>
-                        ))}
+                          <div className="space-y-2 pt-1">
+                            <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                              <span>Submission Progress</span>
+                              <span className="text-primary">{submissionProgress}%</span>
+                            </div>
+                            <Progress value={submissionProgress} className="h-1.5" />
+                          </div>
+                        </div>
                       </div>
-                    ) : (
-                      <div className="h-20 bg-muted/20 border-2 border-dashed border-border/50 rounded-xl flex items-center justify-center text-muted-foreground text-sm italic">
-                        No assignments deployed in this module yet.
+
+                      <div className="p-4 border-t border-border/50 bg-muted/20 flex flex-col gap-2">
+                        <Button
+                          className="w-full justify-center bg-primary hover:bg-primary/90 text-primary-foreground gap-2 font-bold shadow-sm"
+                          onClick={() => setSelectedAssignment(asg)}
+                        >
+                          <PlayCircle className="w-4 h-4" />
+                          View Submissions
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-center hover:bg-primary/10 hover:text-primary gap-2 font-bold border-border/60"
+                          onClick={() => toast({ title: "Edit Mode", description: "This will open the assignment editor." })}
+                        >
+                          <ClipboardList className="w-4 h-4" />
+                          Edit Assignment
+                        </Button>
                       </div>
-                    )}
-                  </div>
+                    </CardContent>
+                  </Card>
                 );
               })}
             </div>
           </div>
         )}
 
-        {/* View 3: Submissions Review */}
+        {/* Detail View: Submissions Review */}
         {selectedAssignment && (
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">

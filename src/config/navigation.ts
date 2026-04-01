@@ -34,7 +34,7 @@ import {
   PencilLine,
 } from "lucide-react";
 
-export type UserRole = "student" | "intern" | "tutor" | "mentor" | "admin" | "finance" | "superadmin";
+export type UserRole = "student" | "intern" | "tutor" | "mentor" | "admin" | "finance" | "superadmin" | "coordinator" | "advisor";
 
 export interface NavItem {
   title: string;
@@ -58,24 +58,25 @@ export const studentNavigation: RoleNavigation = {
   baseUrl: "/student",
   mainNav: [
     { title: "Dashboard", url: "/student", icon: LayoutDashboard },
-    {
-      title: "My Courses",
-      url: "#",
-      icon: BookOpen,
-      children: [
-        { title: "Courses", url: "/student/my-course", icon: Layers },
-        { title: "Live Sessions", url: "/student/live-sessions", icon: Video },
-        { title: "Learning Materials", url: "/student/materials", icon: FileText },
-        { title: "Assignments", url: "/student/assignments", icon: ClipboardList },
-        { title: "Webinars", url: "/student/webinars", icon: Video },
-      ]
-    },
+    { title: "Courses", url: "/student/courses", icon: Layers },
+    { title: "Webinar", url: "/student/webinar", icon: Video },
     { title: "Chat", url: "/student/chat", icon: MessageSquare },
     { title: "Payments", url: "/student/wallet", icon: CreditCard },
     { title: "Exam", url: "/student/exam", icon: PencilLine },
     { title: "Certificate", url: "/student/certificates", icon: Award },
     { title: "Support Tickets", url: "/student/support-tickets", icon: LifeBuoy },
     { title: "Game", url: "/student/game", icon: Gamepad2 },
+    { title: "Feedback", url: "/student/feedback", icon: MessageSquare },
+    {
+      title: "My Courses",
+      url: "/student/my-course",
+      icon: BookOpen,
+      children: [
+        { title: "Live Sessions", url: "/student/live-sessions", icon: Video },
+        { title: "Learning Materials", url: "/student/materials", icon: FileText },
+        { title: "Assignments", url: "/student/assignments", icon: ClipboardList },
+      ]
+    },
   ],
   secondaryNav: [],
 };
@@ -87,16 +88,17 @@ export const internNavigation: RoleNavigation = {
   baseUrl: "/intern",
   mainNav: [
     { title: "Dashboard", url: "/intern", icon: LayoutDashboard },
-    { title: "Tasks", url: "/intern/tasks", icon: ListTodo },
     { title: "Meet", url: "/intern/meet", icon: Video },
     { title: "Materials", url: "/intern/materials", icon: BookOpen },
-    { title: "Support Ticket", url: "/intern/support-ticket", icon: LifeBuoy },
-    { title: "Placement Updates", url: "/intern/placement-updates", icon: Briefcase },
-    { title: "Weekly Report", url: "/intern/weekly-report", icon: FileText },
+    { title: "Task", url: "/intern/tasks", icon: ListTodo },
     { title: "Progress", url: "/intern/progress", icon: TrendingUp },
-    { title: "Attendance", url: "/intern/attendance", icon: UserCheck },
+    { title: "Weekly Report", url: "/intern/weekly-report", icon: FileText },
+    { title: "Support Ticket", url: "/intern/support-ticket", icon: LifeBuoy },
     { title: "Chat", url: "/intern/chat", icon: MessageSquare },
     { title: "Certificates", url: "/intern/certificates", icon: Award },
+    { title: "Placement Update", url: "/intern/placement-updates", icon: Briefcase },
+    { title: "Feedback", url: "/intern/feedback", icon: MessageSquare },
+    { title: "Attendance", url: "/intern/attendance", icon: UserCheck },
   ],
   secondaryNav: [],
 };
@@ -109,12 +111,14 @@ export const tutorNavigation: RoleNavigation = {
   mainNav: [
     { title: "Dashboard", url: "/tutor", icon: LayoutDashboard },
     { title: "My Batches", url: "/tutor/batches", icon: BookOpen },
-    { title: "Students", url: "/tutor/students", icon: Users },
     { title: "Chat", url: "/tutor/chat", icon: MessageSquare },
+    { title: "Feedback", url: "/tutor/feedback", icon: MessageSquare },
     { title: "Assignments", url: "/tutor/assignments", icon: ClipboardList },
     { title: "Announcements", url: "/tutor/announcements", icon: Bell },
     { title: "Learning Materials", url: "/tutor/materials", icon: FileText },
+    { title: "Support Ticket", url: "/tutor/support-ticket", icon: LifeBuoy },
     { title: "Wallet", url: "/tutor/wallet", icon: Wallet },
+    { title: "Students", url: "/tutor/students", icon: Users },
   ],
   secondaryNav: [],
 };
@@ -126,10 +130,18 @@ export const mentorNavigation: RoleNavigation = {
   baseUrl: "/mentor",
   mainNav: [
     { title: "Dashboard", url: "/mentor", icon: LayoutDashboard },
-    { title: "Tutor", url: "/mentor/tutors", icon: GraduationCap },
-    { title: "Students", url: "/mentor/students", icon: GraduationCap },
     {
-      title: "Interns",
+      title: "My Batches",
+      url: "#",
+      icon: BookOpen,
+      children: [
+        { title: "Tutor", url: "/mentor/tutors", icon: GraduationCap },
+        { title: "Student", url: "/mentor/students", icon: GraduationCap },
+        { title: "Live Session", url: "/mentor/live-sessions", icon: Video },
+      ]
+    },
+    {
+      title: "Intern",
       url: "#",
       icon: Briefcase,
       children: [
@@ -141,9 +153,10 @@ export const mentorNavigation: RoleNavigation = {
         { title: "Performance", url: "/mentor/performance", icon: TrendingUp },
       ]
     },
-    { title: "Live Sessions", url: "/mentor/live-sessions", icon: Video },
-    { title: "Batch", url: "/mentor/batches", icon: Layers },
+    { title: "Meet", url: "/mentor/meet", icon: Video },
     { title: "Chat", url: "/mentor/chat", icon: MessageSquare },
+    { title: "Feedback", url: "/mentor/feedback", icon: MessageSquare },
+    { title: "Support Ticket", url: "/mentor/support-ticket", icon: LifeBuoy },
   ],
   secondaryNav: [],
 };
@@ -210,6 +223,39 @@ export const financeNavigation: RoleNavigation = {
   secondaryNav: [],
 };
 
+// Coordinator Navigation - Focus: management and monitoring
+export const coordinatorNavigation: RoleNavigation = {
+  role: "coordinator",
+  label: "Coordinator",
+  baseUrl: "/coordinator",
+  mainNav: [
+    { title: "Dashboard", url: "/coordinator/dashboard", icon: LayoutDashboard },
+    { title: "Meet", url: "/coordinator/meet", icon: Video },
+    { title: "Interns", url: "/coordinator/interns", icon: Briefcase },
+    { title: "Tasks", url: "/coordinator/tasks", icon: ListTodo },
+    { title: "Task Reviews", url: "/coordinator/task-reviews", icon: ClipboardList },
+    { title: "Weekly Reports", url: "/coordinator/weekly-reports", icon: FileText },
+    { title: "Attendance", url: "/coordinator/attendance", icon: UserCheck },
+    { title: "Performance", url: "/coordinator/progress", icon: TrendingUp },
+    { title: "Chat", url: "/coordinator/chat", icon: MessageSquare },
+    { title: "Feedback", url: "/coordinator/feedback", icon: MessageSquare },
+    { title: "Support Ticket", url: "/coordinator/support-ticket", icon: LifeBuoy },
+  ],
+  secondaryNav: [],
+};
+
+// Advisor Navigation - Focus: guidance and student tracking
+export const advisorNavigation: RoleNavigation = {
+  role: "advisor",
+  label: "Advisor",
+  baseUrl: "/advisor",
+  mainNav: [
+    { title: "Dashboard", url: "/advisor/dashboard", icon: LayoutDashboard },
+    { title: "Feedback", url: "/advisor/feedback", icon: MessageSquare },
+  ],
+  secondaryNav: [],
+};
+
 export { ChevronDown };
 
 // Super Admin Navigation - Focus: full control and governance
@@ -254,6 +300,10 @@ export const getNavigationByRole = (role: UserRole): RoleNavigation => {
       return financeNavigation;
     case "superadmin":
       return superadminNavigation;
+    case "coordinator":
+      return coordinatorNavigation;
+    case "advisor":
+      return advisorNavigation;
     default:
       return studentNavigation;
   }
@@ -268,4 +318,6 @@ export const roleDisplayInfo: Record<UserRole, { label: string; color: string }>
   admin: { label: "Admin", color: "bg-role-admin" },
   finance: { label: "Finance", color: "bg-role-finance" },
   superadmin: { label: "Super Admin", color: "bg-role-superadmin" },
+  coordinator: { label: "Coordinator", color: "bg-role-coordinator" },
+  advisor: { label: "Advisor", color: "bg-role-advisor" },
 };

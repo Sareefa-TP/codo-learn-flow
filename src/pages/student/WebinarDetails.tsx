@@ -136,7 +136,7 @@ const WebinarDetails = () => {
             <div className="animate-fade-in max-w-4xl mx-auto pb-20 space-y-8">
                 <Button
                     variant="ghost"
-                    onClick={() => navigate(-1)}
+                    onClick={() => navigate("/student/webinar")}
                     className="group pl-0 hover:bg-transparent text-muted-foreground hover:text-foreground"
                 >
                     <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />

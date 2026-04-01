@@ -6,8 +6,10 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import {
   CheckCircle2, UserCheck, TrendingUp, User,
-  ListTodo, Clock, Briefcase,
+  ListTodo, Clock, Briefcase, LogOut, ArrowRightCircle
 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 // ─── Mock Data ────────────────────────────────────────────────────────────────
 
@@ -82,6 +84,127 @@ const StatCard = ({ label, value, sub, icon: Icon, iconBg, iconColor, valueColor
   </Card>
 );
 
+// ─── Attendance Card Component ───────────────────────────────────────────────
+
+const AttendanceCard = () => {
+  const [checkIn, setCheckIn] = useState<string | null>(localStorage.getItem("attendance_checkin"));
+  const [checkOut, setCheckOut] = useState<string | null>(localStorage.getItem("attendance_checkout"));
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    // Daily Reset Logic
+    const today = new Date().toISOString().split("T")[0];
+    const storedDate = localStorage.getItem("attendance_date");
+    
+    if (storedDate !== today) {
+      localStorage.removeItem("attendance_checkin");
+      localStorage.removeItem("attendance_checkout");
+      localStorage.setItem("attendance_date", today);
+      setCheckIn(null);
+      setCheckOut(null);
+    }
+
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const handleCheckIn = () => {
+    const now = new Date().toISOString();
+    localStorage.setItem("attendance_checkin", now);
+    setCheckIn(now);
+    toast.success("Checked in successfully!");
+  };
+
+  const handleCheckOut = () => {
+    const now = new Date().toISOString();
+    localStorage.setItem("attendance_checkout", now);
+    setCheckOut(now);
+    toast.success("Checked out successfully!");
+  };
+
+  const formatTime = (isoString: string | null) => {
+    if (!isoString) return "--:--";
+    return new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const calculateDuration = () => {
+    if (!checkIn) return "0h 0m";
+    const start = new Date(checkIn).getTime();
+    const end = checkOut ? new Date(checkOut).getTime() : currentTime.getTime();
+    const diffMs = Math.max(0, end - start);
+    const diffHrs = Math.floor(diffMs / 3600000);
+    const diffMins = Math.floor((diffMs % 3600000) / 60000);
+    return `${diffHrs}h ${diffMins}m`;
+  };
+
+  const status = !checkIn ? "Not Started" : (!checkOut ? "Working" : "Completed");
+
+  return (
+    <Card className="border-border/50 shadow-sm rounded-xl overflow-hidden group">
+      <CardHeader className="pb-3 px-6 pt-5 border-b border-border/20 bg-muted/5">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-base font-semibold flex items-center gap-2">
+            <UserCheck className="w-4 h-4 text-primary" />
+            Today's Attendance
+          </CardTitle>
+          <Badge variant="outline" className={`text-[10px] font-bold uppercase tracking-wider ${
+            status === "Working" ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" :
+            status === "Completed" ? "bg-blue-500/10 text-blue-600 border-blue-500/20" :
+            "bg-muted text-muted-foreground border-border/40"
+          }`}>
+            {status}
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+          <div className="flex items-center gap-4 group-hover:translate-x-1 transition-transform">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+              <ArrowRightCircle className="w-5 h-5 text-emerald-600" />
+            </div>
+            <div>
+              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-tight">Check-In Time</p>
+              <p className="text-lg font-bold text-foreground leading-tight">{formatTime(checkIn)}</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 group-hover:translate-x-1 transition-transform duration-300">
+            <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center flex-shrink-0">
+              <LogOut className="w-5 h-5 text-orange-600" />
+            </div>
+            <div>
+              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-tight">Check-Out Time</p>
+              <p className="text-lg font-bold text-foreground leading-tight">{formatTime(checkOut)}</p>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            {!checkIn ? (
+              <Button onClick={handleCheckIn} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl h-11 shadow-md shadow-emerald-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                Check-In
+              </Button>
+            ) : !checkOut ? (
+              <Button onClick={handleCheckOut} className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl h-11 shadow-md shadow-orange-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                Check-Out
+              </Button>
+            ) : (
+              <Button disabled className="w-full bg-muted text-muted-foreground font-bold rounded-xl h-11 border border-border/50">
+                Attendance Completed
+              </Button>
+            )}
+            <div className="flex items-center justify-center gap-1.5 py-1">
+              <div className={`w-1.5 h-1.5 rounded-full ${status === 'Working' ? 'bg-emerald-500 animate-pulse' : 'bg-muted-foreground/30'}`} />
+              <p className="text-[11px] text-muted-foreground font-semibold">
+                Working Duration: <span className="text-foreground font-bold tabular-nums">{calculateDuration()}</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 const InternDashboard = () => {
@@ -114,6 +237,9 @@ const InternDashboard = () => {
             <span>{intern.startDate} – {intern.endDate}</span>
           </div>
         </div>
+
+        {/* ── Attendance Card ── */}
+        <AttendanceCard />
 
         {/* ── 4 KPI Cards ── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

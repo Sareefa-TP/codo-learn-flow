@@ -1,18 +1,28 @@
+import { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   BookOpen,
   Calendar,
-  FileText,
-  CreditCard,
   Award,
   Lock,
-  Wallet
+  Wallet,
+  Briefcase,
+  TrendingUp,
+  FileText,
+  MoreVertical,
+  ChevronDown
 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const MultiSegmentProgress = ({
   student,
@@ -60,6 +70,8 @@ const MultiSegmentProgress = ({
 };
 
 const StudentDashboard = () => {
+  const navigate = useNavigate();
+  
   // Mock data for student dashboard
   const studentInfo = {
     name: "Sareefa",
@@ -99,33 +111,67 @@ const StudentDashboard = () => {
     .filter(cls => cls.timestamp > Date.now())
     .sort((a, b) => a.timestamp - b.timestamp)[0];
 
-  const progressData = {
-    course: {
-      teacher: { current: 14, total: 20 },
-      student: { current: 9, total: 20 },
+  const courses = [
+    {
+      id: "fsd",
+      name: "Full Stack Development",
+      progress: {
+        teacher: { current: 14, total: 20 },
+        student: { current: 9, total: 20 },
+      },
+      assignmentProgress: {
+        teacher: { current: 10, total: 12 },
+        student: { current: 7, total: 12 },
+      },
+      attendance: {
+        total: 40,
+        attended: 32,
+        percentage: 80,
+      }
     },
-    assignments: {
-      teacher: { current: 10, total: 12 },
-      student: { current: 7, total: 12 },
+    {
+      id: "ds",
+      name: "Data Science",
+      progress: {
+        teacher: { current: 8, total: 20 },
+        student: { current: 5, total: 20 },
+      },
+      assignmentProgress: {
+        teacher: { current: 6, total: 10 },
+        student: { current: 4, total: 10 },
+      },
+      attendance: {
+        total: 25,
+        attended: 18,
+        percentage: 72,
+      }
     },
-    attendance: {
-      total: 40,
-      attended: 32,
-      percentage: 80,
-    },
-  };
+    {
+      id: "uiux",
+      name: "UI/UX Design",
+      progress: {
+        teacher: { current: 18, total: 20 },
+        student: { current: 12, total: 20 },
+      },
+      assignmentProgress: {
+        teacher: { current: 14, total: 15 },
+        student: { current: 11, total: 15 },
+      },
+      attendance: {
+        total: 30,
+        attended: 28,
+        percentage: 93,
+      }
+    }
+  ];
+
+  const [selectedCourseId, setSelectedCourseId] = useState(courses[0].id);
+  const currentCourse = courses.find(c => c.id === selectedCourseId) || courses[0];
 
   const assessments = {
     pre: {
-      score: "85%",
       date: "10 Feb 2026",
-      status: "Completed",
-    },
-    post: {
-      isAvailable: false, // Course not completed yet
-      score: "-",
-      date: "-",
-      status: "Available after course completion",
+      status: "Passed",
     },
   };
 
@@ -138,11 +184,10 @@ const StudentDashboard = () => {
 
   return (
     <DashboardLayout>
-      <div className="animate-fade-in space-y-6 lg:space-y-8">
+      <div className="animate-fade-in space-y-6 max-w-6xl mx-auto px-4 md:px-6 lg:px-8 pb-10">
 
-        {/* 1 & 2. Welcome & Wallet Section */}
+        {/* Welcome Section */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Welcome Section */}
           <Card className="lg:col-span-3 border-none shadow-sm bg-gradient-to-br from-primary/10 via-primary/5 to-background">
             <CardContent className="p-6">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -196,7 +241,7 @@ const StudentDashboard = () => {
           </Card>
         </div>
 
-        {/* 3. Upcoming Live Class Section (Full Width) */}
+        {/* Upcoming Live Class Section */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -248,10 +293,32 @@ const StudentDashboard = () => {
             </Card>
           )}
         </section>
+        
+        {/* Global Course Selector */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-xl border-primary/10 bg-primary/5 shadow-inner">
+          <div className="space-y-1">
+            <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-primary" />
+              Viewing Data For:
+            </h3>
+            <p className="text-xs text-muted-foreground">Select a course to update progress, assignments, and attendance metrics.</p>
+          </div>
+          <Select value={selectedCourseId} onValueChange={setSelectedCourseId}>
+            <SelectTrigger className="w-full sm:w-[280px] h-10 bg-background shadow-sm border-primary/20 focus:ring-primary/30">
+              <SelectValue placeholder="Select active course" />
+            </SelectTrigger>
+            <SelectContent>
+              {courses.map((course) => (
+                <SelectItem key={course.id} value={course.id} className="text-sm">
+                  {course.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-        {/* 4 & 5. Progress Section */}
+        {/* Progress Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* 4. Course Progress */}
           <Card className="border-primary/10 shadow-sm overflow-hidden flex flex-col">
             <CardHeader className="pb-2 bg-slate-50/50">
               <CardTitle className="text-lg font-bold flex items-center gap-2">
@@ -261,16 +328,15 @@ const StudentDashboard = () => {
             </CardHeader>
             <CardContent className="pt-6 flex-1">
               <MultiSegmentProgress
-                student={progressData.course.student.current}
-                tutor={progressData.course.teacher.current}
-                total={progressData.course.teacher.total}
+                student={currentCourse.progress.student.current}
+                tutor={currentCourse.progress.teacher.current}
+                total={currentCourse.progress.teacher.total}
                 studentLabel="Student Completed"
                 tutorLabel="Tutor Covered"
               />
             </CardContent>
           </Card>
 
-          {/* 5. Assignment Progress */}
           <Card className="border-primary/10 shadow-sm overflow-hidden flex flex-col">
             <CardHeader className="pb-2 bg-slate-50/50">
               <CardTitle className="text-lg font-bold flex items-center gap-2">
@@ -280,9 +346,9 @@ const StudentDashboard = () => {
             </CardHeader>
             <CardContent className="pt-6 flex-1">
               <MultiSegmentProgress
-                student={progressData.assignments.student.current}
-                tutor={progressData.assignments.teacher.current}
-                total={progressData.assignments.teacher.total}
+                student={currentCourse.assignmentProgress.student.current}
+                tutor={currentCourse.assignmentProgress.teacher.current}
+                total={currentCourse.assignmentProgress.teacher.total}
                 studentLabel="Student Completed"
                 tutorLabel="Tutor Assigned"
               />
@@ -290,9 +356,8 @@ const StudentDashboard = () => {
           </Card>
         </div>
 
-        {/* 6 & 7. Attendance & Assessments Section */}
+        {/* Attendance & Assessments Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-6">
-          {/* 6. Attendance */}
           <Card className="border-primary/10 shadow-sm overflow-hidden h-full flex flex-col">
             <CardHeader className="pb-2 bg-slate-50/50">
               <CardTitle className="text-lg font-bold">Attendance</CardTitle>
@@ -301,29 +366,28 @@ const StudentDashboard = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Total Classes</p>
-                  <p className="text-2xl font-bold">{progressData.attendance.total}</p>
+                  <p className="text-2xl font-bold">{currentCourse.attendance.total}</p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Attended</p>
-                  <p className="text-2xl font-bold">{progressData.attendance.attended}</p>
+                  <p className="text-2xl font-bold">{currentCourse.attendance.attended}</p>
                 </div>
               </div>
 
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-bold">Overall Attendance: {progressData.attendance.percentage}%</span>
+                  <span className="text-sm font-bold">Overall Attendance: {currentCourse.attendance.percentage}%</span>
                 </div>
                 <div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200">
                   <div
-                    className={`h-full transition-all duration-700 ${getAttendanceColor(progressData.attendance.percentage)}`}
-                    style={{ width: `${progressData.attendance.percentage}%` }}
+                    className={`h-full transition-all duration-700 ${getAttendanceColor(currentCourse.attendance.percentage)}`}
+                    style={{ width: `${currentCourse.attendance.percentage}%` }}
                   />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* 7. Assessments */}
           <Card className="border-primary/10 shadow-sm overflow-hidden h-full flex flex-col">
             <CardHeader className="pb-2 bg-slate-50/50">
               <CardTitle className="text-lg font-bold flex items-center gap-2">
@@ -333,20 +397,24 @@ const StudentDashboard = () => {
             </CardHeader>
             <CardContent className="pt-6 flex-1">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 h-full">
-                {/* Pre Assessment */}
                 <Card className="border-primary/10 hover:border-primary/30 transition-colors shadow-sm">
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start mb-2">
                       <Badge variant="secondary" className="bg-green-100 text-green-700 border-none">Pre Assessment</Badge>
                       <span className="text-xs text-muted-foreground font-medium">{assessments.pre.date}</span>
                     </div>
-                    <h3 className="font-bold text-lg mb-1">{assessments.pre.score}</h3>
-                    <p className="text-xs text-muted-foreground mb-3">{assessments.pre.status}</p>
-                    <Button variant="ghost" size="sm" className="w-full text-xs font-bold text-primary hover:bg-primary/5">View Report</Button>
+                    <p className="text-xs text-muted-foreground mb-3 font-medium">Status: {assessments.pre.status}</p>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="w-full text-xs font-bold text-primary hover:bg-primary/5"
+                      onClick={() => navigate('/student/assessment-report')}
+                    >
+                      View Report
+                    </Button>
                   </CardContent>
                 </Card>
 
-                {/* Post Assessment */}
                 <Card className="border-dashed border-2 bg-muted/5 opacity-80 relative overflow-hidden group">
                   <CardContent className="p-4 flex flex-col items-center justify-center text-center min-h-[140px] space-y-2">
                     <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center group-hover:bg-muted/80 transition-colors">

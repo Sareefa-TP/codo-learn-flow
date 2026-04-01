@@ -11,7 +11,7 @@ export const useRole = () => {
     const pathSegments = location.pathname.split("/").filter(Boolean);
     const roleFromPath = pathSegments[0] as UserRole;
 
-    if (roleFromPath && ["student", "intern", "tutor", "mentor", "admin", "finance", "superadmin"].includes(roleFromPath)) {
+    if (roleFromPath && ["student", "intern", "tutor", "mentor", "admin", "finance", "superadmin", "coordinator", "advisor"].includes(roleFromPath)) {
       setRole(roleFromPath);
       sessionStorage.setItem("selectedRole", roleFromPath);
     } else {

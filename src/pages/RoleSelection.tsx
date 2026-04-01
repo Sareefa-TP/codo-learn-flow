@@ -7,6 +7,8 @@ import {
   Shield,
   Wallet,
   Crown,
+  Settings,
+  LifeBuoy,
 } from "lucide-react";
 import RoleCard from "@/components/RoleCard";
 import Logo from "@/components/Logo";
@@ -60,6 +62,20 @@ const roles = [
     title: "Super Admin",
     description: "Full system access with advanced configuration controls",
     colorClass: "bg-role-superadmin",
+  },
+  {
+    id: "coordinator",
+    icon: Settings,
+    title: "Coordinator",
+    description: "Manage batches, coordinate between tutors and students, and oversee operations",
+    colorClass: "bg-role-coordinator",
+  },
+  {
+    id: "advisor",
+    icon: LifeBuoy,
+    title: "Advisor",
+    description: "Provide academic guidance, support students, and track learning progress",
+    colorClass: "bg-role-advisor",
   },
 ];
 

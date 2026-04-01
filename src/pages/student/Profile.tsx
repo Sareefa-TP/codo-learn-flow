@@ -18,15 +18,9 @@ import {
   User,
   Mail,
   Phone,
-  MapPin,
-  Calendar,
   BookOpen,
-  Award,
-  CreditCard,
   Edit,
   Camera,
-  CheckCircle2,
-  Clock,
   Briefcase,
   Save,
   X,
@@ -35,6 +29,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { studentData } from "@/data/studentData";
+import { cn } from "@/lib/utils";
 
 const StudentProfile = () => {
   const { toast } = useToast();
@@ -61,21 +56,28 @@ const StudentProfile = () => {
   });
 
   // Academic & Activity Data (Mock)
-  const academicInfo = {
-    courseName: "Full Stack Web Development",
-    batchName: "Jan 2026 Batch",
-    startDate: "15 Jan 2026",
-    duration: "6 Months",
-    modulesCompleted: "4 / 8",
-    currentWeek: "Week 12",
-  };
-
-  const learningActivity = {
-    assignmentsSubmitted: 14,
-    assignmentsPending: 2,
-    progress: 72,
-    lastLogin: "Today, 10:45 AM",
-  };
+  const enrolledCourses = [
+    {
+      name: "Full Stack Web Development",
+      batch: "Jan 2026 Batch",
+      start: "15 Jan 2026",
+      duration: "6 Months",
+      modules: "4 / 8",
+      current: "Week 12",
+      status: "Ongoing",
+      progress: 72
+    },
+    {
+      name: "UI/UX Design Foundation",
+      batch: "Aug 2025 Batch",
+      start: "10 Aug 2025",
+      duration: "3 Months",
+      modules: "6 / 6",
+      current: "Completed",
+      status: "Completed",
+      progress: 100
+    }
+  ];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -229,11 +231,11 @@ const StudentProfile = () => {
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Briefcase className="w-4 h-4" />
-                      {academicInfo.batchName}
+                      {enrolledCourses[0].batch}
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <BookOpen className="w-4 h-4" />
-                      {academicInfo.courseName}
+                      {enrolledCourses[0].name}
                     </div>
                   </div>
                 </div>
@@ -338,7 +340,6 @@ const StudentProfile = () => {
             )}
           </Card>
 
-          {/* Academic Information */}
           <Card className="border-border/50 shadow-sm">
             <CardHeader className="pb-4">
               <CardTitle className="text-lg flex items-center gap-2">
@@ -346,90 +347,58 @@ const StudentProfile = () => {
                 Academic Information
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-4 rounded-xl bg-muted/30 border border-border/20">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Course Name</p>
-                  <p className="text-sm font-semibold text-foreground">{academicInfo.courseName}</p>
-                </div>
-                <div className="p-4 rounded-xl bg-muted/30 border border-border/20">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Batch Name</p>
-                  <p className="text-sm font-semibold text-foreground">{academicInfo.batchName}</p>
-                </div>
-                <div className="p-4 rounded-xl bg-muted/30 border border-border/20">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Batch Start Date</p>
-                  <p className="text-sm font-semibold text-foreground">{academicInfo.startDate}</p>
-                </div>
-                <div className="p-4 rounded-xl bg-muted/30 border border-border/20">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Course Duration</p>
-                  <p className="text-sm font-semibold text-foreground">{academicInfo.duration}</p>
-                </div>
-                <div className="p-4 rounded-xl bg-muted/30 border border-border/20">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Modules Completed</p>
-                  <p className="text-sm font-semibold text-foreground">{academicInfo.modulesCompleted}</p>
-                </div>
-                <div className="p-4 rounded-xl bg-muted/30 border border-border/20">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Current Progress</p>
-                  <p className="text-sm font-semibold text-foreground">{academicInfo.currentWeek}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Learning Activity */}
-          <Card className="border-border/50 shadow-sm lg:col-span-2">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-primary" />
-                Learning Activity
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="space-y-4 md:col-span-1">
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-primary/5 border border-primary/10">
+            <CardContent className="space-y-4">
+              {enrolledCourses.map((course, index) => (
+                <div key={index} className="p-5 rounded-2xl bg-muted/20 border border-border/40 space-y-4 hover:shadow-md transition-shadow duration-300">
+                  <div className="flex items-start justify-between gap-4">
                     <div className="space-y-1">
-                      <p className="text-xs font-medium text-muted-foreground">Submitted</p>
-                      <p className="text-2xl font-bold text-foreground">{learningActivity.assignmentsSubmitted}</p>
+                      <h3 className="font-bold text-foreground text-lg leading-tight">{course.name}</h3>
+                      <p className="text-xs text-muted-foreground font-medium">{course.batch}</p>
                     </div>
-                    <CheckCircle2 className="w-8 h-8 text-primary opacity-20" />
+                    <Badge 
+                      className={cn(
+                        "rounded-lg px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider",
+                        course.status === "Ongoing" 
+                          ? "bg-primary/10 text-primary border-primary/20 hover:bg-primary/20" 
+                          : "bg-muted/50 text-muted-foreground border-border/50"
+                      )}
+                      variant="outline"
+                    >
+                      {course.status}
+                    </Badge>
                   </div>
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-orange-500/5 border border-orange-500/10">
-                    <div className="space-y-1">
-                      <p className="text-xs font-medium text-muted-foreground">Pending</p>
-                      <p className="text-2xl font-bold text-foreground">{learningActivity.assignmentsPending}</p>
-                    </div>
-                    <Clock className="w-8 h-8 text-orange-500 opacity-20" />
-                  </div>
-                </div>
 
-                <div className="md:col-span-2 flex flex-col justify-center gap-6 p-6 rounded-2xl bg-muted/20 border border-border/50">
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-end">
-                      <p className="text-sm font-medium text-foreground">Overall Course Progress</p>
-                      <p className="text-2xl font-bold text-primary">{learningActivity.progress}%</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div className="space-y-0.5">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Start Date</p>
+                      <p className="text-xs font-semibold text-foreground">{course.start}</p>
                     </div>
-                    <div className="h-3 w-full bg-primary/10 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-primary transition-all duration-1000 ease-out rounded-full"
-                        style={{ width: `${learningActivity.progress}%` }}
-                      />
+                    <div className="space-y-0.5">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Duration</p>
+                      <p className="text-xs font-semibold text-foreground">{course.duration}</p>
+                    </div>
+                    <div className="space-y-0.5">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Modules</p>
+                      <p className="text-xs font-semibold text-foreground">{course.modules}</p>
+                    </div>
+                    <div className="space-y-0.5">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Progress</p>
+                      <p className="text-xs font-semibold text-foreground">{course.current}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Badge variant="outline" className="bg-background">On Track</Badge>
-                    <span>Expected completion by July 2026</span>
-                  </div>
-                </div>
 
-                <div className="md:col-span-1 flex flex-col justify-center items-center p-6 text-center rounded-2xl bg-muted/20 border border-border/50">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
-                    <Clock className="w-6 h-6 text-primary" />
-                  </div>
-                  <p className="text-xs font-medium text-muted-foreground mb-1">Last Login</p>
-                  <p className="text-sm font-bold text-foreground">{learningActivity.lastLogin}</p>
+                  {course.status === "Ongoing" && (
+                    <div className="space-y-1.5">
+                      <div className="h-1.5 w-full bg-primary/5 rounded-full overflow-hidden border border-primary/5">
+                        <div 
+                          className="h-full bg-primary/80 transition-all duration-1000 ease-out"
+                          style={{ width: `${course.progress}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
+              ))}
             </CardContent>
           </Card>
         </div>
