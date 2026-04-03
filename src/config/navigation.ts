@@ -134,16 +134,20 @@ export const mentorNavigation: RoleNavigation = {
   baseUrl: "/mentor",
   mainNav: [
     { title: "Dashboard", url: "/mentor", icon: LayoutDashboard },
+    { title: "Meet", url: "/mentor/meet", icon: Video },
     {
       title: "My Batches",
       url: "#",
       icon: BookOpen,
       children: [
-        { title: "Tutor", url: "/mentor/tutors", icon: GraduationCap },
-        { title: "Student", url: "/mentor/students", icon: GraduationCap },
-        { title: "Live Session", url: "/mentor/live-sessions", icon: Video },
+        { title: "Tutors", url: "/mentor/my-batches/tutors", icon: GraduationCap },
+        { title: "Students", url: "/mentor/my-batches/students", icon: GraduationCap },
+        { title: "Live Sessions", url: "/mentor/live-sessions", icon: Video },
       ]
     },
+    { title: "Feedback", url: "/mentor/feedback", icon: MessageSquare },
+    { title: "Chat", url: "/mentor/chat", icon: MessageSquare },
+    { title: "Support Ticket", url: "/mentor/support-ticket", icon: LifeBuoy },
     {
       title: "Intern",
       url: "#",
@@ -157,10 +161,6 @@ export const mentorNavigation: RoleNavigation = {
         { title: "Performance", url: "/mentor/performance", icon: TrendingUp },
       ]
     },
-    { title: "Meet", url: "/mentor/meet", icon: Video },
-    { title: "Chat", url: "/mentor/chat", icon: MessageSquare },
-    { title: "Feedback", url: "/mentor/feedback", icon: MessageSquare },
-    { title: "Support Ticket", url: "/mentor/support-ticket", icon: LifeBuoy },
   ],
   secondaryNav: [],
 };
