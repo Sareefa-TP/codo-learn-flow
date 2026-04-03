@@ -142,7 +142,7 @@ export const mentorNavigation: RoleNavigation = {
       children: [
         { title: "Tutors", url: "/mentor/my-batches/tutors", icon: GraduationCap },
         { title: "Students", url: "/mentor/my-batches/students", icon: GraduationCap },
-        { title: "Live Sessions", url: "/mentor/live-sessions", icon: Video },
+        { title: "Live Sessions", url: "/mentor/my-batches/live-sessions", icon: Video },
       ]
     },
     { title: "Feedback", url: "/mentor/feedback", icon: MessageSquare },
