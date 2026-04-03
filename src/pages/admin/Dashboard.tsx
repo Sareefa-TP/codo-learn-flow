@@ -1,618 +1,396 @@
 import DashboardLayout from "@/components/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Users,
-  BookOpen,
-  Briefcase,
-  Calendar,
-  ClipboardList,
-  Award,
   UserCheck,
+  GraduationCap,
+  Users2,
+  BookOpen,
+  Calendar,
+  Clock,
+  CircleDollarSign,
+  TrendingUp,
+  BarChart3,
+  PieChart,
+  Activity,
+  Plus,
+  CheckCircle2,
   AlertCircle,
-  ArrowRight,
-  MoreVertical,
-  Eye,
-  Edit,
-  PowerOff,
-  Search
+  FileText,
+  CreditCard,
+  User,
+  ArrowUpRight,
+  ArrowDownRight,
+  MoreHorizontal
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import {
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart as RePieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend
+} from "recharts";
+import { cn } from "@/lib/utils";
 
-// Static mock data
-const summaryCards = [
-  {
-    title: "Total Students",
-    count: "487",
-    subtitle: "+12 this month",
-    icon: Users,
-    colorClass: "text-blue-600 bg-blue-100 dark:bg-blue-900/30",
-    path: "/admin/students"
-  },
-  {
-    title: "Learning Phase",
-    count: "245",
-    subtitle: "Active participants",
-    icon: BookOpen,
-    colorClass: "text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30",
-    path: "/admin/students?phase=learning"
-  },
-  {
-    title: "Internship Phase",
-    count: "156",
-    subtitle: "Currently engaged",
-    icon: Briefcase,
-    colorClass: "text-purple-600 bg-purple-100 dark:bg-purple-900/30",
-    path: "/admin/students?phase=internship"
-  },
-  {
-    title: "Active Batches",
-    count: "12",
-    subtitle: "Across all phases",
-    icon: Calendar,
-    colorClass: "text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30",
-    path: "/admin/batches"
-  },
-  {
-    title: "Pending Grading",
-    count: "38",
-    subtitle: "Assignments to review",
-    icon: ClipboardList,
-    colorClass: "text-orange-600 bg-orange-100 dark:bg-orange-900/30",
-    path: "/admin/assignments?filter=pending"
-  },
-  {
-    title: "Certificates Pending",
-    count: "14",
-    subtitle: "Awaiting approval",
-    icon: Award,
-    colorClass: "text-pink-600 bg-pink-100 dark:bg-pink-900/30",
-    path: "/admin/certificates?filter=pending"
-  },
-  {
-    title: "Average Attendance",
-    count: "88%",
-    subtitle: "Stable trend",
-    icon: UserCheck,
-    colorClass: "text-teal-600 bg-teal-100 dark:bg-teal-900/30",
-    path: "/admin/attendance"
-  }
+// --- Mock Data ---
+
+const summaryStats = [
+  { label: "Total Students", value: "1,284", icon: Users, trend: "+12%", color: "text-blue-600", bg: "bg-blue-50" },
+  { label: "Total Interns", value: "456", icon: GraduationCap, trend: "+5%", color: "text-purple-600", bg: "bg-purple-50" },
+  { label: "Total Tutors", value: "84", icon: UserCheck, trend: "+2%", color: "text-emerald-600", bg: "bg-emerald-50" },
+  { label: "Total Mentors", value: "128", icon: Users2, trend: "+8%", color: "text-indigo-600", bg: "bg-indigo-50" },
+  { label: "Total Courses", value: "32", icon: BookOpen, trend: "0%", color: "text-orange-600", bg: "bg-orange-50" },
+  { label: "Active Batches", value: "18", icon: Calendar, trend: "+3", color: "text-pink-600", bg: "bg-pink-50" },
+  { label: "Pending Approvals", value: "24", icon: Clock, trend: "-15%", color: "text-amber-600", bg: "bg-amber-50" },
+  { label: "Total Revenue", value: "$45.2k", icon: CircleDollarSign, trend: "+18%", color: "text-cyan-600", bg: "bg-cyan-50" },
 ];
 
-const initialBatchPerformance = [
-  { id: "B1", name: "Jan 2026 Cohort", tutor: "Arun Krishnan", totalStudents: 120, capacity: 150, learningCount: 120, internshipCount: 0, avgProgress: 35, status: "Active", startDate: "2026-01-15", endDate: "2026-04-15" },
-  { id: "B2", name: "Oct 2025 Cohort", tutor: "Anjali Desai", totalStudents: 95, capacity: 100, learningCount: 10, internshipCount: 85, avgProgress: 82, status: "Active", startDate: "2025-10-10", endDate: "2026-01-10" },
-  { id: "B3", name: "Jul 2025 Evening", tutor: "Meera Nair", totalStudents: 60, capacity: 60, learningCount: 0, internshipCount: 55, avgProgress: 95, status: "Active", startDate: "2025-07-05", endDate: "2025-10-05" },
-  { id: "B4", name: "Feb 2026 Python", tutor: "Rajesh Iyer", totalStudents: 85, capacity: 100, learningCount: 85, internshipCount: 0, avgProgress: 15, status: "Active", startDate: "2026-02-01", endDate: "2026-05-01" },
+const growthData = [
+  { name: "Jan", students: 400 },
+  { name: "Feb", students: 600 },
+  { name: "Mar", students: 800 },
+  { name: "Apr", students: 1000 },
+  { name: "May", students: 1284 },
 ];
 
-const alerts = [
-  {
-    id: 1,
-    message: "5 Students ready for Internship (100% progress)",
-    actionLabel: "Review",
-    icon: Award,
-    path: "/admin/students?status=ready"
-  },
-  {
-    id: 2,
-    message: "2 Internship students without Mentor",
-    actionLabel: "Assign",
-    icon: Users,
-    path: "/admin/interns?filter=unassigned"
-  },
-  {
-    id: 3,
-    message: "3 Assignments overdue for grading",
-    actionLabel: "Review",
-    icon: ClipboardList,
-    path: "/admin/assignments?filter=overdue"
-  },
-  {
-    id: 4,
-    message: "4 Certificates pending final approval",
-    actionLabel: "Approve",
-    icon: Award,
-    path: "/admin/certificates?filter=pending"
-  }
+const revenueData = [
+  { name: "Jan", revenue: 4000 },
+  { name: "Feb", revenue: 5500 },
+  { name: "Mar", revenue: 7000 },
+  { name: "Apr", revenue: 8500 },
+  { name: "May", revenue: 12000 },
 ];
 
-const phaseDistribution = [
-  { label: "Learning Phase", percentage: 45, color: "bg-blue-500", count: 245 },
-  { label: "Internship Phase", percentage: 35, color: "bg-purple-500", count: 185 },
-  { label: "Completed/Graduated", percentage: 20, color: "bg-emerald-500", count: 108 },
+const enrollmentData = [
+  { name: "React", count: 450 },
+  { name: "Python", count: 320 },
+  { name: "UI/UX", count: 280 },
+  { name: "Node.js", count: 190 },
 ];
 
-const tutorOptions = [
-  "Arun Krishnan",
-  "Anjali Desai",
-  "Meera Nair",
-  "Rajesh Iyer",
-  "Priya Sharma"
+const userActivityData = [
+  { name: "Students", value: 65, color: "#2563eb" },
+  { name: "Tutors", value: 15, color: "#10b981" },
+  { name: "Mentors", value: 20, color: "#8b5cf6" },
 ];
 
-const AdminDashboard = () => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
+const recentRegistrations = [
+  { name: "Sarah Connor", role: "Student", status: "Active", time: "2 mins ago" },
+  { name: "John Smith", role: "Tutor", status: "Pending", time: "15 mins ago" },
+  { name: "Elena Gilbert", role: "Mentor", status: "Active", time: "1 hour ago" },
+  { name: "Stefan Salvatore", role: "Student", status: "Active", time: "2 hours ago" },
+  { name: "Bonnie Bennett", role: "Tutor", status: "Pending", time: "3 hours ago" },
+];
 
-  const [batches, setBatches] = useState(initialBatchPerformance);
-  const [searchTerm, setSearchTerm] = useState("");
+const activityFeed = [
+  { icon: Users, text: "New student registered: Sarah Connor", time: "2 mins ago", color: "bg-blue-100 text-blue-600" },
+  { icon: FileText, text: "Assignment submitted in 'React Advanced'", time: "10 mins ago", color: "bg-purple-100 text-purple-600" },
+  { icon: Calendar, text: "New batch 'Web Dev Apr-24' created", time: "1 hour ago", color: "bg-emerald-100 text-emerald-600" },
+  { icon: CreditCard, text: "Payment completed by John Doe", time: "3 hours ago", color: "bg-amber-100 text-amber-600" },
+  { icon: CheckCircle2, text: "Tutor 'Alex Rivera' approved", time: "5 hours ago", color: "bg-cyan-100 text-cyan-600" },
+];
 
-  const filteredBatches = batches.filter(batch =>
-    batch.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    batch.tutor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    batch.status.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+const financeTransactions = [
+  { id: "TX1001", user: "John Doe", amount: "$150.00", status: "Paid" },
+  { id: "TX1002", user: "Jane Smith", amount: "$200.00", status: "Pending" },
+  { id: "TX1003", user: "Mike Ross", amount: "$120.00", status: "Paid" },
+];
 
-  // Modals state
-  const [viewBatch, setViewBatch] = useState<typeof initialBatchPerformance[0] | null>(null);
-  const [editBatch, setEditBatch] = useState<typeof initialBatchPerformance[0] | null>(null);
-  const [closeBatchData, setCloseBatchData] = useState<typeof initialBatchPerformance[0] | null>(null);
+// --- Sub-components ---
 
-  // Edit form state
-  const [editForm, setEditForm] = useState({
-    name: "",
-    tutor: "",
-    capacity: "",
-    startDate: "",
-    endDate: "",
-    status: ""
-  });
-
-  const handleOpenEdit = (batch: typeof initialBatchPerformance[0]) => {
-    setEditForm({
-      name: batch.name,
-      tutor: batch.tutor,
-      capacity: batch.capacity.toString(),
-      startDate: batch.startDate,
-      endDate: batch.endDate,
-      status: batch.status
-    });
-    setEditBatch(batch);
-  };
-
-  const handleSaveEdit = () => {
-    if (!editBatch) return;
-
-    setBatches(batches.map(b => b.id === editBatch.id ? {
-      ...b,
-      name: editForm.name,
-      tutor: editForm.tutor,
-      capacity: parseInt(editForm.capacity) || b.capacity,
-      startDate: editForm.startDate,
-      endDate: editForm.endDate,
-      status: editForm.status
-    } : b));
-
-    toast({
-      title: "Batch Updated",
-      description: "Batch details have been saved successfully.",
-    });
-
-    setEditBatch(null);
-  };
-
-  const handleConfirmClose = () => {
-    if (!closeBatchData) return;
-
-    setBatches(batches.map(b => b.id === closeBatchData.id ? { ...b, status: "Closed" } : b));
-
-    toast({
-      title: "Batch Closed",
-      description: `${closeBatchData.name} has been marked as Closed.`,
-    });
-
-    setCloseBatchData(null);
-  };
-
-  return (
-    <DashboardLayout>
-      <div className="animate-fade-in space-y-8 max-w-7xl mx-auto pb-10">
-
-        {/* Header Section */}
-        <div>
-          <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-foreground">
-            Admin Overview
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Monitor institutional metrics, batch performance, and pending operational tasks.
-          </p>
+const StatCard = ({ stat }: { stat: typeof summaryStats[0] }) => (
+  <Card className="border-none shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-all duration-300 group">
+    <CardContent className="p-5 flex flex-col justify-between h-full">
+      <div className="flex items-center justify-between mb-4">
+        <div className={cn("p-2.5 rounded-xl group-hover:scale-110 transition-transform duration-300", stat.bg, stat.color)}>
+          <stat.icon className="w-5 h-5" />
         </div>
-
-        {/* 1. Summary Cards Section */}
-        <section>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5">
-            {summaryCards.map((stat, idx) => (
-              <div
-                key={idx}
-                onClick={() => navigate(stat.path)}
-                className="group rounded-xl border border-border/50 bg-card p-5 shadow-sm transition-all hover:shadow-md hover:border-primary/20 cursor-pointer"
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
-                      {stat.title}
-                    </p>
-                    <h3 className="text-3xl font-bold mt-2 text-foreground">
-                      {stat.count}
-                    </h3>
-                  </div>
-                  <div className={`p-2.5 rounded-lg ${stat.colorClass} transition-transform group-hover:scale-110`}>
-                    <stat.icon className="w-5 h-5" />
-                  </div>
-                </div>
-                <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
-                  {stat.subtitle}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Main Grid Layout for the Rest */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
-
-          {/* 2. Batch Performance Overview (Left - takes 2 cols on XL) */}
-          <section className="xl:col-span-2 space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <h2 className="text-lg font-semibold tracking-tight">Batch Performance Overview</h2>
-              <div className="flex items-center gap-3 w-full sm:w-auto">
-                <div className="relative w-full sm:w-64">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search by batch name, tutor, or status..."
-                    className="pl-9 bg-muted/30"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-                <Button onClick={() => navigate("/admin/batches")} variant="ghost" size="sm" className="hidden sm:flex text-primary shrink-0">
-                  View All Batches <ArrowRight className="w-4 h-4 ml-1" />
-                </Button>
-              </div>
-            </div>
-
-            <Card className="border-border/50 shadow-sm overflow-hidden">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader className="bg-muted/30">
-                    <TableRow>
-                      <TableHead className="pl-6 w-[200px]">Batch Name</TableHead>
-                      <TableHead>Tutor</TableHead>
-                      <TableHead className="text-center">Total</TableHead>
-                      <TableHead className="text-center">Learning</TableHead>
-                      <TableHead className="text-center">Internship</TableHead>
-                      <TableHead className="w-[15%]">Progress</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="pr-6"></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredBatches.length > 0 ? (
-                      filteredBatches.map((batch) => (
-                        <TableRow key={batch.id} className="hover:bg-muted/20">
-                          <TableCell className="pl-6 font-medium text-foreground">
-                            {batch.name}
-                          </TableCell>
-                          <TableCell className="text-muted-foreground text-sm">
-                            {batch.tutor}
-                          </TableCell>
-                          <TableCell className="text-center font-semibold">
-                            {batch.totalStudents}
-                          </TableCell>
-                          <TableCell className="text-center text-indigo-600 dark:text-indigo-400">
-                            {batch.learningCount}
-                          </TableCell>
-                          <TableCell className="text-center text-purple-600 dark:text-purple-400">
-                            {batch.internshipCount}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Progress value={batch.avgProgress} className="h-2 flex-1" />
-                              <span className="text-xs font-medium text-muted-foreground w-6">{batch.avgProgress}%</span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className={
-                              batch.status === "Active"
-                                ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
-                                : "bg-muted text-muted-foreground border-border/50"
-                            }>
-                              {batch.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="pr-6 text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="w-8 h-8 hover:bg-muted">
-                                  <MoreVertical className="w-4 h-4 text-muted-foreground" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem className="cursor-pointer gap-2" onClick={() => setViewBatch(batch)}>
-                                  <Eye className="w-4 h-4" /> View Details
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="cursor-pointer gap-2" onClick={() => handleOpenEdit(batch)}>
-                                  <Edit className="w-4 h-4" /> Edit Batch
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  className="cursor-pointer gap-2 text-destructive focus:text-destructive focus:bg-destructive/10"
-                                  onClick={() => setCloseBatchData(batch)}
-                                  disabled={batch.status === "Closed"}
-                                >
-                                  <PowerOff className="w-4 h-4" /> Close Batch
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
-                          No batches found.
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            </Card>
-          </section>
-
-          {/* Right Column: Alerts & Phase Distribution */}
-          <div className="space-y-6 lg:space-y-8">
-
-            {/* 3. Action Required Panel */}
-            <section className="space-y-4">
-              <h2 className="text-lg font-semibold tracking-tight flex items-center gap-2">
-                <AlertCircle className="w-5 h-5 text-warning" />
-                Action Required
-              </h2>
-
-              <Card className="border-warning/30 shadow-sm bg-warning/5 dark:bg-warning/10 overflow-hidden relative">
-                <div className="absolute top-0 left-0 w-1 h-full bg-warning"></div>
-                <CardContent className="p-0">
-                  <div className="divide-y divide-border/50">
-                    {alerts.map((alert) => (
-                      <div key={alert.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 hover:bg-muted/30 transition-colors">
-                        <div className="flex items-start gap-3">
-                          <div className="p-2 rounded-full bg-background border border-border mt-0.5 shadow-sm">
-                            <alert.icon className="w-4 h-4 text-warning" />
-                          </div>
-                          <p className="text-sm font-medium text-foreground mt-1.5 leading-snug">
-                            {alert.message}
-                          </p>
-                        </div>
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          className="shrink-0 w-full sm:w-auto h-8 bg-background border border-border hover:bg-muted font-medium"
-                          onClick={() => navigate(alert.path)}
-                        >
-                          {alert.actionLabel}
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </section>
-
-            {/* 4. Phase Distribution Overview */}
-            <section className="space-y-4">
-              <h2 className="text-lg font-semibold tracking-tight">Phase Distribution</h2>
-
-              <Card className="border-border/50 shadow-sm">
-                <CardContent className="p-5 space-y-6">
-
-                  {/* Combined Visual Bar */}
-                  <div className="w-full h-3 rounded-full overflow-hidden flex bg-muted">
-                    {phaseDistribution.map((phase, idx) => (
-                      <div
-                        key={idx}
-                        style={{ width: `${phase.percentage}%` }}
-                        className={phase.color}
-                        title={`${phase.label} (${phase.percentage}%)`}
-                      />
-                    ))}
-                  </div>
-
-                  {/* Legends */}
-                  <div className="space-y-4">
-                    {phaseDistribution.map((phase, idx) => (
-                      <div key={idx} className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-3 h-3 rounded-full ${phase.color}`} />
-                          <span className="text-sm font-medium text-foreground">{phase.label}</span>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <span className="text-sm text-muted-foreground">{phase.count} students</span>
-                          <span className="text-sm font-bold text-foreground w-10 text-right">{phase.percentage}%</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                </CardContent>
-              </Card>
-            </section>
-
-          </div>
+        <div className={cn(
+          "text-[10px] font-bold px-2 py-0.5 rounded-full",
+          stat.trend.startsWith("+") ? "bg-emerald-50 text-emerald-600" : stat.trend === "0%" ? "bg-gray-50 text-gray-400" : "bg-red-50 text-red-600"
+        )}>
+          {stat.trend}
         </div>
       </div>
+      <div>
+        <h3 className="text-2xl font-bold text-foreground mb-1">{stat.value}</h3>
+        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{stat.label}</p>
+      </div>
+    </CardContent>
+  </Card>
+);
 
-      {/* View Details Modal */}
-      <Dialog open={!!viewBatch} onOpenChange={(open) => !open && setViewBatch(null)}>
-        <DialogContent className="sm:max-w-[450px]">
-          <DialogHeader>
-            <DialogTitle>Batch Details</DialogTitle>
-          </DialogHeader>
-          {viewBatch && (
-            <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-y-4 gap-x-6 text-sm">
-                <div>
-                  <p className="text-muted-foreground mb-1">Batch Name</p>
-                  <p className="font-semibold text-foreground">{viewBatch.name}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground mb-1">Tutor</p>
-                  <p className="font-semibold text-foreground">{viewBatch.tutor}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground mb-1">Total Students</p>
-                  <p className="font-semibold text-foreground">{viewBatch.totalStudents} / {viewBatch.capacity}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground mb-1">Status</p>
-                  <Badge variant="outline" className={viewBatch.status === "Active" ? "bg-emerald-500/10 text-emerald-600" : "bg-muted text-muted-foreground"}>
-                    {viewBatch.status}
-                  </Badge>
-                </div>
-                <div>
-                  <p className="text-muted-foreground mb-1">Learning Phase</p>
-                  <p className="font-semibold text-indigo-600 dark:text-indigo-400">{viewBatch.learningCount} students</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground mb-1">Internship Phase</p>
-                  <p className="font-semibold text-purple-600 dark:text-purple-400">{viewBatch.internshipCount} students</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground mb-1">Start Date</p>
-                  <p className="font-semibold text-foreground">{viewBatch.startDate}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground mb-1">End Date</p>
-                  <p className="font-semibold text-foreground">{viewBatch.endDate}</p>
-                </div>
-              </div>
-              <div>
-                <p className="text-muted-foreground mb-2 text-sm">Average Progress</p>
-                <div className="flex items-center gap-3">
-                  <Progress value={viewBatch.avgProgress} className="h-2 flex-1" />
-                  <span className="text-sm font-semibold">{viewBatch.avgProgress}%</span>
-                </div>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+const ChartCard = ({ title, children, icon: Icon }: { title: string, children: React.ReactNode, icon?: any }) => (
+  <Card className="border-none shadow-sm rounded-2xl overflow-hidden min-h-[350px]">
+    <CardHeader className="flex flex-row items-center justify-between py-4 px-6 border-b border-border/50">
+      <CardTitle className="text-sm font-bold flex items-center gap-2">
+        {Icon && <Icon className="w-4 h-4 text-primary" />}
+        {title}
+      </CardTitle>
+      <MoreHorizontal className="w-4 h-4 text-muted-foreground cursor-pointer" />
+    </CardHeader>
+    <CardContent className="p-6 h-[300px]">
+      {children}
+    </CardContent>
+  </Card>
+);
 
-      {/* Edit Batch Modal */}
-      <Dialog open={!!editBatch} onOpenChange={(open) => !open && setEditBatch(null)}>
-        <DialogContent className="sm:max-w-[450px]">
-          <DialogHeader>
-            <DialogTitle>Edit Batch</DialogTitle>
-            <DialogDescription>Modify the batch details. Changes appear immediately.</DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="name">Batch Name</Label>
-              <Input id="name" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="tutor">Tutor</Label>
-                <Select value={editForm.tutor} onValueChange={(val) => setEditForm({ ...editForm, tutor: val })}>
-                  <SelectTrigger id="tutor">
-                    <SelectValue placeholder="Select Tutor" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {tutorOptions.map((t) => (
-                      <SelectItem key={t} value={t}>{t}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="capacity">Capacity</Label>
-                <Input id="capacity" type="number" value={editForm.capacity} onChange={(e) => setEditForm({ ...editForm, capacity: e.target.value })} />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="startDate">Start Date</Label>
-                <Input id="startDate" type="date" value={editForm.startDate} onChange={(e) => setEditForm({ ...editForm, startDate: e.target.value })} />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="endDate">End Date</Label>
-                <Input id="endDate" type="date" value={editForm.endDate} onChange={(e) => setEditForm({ ...editForm, endDate: e.target.value })} />
-              </div>
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="status">Status</Label>
-              <Select value={editForm.status} onValueChange={(val) => setEditForm({ ...editForm, status: val })}>
-                <SelectTrigger id="status">
-                  <SelectValue placeholder="Select Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Active">Active</SelectItem>
-                  <SelectItem value="Closed">Closed</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+const AdminDashboard = () => {
+  return (
+    <DashboardLayout>
+      <div className="animate-fade-in space-y-6 max-w-[1600px] mx-auto pb-10 px-6">
+        
+        {/* Header + Quick Actions */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-2">
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-foreground">
+              Platform Overview
+            </h1>
+            <p className="text-muted-foreground mt-1 font-medium">
+              Welcome back, Admin. Here's what's happening across the system today.
+            </p>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditBatch(null)}>Cancel</Button>
-            <Button onClick={handleSaveEdit}>Save Changes</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          
+          <div className="flex flex-wrap items-center gap-3">
+            <Button className="rounded-xl shadow-sm hover:shadow-md transition-all gap-2 bg-primary">
+              <Plus className="w-4 h-4" /> Add Course
+            </Button>
+            <Button variant="outline" className="rounded-xl shadow-sm hover:shadow-md transition-all gap-2 bg-background">
+              <Calendar className="w-4 h-4" /> Create Batch
+            </Button>
+            <Button variant="outline" className="rounded-xl shadow-sm hover:shadow-md transition-all gap-2 bg-background">
+              <UserCheck className="w-4 h-4" /> Approve Users
+            </Button>
+            <Button variant="outline" className="rounded-xl shadow-sm hover:shadow-md transition-all gap-2 bg-background">
+              <Plus className="w-4 h-4" /> Add Tutor
+            </Button>
+            <Button variant="outline" className="rounded-xl shadow-sm hover:shadow-md transition-all gap-2 bg-background">
+              <Activity className="w-4 h-4" /> Create Announcement
+            </Button>
+          </div>
+        </div>
 
-      {/* Close Confirm Modal */}
-      <Dialog open={!!closeBatchData} onOpenChange={(open) => !open && setCloseBatchData(null)}>
-        <DialogContent className="sm:max-w-[400px]">
-          <DialogHeader>
-            <DialogTitle className="text-destructive">Close Batch</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to close this batch? This will mark the batch status as "Closed".
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="mt-4">
-            <Button variant="outline" onClick={() => setCloseBatchData(null)}>Cancel</Button>
-            <Button variant="destructive" onClick={handleConfirmClose}>Close Batch</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        {/* Section 1: Summary Cards */}
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {summaryStats.map((stat, idx) => (
+            <StatCard key={idx} stat={stat} />
+          ))}
+        </section>
 
+        {/* Section 2: Charts Section */}
+        <section className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <ChartCard title="Student Growth" icon={TrendingUp}>
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={growthData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                <Tooltip />
+                <Line type="monotone" dataKey="students" stroke="#2563eb" strokeWidth={3} dot={{ r: 4, fill: "#2563eb" }} activeDot={{ r: 6 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </ChartCard>
+
+          <ChartCard title="Revenue Overview" icon={CircleDollarSign}>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={revenueData}>
+                <defs>
+                  <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                <Tooltip />
+                <Area type="monotone" dataKey="revenue" stroke="#8b5cf6" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </ChartCard>
+
+          <ChartCard title="Course Enrollment" icon={BarChart3}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={enrollmentData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                <Tooltip />
+                <Bar dataKey="count" fill="#10b981" radius={[6, 6, 0, 0]} barSize={40} />
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartCard>
+
+          <ChartCard title="Active Users Distribution" icon={PieChart}>
+            <ResponsiveContainer width="100%" height="100%">
+              <RePieChart>
+                <Pie
+                  data={userActivityData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={80}
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {userActivityData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </RePieChart>
+            </ResponsiveContainer>
+          </ChartCard>
+        </section>
+
+        {/* Section 3 & 4: Role Overview + Activity & Finance */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          
+          {/* Recent Registrations (Role Overview) */}
+          <Card className="border-none shadow-sm rounded-2xl overflow-hidden xl:col-span-2">
+            <CardHeader className="border-b border-border/50 py-4 px-6 flex flex-row items-center justify-between">
+              <CardTitle className="text-sm font-bold flex items-center gap-2">
+                <Users className="w-4 h-4 text-primary" />
+                Recent Registrations
+              </CardTitle>
+              <Button variant="ghost" size="sm" className="text-xs text-primary font-bold">View All</Button>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead className="bg-muted/30 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                    <tr>
+                      <th className="px-6 py-3">Name</th>
+                      <th className="px-6 py-3">Role</th>
+                      <th className="px-6 py-3">Status</th>
+                      <th className="px-6 py-3">Joined</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/50">
+                    {recentRegistrations.map((user, idx) => (
+                      <tr key={idx} className="hover:bg-muted/10 transition-colors">
+                        <td className="px-6 py-4 font-semibold text-sm">{user.name}</td>
+                        <td className="px-6 py-4 text-xs font-medium text-muted-foreground">{user.role}</td>
+                        <td className="px-6 py-4">
+                          <Badge variant={user.status === "Active" ? "default" : "secondary"} className={cn(
+                            "text-[10px] font-bold px-2 py-0.5",
+                            user.status === "Active" ? "bg-emerald-50 text-emerald-600 border-none shadow-none" : "bg-amber-50 text-amber-600 border-none shadow-none"
+                          )}>
+                            {user.status}
+                          </Badge>
+                        </td>
+                        <td className="px-6 py-4 text-xs text-muted-foreground">{user.time}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Activity Feed */}
+          <Card className="border-none shadow-sm rounded-2xl overflow-hidden">
+            <CardHeader className="border-b border-border/50 py-4 px-6">
+              <CardTitle className="text-sm font-bold flex items-center gap-2">
+                <Activity className="w-4 h-4 text-primary" />
+                Activity Feed
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <ScrollArea className="h-[300px] w-full">
+                <div className="space-y-6">
+                  {activityFeed.map((item, idx) => (
+                    <div key={idx} className="flex items-start gap-4 group">
+                      <div className={cn("p-2 rounded-xl shrink-0 group-hover:scale-110 transition-transform", item.color)}>
+                        <item.icon className="w-4 h-4" />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-sm font-semibold text-foreground leading-snug">{item.text}</p>
+                        <p className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
+                          <Clock className="w-3 h-3" /> {item.time}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Section 4: Finance Snapshot */}
+        <section className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          <Card className="border-none shadow-sm rounded-2xl overflow-hidden xl:col-span-1">
+            <CardHeader className="border-b border-border/50 py-4 px-6 bg-gradient-to-r from-cyan-50 to-transparent">
+              <CardTitle className="text-sm font-bold flex items-center gap-2">
+                <CircleDollarSign className="w-4 h-4 text-cyan-600" />
+                Finance Snapshot
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-muted/20 rounded-2xl border border-border/50">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">Revenue</p>
+                  <p className="text-xl font-black text-foreground">$45,280</p>
+                  <div className="flex items-center text-[10px] text-emerald-600 font-bold mt-1">
+                    <ArrowUpRight className="w-3 h-3" /> 12.5%
+                  </div>
+                </div>
+                <div className="p-4 bg-muted/20 rounded-2xl border border-border/50">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">Pending</p>
+                  <p className="text-xl font-black text-foreground">$8,420</p>
+                  <div className="flex items-center text-[10px] text-amber-600 font-bold mt-1">
+                    <ArrowDownRight className="w-3 h-3" /> 3.2%
+                  </div>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <p className="text-[11px] font-black text-muted-foreground uppercase tracking-widest px-1">Recent Transactions</p>
+                <div className="space-y-3">
+                  {financeTransactions.map((tx, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-3 bg-muted/10 rounded-xl hover:bg-muted/20 transition-all border border-border/20">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-background flex items-center justify-center border border-border shadow-sm">
+                          <User className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-foreground">{tx.user}</p>
+                          <p className="text-[10px] text-muted-foreground font-medium">{tx.id}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs font-black text-foreground">{tx.amount}</p>
+                        <Badge className={cn(
+                          "text-[9px] font-black h-4 px-1.5",
+                          tx.status === "Paid" ? "bg-emerald-50 text-emerald-600 border-none" : "bg-amber-50 text-amber-600 border-none"
+                        )}>
+                          {tx.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+      </div>
     </DashboardLayout>
   );
 };

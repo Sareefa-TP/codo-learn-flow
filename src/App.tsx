@@ -29,6 +29,7 @@ import StudentExams from "@/pages/student/Exams";
 import StudentSupportTickets from "./pages/student/SupportTickets";
 import StudentWebinars from "./pages/student/Webinars";
 import WebinarDetails from "./pages/student/WebinarDetails";
+import StudentMeet from "./pages/student/Meet";
 
 // Intern Pages
 import InternDashboard from "./pages/intern/Dashboard";
@@ -95,11 +96,15 @@ import MentorChat from "./pages/mentor/Chat";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/Dashboard";
-import AdminStudents from "./pages/admin/Students";
+import StudentList from "./pages/admin/students/StudentList";
+import StudentDetails from "./pages/admin/students/StudentDetails";
+import AddEditStudent from "./pages/admin/students/AddEditStudent";
 import AdminInterns from "./pages/admin/Interns";
-import AdminTutors from "./pages/admin/Tutors";
 import AdminTutorDetails from "./pages/admin/TutorDetails";
+import AddEditTutor from "./pages/admin/AddEditTutor";
+import AdminTutors from "./pages/admin/Tutors";
 import AdminMentors from "./pages/admin/Mentors";
+import AddEditMentor from "./pages/admin/AddEditMentor";
 import AdminMentorDetails from "./pages/admin/MentorDetails";
 import AdminCourses from "./pages/admin/Courses";
 import CoursePage from "./pages/admin/CoursePage";
@@ -111,6 +116,10 @@ import AdminFinanceBatchDetails from "./pages/admin/FinanceBatchDetails";
 import AdminReports from "./pages/admin/AdminReports";
 import AdminNotifications from "./pages/admin/Notifications";
 import AdminProfile from "./pages/admin/Profile";
+import AdminMeetList from "./pages/admin/meet/MeetList";
+import AdminCreateMeet from "./pages/admin/meet/CreateMeet";
+import AdminMeetDetails from "./pages/admin/meet/MeetDetails";
+import AdminScheduleMeet from "./pages/admin/meet/ScheduleMeet";
 
 // Finance Pages
 import FinanceDashboard from "./pages/finance/Dashboard";
@@ -212,6 +221,8 @@ const App = () => (
           <Route path="/student/support-tickets" element={<StudentSupportTickets />} />
           <Route path="/student/webinar" element={<StudentWebinars />} />
           <Route path="/student/webinar/:id" element={<WebinarDetails />} />
+          <Route path="/student/meet" element={<StudentMeet />} />
+          <Route path="/student/meet/:tab" element={<StudentMeet />} />
 
           {/* Intern Routes */}
           <Route path="/intern" element={<InternDashboard />} />
@@ -281,12 +292,22 @@ const App = () => (
 
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/students" element={<AdminStudents />} />
+          <Route path="/admin/meet" element={<AdminMeetList />} />
+          <Route path="/admin/meet/schedule" element={<AdminScheduleMeet />} />
+          <Route path="/admin/meet/:id" element={<AdminMeetDetails />} />
+          <Route path="/admin/students" element={<StudentList />} />
+          <Route path="/admin/students/:id" element={<StudentDetails />} />
+          <Route path="/admin/students/add" element={<AddEditStudent mode="add" />} />
+          <Route path="/admin/students/edit/:id" element={<AddEditStudent mode="edit" />} />
           <Route path="/admin/interns" element={<AdminInterns />} />
-          <Route path="/admin/tutors" element={<AdminTutors />} />
-          <Route path="/admin/tutors/:id" element={<AdminTutorDetails />} />
-          <Route path="/admin/mentors" element={<AdminMentors />} />
-          <Route path="/admin/mentors/:id" element={<AdminMentorDetails />} />
+          <Route path="/admin/tutor" element={<AdminTutors />} />
+          <Route path="/admin/tutor/:id" element={<AdminTutorDetails />} />
+          <Route path="/admin/tutor/add" element={<AddEditTutor mode="add" />} />
+          <Route path="/admin/tutor/edit/:id" element={<AddEditTutor mode="edit" />} />
+          <Route path="/admin/mentor" element={<AdminMentors />} />
+          <Route path="/admin/mentor/add" element={<AddEditMentor mode="add" />} />
+          <Route path="/admin/mentor/edit/:id" element={<AddEditMentor mode="edit" />} />
+          <Route path="/admin/mentor/:id" element={<AdminMentorDetails />} />
           <Route path="/admin/courses" element={<CoursePage />} />
           <Route path="/admin/batch" element={<AdminBatchManagement />} />
           <Route path="/admin/attendance" element={<AdminAttendance />} />
