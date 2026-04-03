@@ -24,6 +24,7 @@ import {
   Settings,
   Link2,
   Package,
+  Plus,
   PieChart,
   ScrollText,
   UserCog,
@@ -32,6 +33,8 @@ import {
   Gamepad2,
   LifeBuoy,
   PencilLine,
+  History,
+  Star,
 } from "lucide-react";
 
 export type UserRole = "student" | "intern" | "tutor" | "mentor" | "admin" | "finance" | "superadmin" | "coordinator" | "advisor";
@@ -59,6 +62,7 @@ export const studentNavigation: RoleNavigation = {
   mainNav: [
     { title: "Dashboard", url: "/student", icon: LayoutDashboard },
     { title: "Courses", url: "/student/courses", icon: Layers },
+    { title: "Meet", url: "/student/meet", icon: Video },
     { title: "Webinar", url: "/student/webinar", icon: Video },
     { title: "Chat", url: "/student/chat", icon: MessageSquare },
     { title: "Payments", url: "/student/wallet", icon: CreditCard },
@@ -170,10 +174,11 @@ export const adminNavigation: RoleNavigation = {
     { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
     { title: "Students", url: "/admin/students", icon: GraduationCap },
     { title: "Interns", url: "/admin/interns", icon: Briefcase },
-    { title: "Tutors", url: "/admin/tutors", icon: BookOpen },
-    { title: "Mentors", url: "/admin/mentors", icon: Users },
+    { title: "Tutors", url: "/admin/tutor", icon: BookOpen },
+    { title: "Mentors", url: "/admin/mentor", icon: Users },
     { title: "Course", url: "/admin/courses", icon: Package },
     { title: "Batch", url: "/admin/batch", icon: Layers },
+    { title: "Meet", url: "/admin/meet", icon: Video },
     { title: "Assignments", url: "/admin/assignments", icon: ClipboardList },
     { title: "Attendance", url: "/admin/attendance", icon: UserCheck },
     { title: "Finance Overview", url: "/admin/finance", icon: Wallet },
@@ -244,14 +249,21 @@ export const coordinatorNavigation: RoleNavigation = {
   secondaryNav: [],
 };
 
-// Advisor Navigation - Focus: guidance and student tracking
+// Advisor Navigation - Focus: leads, sales, and student guidance
 export const advisorNavigation: RoleNavigation = {
   role: "advisor",
   label: "Advisor",
   baseUrl: "/advisor",
   mainNav: [
     { title: "Dashboard", url: "/advisor/dashboard", icon: LayoutDashboard },
-    { title: "Feedback", url: "/advisor/feedback", icon: MessageSquare },
+    { title: "Leads", url: "/advisor/leads", icon: Users },
+    { title: "Students", url: "/advisor/students", icon: GraduationCap },
+    { title: "Courses", url: "/advisor/courses", icon: BookOpen },
+    { title: "Follow-ups", url: "/advisor/follow-ups", icon: History },
+    { title: "Meet", url: "/advisor/meet", icon: Video },
+    { title: "Chat", url: "/advisor/chat", icon: MessageSquare },
+    { title: "Support Ticket", url: "/advisor/support-ticket", icon: LifeBuoy },
+    { title: "Feedback", url: "/advisor/feedback", icon: Star },
   ],
   secondaryNav: [],
 };

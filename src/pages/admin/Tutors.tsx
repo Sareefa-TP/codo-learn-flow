@@ -1,16 +1,10 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -20,307 +14,337 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Search,
-  MoreVertical,
-  Eye,
-  Power,
-  UserPlus,
-  Users,
-  UserCheck,
-  GraduationCap,
-  UserX
+import { 
+  Users, 
+  UserCheck, 
+  UserX, 
+  UserPlus, 
+  Search, 
+  MoreVertical, 
+  Eye, 
+  Edit, 
+  Trash2, 
+  Ban,
+  FilterX,
+  Plus,
+  BookOpen,
+  Layers,
+  Phone
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { mockTutors, mockStudents } from "@/data/mockTutors";
-import { StatusBadge } from "@/components/admin/tutors/StatusBadge";
-import { WorkloadBadge } from "@/components/admin/tutors/WorkloadBadge";
-import { AddTutorModal } from "@/components/admin/tutors/AddTutorModal";
-import { EditTutorModal } from "@/components/admin/tutors/EditTutorModal";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Edit2 } from "lucide-react";
+import { toast } from "sonner";
+import { mockTutors as initialTutors } from "@/data/mockTutors";
+import { cn } from "@/lib/utils";
 
 const AdminTutors = () => {
-  const { toast } = useToast();
   const navigate = useNavigate();
+  const [tutors, setTutors] = useState(initialTutors);
+  
+  // Filters State
+  const [search, setSearch] = useState("");
+  const [courseFilter, setCourseFilter] = useState("all");
+  const [batchFilter, setBatchFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
 
-  // State
-  const [tutors, setTutors] = useState(mockTutors);
-  const [students, setStudents] = useState(mockStudents);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState("All");
+  // Pagination State
+  const [rowsPerPage, setRowsPerPage] = useState("10");
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // Modals state
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [editModalTutor, setEditModalTutor] = useState<typeof mockTutors[0] | null>(null);
-  const [assignModalTutor, setAssignModalTutor] = useState<typeof mockTutors[0] | null>(null);
-  const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
-
-  // Derived Summary Metrics
-  const totalTutors = tutors.length;
-  const activeTutors = tutors.filter(t => t.status === "Active").length;
-  const totalAssignedStudents = students.filter(s => s.assignedTutorId !== null).length;
-  const totalUnassignedStudents = students.filter(s => s.assignedTutorId === null).length;
-
-  // Derive workload
-  const tutorsWithWorkload = tutors.map(tutor => {
-    const assignedStudents = students.filter(s => s.assignedTutorId === tutor.id);
-    const activeStudents = assignedStudents.filter(s => s.status === "Active");
-    return {
-      ...tutor,
-      totalStudentsCount: assignedStudents.length,
-      activeStudentsCount: activeStudents.length
-    };
-  });
-
-  // Filter list
-  const filteredTutors = tutorsWithWorkload.filter(tutor => {
-    const matchesSearch =
-      tutor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      tutor.email.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesStatus = filterStatus === "All" || tutor.status === filterStatus;
-
-    return matchesSearch && matchesStatus;
-  });
-
-  // Actions
-  const handleToggleStatus = (id: string, currentStatus: string) => {
-    const newStatus = currentStatus === "Active" ? "Inactive" : "Active";
-    setTutors(tutors.map(t => t.id === id ? { ...t, status: newStatus } : t));
-
-    toast({
-      title: "Status Updated",
-      description: `Tutor account has been marked as ${newStatus}.`
-    });
+  // Summary Metrics
+  const metrics = {
+    total: tutors.length,
+    active: tutors.filter(t => t.status === "Active").length,
+    inactive: tutors.filter(t => t.status === "Inactive").length,
+    new: tutors.filter(t => {
+        // Mocking "New" as joined in the last 30 days logic for UI purposes
+        return t.joinedDate.includes("2025"); 
+    }).length
   };
 
-  const handleSaveNewTutor = (newTutor: typeof mockTutors[0]) => {
-    setTutors([newTutor, ...tutors]);
-    setIsAddModalOpen(false);
-    toast({
-      title: "Tutor Created",
-      description: `${newTutor.name} has been successfully added to the system.`
+  // Filtering Logic
+  const filteredTutors = useMemo(() => {
+    return tutors.filter(tutor => {
+      const matchesSearch = 
+        tutor.name.toLowerCase().includes(search.toLowerCase()) || 
+        tutor.email.toLowerCase().includes(search.toLowerCase());
+      
+      const matchesCourse = courseFilter === "all" || tutor.courses.some(c => c.name === courseFilter);
+      const matchesStatus = statusFilter === "all" || tutor.status === statusFilter;
+      
+      // Batch filtering would ideally be more complex, but for now:
+      const matchesBatch = batchFilter === "all" || tutor.courses.some(c => c.batches.includes(batchFilter));
+
+      return matchesSearch && matchesCourse && matchesStatus && matchesBatch;
     });
+  }, [tutors, search, courseFilter, batchFilter, statusFilter]);
+
+  const resetFilters = () => {
+    setSearch("");
+    setCourseFilter("all");
+    setBatchFilter("all");
+    setStatusFilter("all");
   };
 
-  const handleSaveEditTutor = (updatedTutor: typeof mockTutors[0]) => {
-    setTutors(tutors.map(t => t.id === updatedTutor.id ? updatedTutor : t));
-    setEditModalTutor(null);
-    toast({
-      title: "Tutor Updated",
-      description: `${updatedTutor.name}'s profile has been updated.`
-    });
+  const handleDelete = (id: string, name: string) => {
+    if (window.confirm(`Are you sure you want to delete tutor ${name}?`)) {
+      setTutors(tutors.filter(t => t.id !== id));
+      toast.success("Tutor deleted successfully");
+    }
   };
 
-  const handleAssignStudentSave = () => {
-    if (!assignModalTutor || selectedStudentIds.length === 0) return;
+  const handleToggleBlock = (id: string, name: string, isBlocked: boolean) => {
+    const action = isBlocked ? "unblock" : "block";
+    if (window.confirm(`Are you sure you want to ${action} tutor ${name}?`)) {
+      setTutors(tutors.map(t => t.id === id ? { ...t, status: isBlocked ? "Active" : "Inactive" } : t));
+      toast.success(`Tutor ${name} ${isBlocked ? "unblocked" : "blocked"} successfully`);
+    }
+  };
 
-    // 1. Map new Tutor ID to selected students
-    setStudents(students.map(s =>
-      selectedStudentIds.includes(s.id) ? { ...s, assignedTutorId: assignModalTutor.id } : s
-    ));
-
-    // 2. Append new student IDs to the mapped Array on Tutor object
-    setTutors(tutors.map(t =>
-      t.id === assignModalTutor.id
-        ? { ...t, assignedStudentIds: [...t.assignedStudentIds, ...selectedStudentIds] }
-        : t
-    ));
-
-    toast({
-      title: "Students Assigned",
-      description: `${selectedStudentIds.length} student(s) successfully assigned to ${assignModalTutor.name}.`
-    });
-
-    setAssignModalTutor(null);
-    setSelectedStudentIds([]);
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "Active":
+        return <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-none font-bold text-[10px] uppercase rounded-lg px-2.5">Active</Badge>;
+      case "Inactive":
+        return <Badge className="bg-slate-100 text-slate-500 hover:bg-slate-100 border-none font-bold text-[10px] uppercase rounded-lg px-2.5">Inactive</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
   };
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 max-w-7xl mx-auto">
-
+      <div className="animate-fade-in space-y-6 max-w-[1600px] mx-auto pb-10 px-6">
+        
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-2">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Tutor Management</h1>
-            <p className="text-muted-foreground mt-1">Control tutor accounts and monitor workload</p>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Tutor Management</h1>
+            <p className="text-muted-foreground text-sm flex items-center gap-1.5 mt-0.5 font-medium">
+               <Users className="w-3.5 h-3.5 text-primary" />
+               Manage educator profiles, assignments, and performance
+            </p>
           </div>
-          <Button onClick={() => setIsAddModalOpen(true)}>
-            <UserPlus className="w-4 h-4 mr-2" />
-            Add Tutor
+          <Button 
+            onClick={() => navigate("/admin/tutor/add")}
+            className="rounded-xl h-12 px-8 font-black uppercase tracking-widest text-[11px] shadow-lg shadow-primary/20 gap-2 transition-transform active:scale-95"
+          >
+            <Plus className="w-4 h-4" /> Add New Tutor
           </Button>
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow">
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center flex-shrink-0">
-                <Users className="w-6 h-6 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Tutors</p>
-                <h3 className="text-2xl font-bold text-foreground">{totalTutors}</h3>
-              </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="border-none shadow-sm rounded-2xl bg-white ring-1 ring-slate-100 hover:shadow-md transition-all group">
+            <CardContent className="p-6 flex items-center gap-5">
+               <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white shrink-0 group-hover:scale-110 transition-transform">
+                  <Users className="w-6 h-6" />
+               </div>
+               <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Tutors</p>
+                  <h3 className="text-2xl font-bold text-slate-900">{metrics.total}</h3>
+               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow">
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
-                <UserCheck className="w-6 h-6 text-emerald-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Active Tutors</p>
-                <h3 className="text-2xl font-bold text-foreground">{activeTutors}</h3>
-              </div>
+          <Card className="border-none shadow-sm rounded-2xl bg-white ring-1 ring-slate-100 hover:shadow-md transition-all group">
+            <CardContent className="p-6 flex items-center gap-5">
+               <div className="w-12 h-12 rounded-2xl bg-emerald-500 flex items-center justify-center text-white shrink-0 group-hover:scale-110 transition-transform">
+                  <UserCheck className="w-6 h-6" />
+               </div>
+               <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Active Tutors</p>
+                  <h3 className="text-2xl font-bold text-slate-900">{metrics.active}</h3>
+               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow">
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center flex-shrink-0">
-                <GraduationCap className="w-6 h-6 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Assigned Students</p>
-                <h3 className="text-2xl font-bold text-foreground">{totalAssignedStudents}</h3>
-              </div>
+          <Card className="border-none shadow-sm rounded-2xl bg-white ring-1 ring-slate-100 hover:shadow-md transition-all group">
+            <CardContent className="p-6 flex items-center gap-5">
+               <div className="w-12 h-12 rounded-2xl bg-slate-400 flex items-center justify-center text-white shrink-0 group-hover:scale-110 transition-transform">
+                  <UserX className="w-6 h-6" />
+               </div>
+               <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Inactive Tutors</p>
+                  <h3 className="text-2xl font-bold text-slate-900">{metrics.inactive}</h3>
+               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow">
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center flex-shrink-0">
-                <UserX className="w-6 h-6 text-orange-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Unassigned Students</p>
-                <h3 className="text-2xl font-bold text-foreground">{totalUnassignedStudents}</h3>
-              </div>
+          <Card className="border-none shadow-sm rounded-2xl bg-white ring-1 ring-slate-100 hover:shadow-md transition-all group">
+            <CardContent className="p-6 flex items-center gap-5">
+               <div className="w-12 h-12 rounded-2xl bg-amber-500 flex items-center justify-center text-white shrink-0 group-hover:scale-110 transition-transform">
+                  <Plus className="w-6 h-6" />
+               </div>
+               <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">New Tutors</p>
+                  <h3 className="text-2xl font-bold text-slate-900">{metrics.new}</h3>
+               </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Filters */}
-        <Card className="border-border/50 shadow-sm">
-          <CardContent className="p-4 flex flex-col sm:flex-row gap-4 items-center justify-between">
-            <div className="relative w-full sm:max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Search by name or email..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 bg-background w-full"
-              />
-            </div>
-            <div className="w-full sm:w-[180px]">
-              <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Filter by Status" />
+        <Card className="border-none shadow-sm rounded-2xl bg-white ring-1 ring-slate-100">
+          <CardContent className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="relative group">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-primary transition-colors" />
+                <Input 
+                  placeholder="Search name, email..." 
+                  className="pl-10 h-11 bg-slate-50/50 border-slate-100/50 rounded-xl font-bold text-slate-800"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
+
+              <Select value={courseFilter} onValueChange={setCourseFilter}>
+                <SelectTrigger className="h-11 bg-slate-50/50 border-slate-100/50 rounded-xl font-bold text-slate-800">
+                  <SelectValue placeholder="Course" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="All">All Statuses</SelectItem>
-                  <SelectItem value="Active">Active</SelectItem>
-                  <SelectItem value="Inactive">Inactive</SelectItem>
+                <SelectContent className="rounded-xl border-none shadow-xl">
+                  <SelectItem value="all" className="font-bold py-2.5">All Courses</SelectItem>
+                  <SelectItem value="Full Stack Development" className="font-bold py-2.5">Full Stack</SelectItem>
+                  <SelectItem value="UI/UX Design Masterclass" className="font-bold py-2.5">UI/UX Design</SelectItem>
+                  <SelectItem value="Python Zero to Hero" className="font-bold py-2.5">Python</SelectItem>
                 </SelectContent>
               </Select>
+
+              <Select value={batchFilter} onValueChange={setBatchFilter}>
+                <SelectTrigger className="h-11 bg-slate-50/50 border-slate-100/50 rounded-xl font-bold text-slate-800">
+                  <SelectValue placeholder="Batch" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-none shadow-xl">
+                  <SelectItem value="all" className="font-bold py-2.5">All Batches</SelectItem>
+                  <SelectItem value="FS-JAN-24" className="font-bold py-2.5 outline-none">FS-JAN-24</SelectItem>
+                  <SelectItem value="UI-MAR-24" className="font-bold py-2.5 outline-none">UI-MAR-24</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="h-11 bg-slate-50/50 border-slate-100/50 rounded-xl font-bold text-slate-800">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-none shadow-xl">
+                  <SelectItem value="all" className="font-bold py-2.5">All Status</SelectItem>
+                  <SelectItem value="Active" className="font-bold py-2.5">Active</SelectItem>
+                  <SelectItem value="Inactive" className="font-bold py-2.5">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Button 
+                variant="outline" 
+                onClick={resetFilters}
+                className="h-11 rounded-xl border-slate-100 text-slate-500 font-bold hover:bg-slate-50 gap-2"
+              >
+                <FilterX className="w-4 h-4" /> Reset Filters
+              </Button>
             </div>
           </CardContent>
         </Card>
 
         {/* Table */}
-        <Card className="border-border/50 shadow-sm overflow-hidden">
+        <Card className="border-none shadow-sm rounded-2xl bg-white overflow-hidden ring-1 ring-slate-100">
           <div className="overflow-x-auto">
             <Table>
-              <TableHeader className="bg-muted/30">
-                <TableRow>
-                  <TableHead className="min-w-[180px]">Name</TableHead>
-                  <TableHead className="min-w-[150px]">Email</TableHead>
-                  <TableHead>Total Students</TableHead>
-                  <TableHead>Active Students</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Joined Date</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+              <TableHeader>
+                <TableRow className="bg-slate-50/50 border-b border-slate-100 hover:bg-slate-50/50">
+                  <TableHead className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Educator Information</TableHead>
+                  <TableHead className="py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Contact Details</TableHead>
+                  <TableHead className="py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Assigned Units</TableHead>
+                  <TableHead className="py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Status</TableHead>
+                  <TableHead className="py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Joined Date</TableHead>
+                  <TableHead className="px-8 py-5 text-right text-[10px] font-black uppercase tracking-widest text-slate-400">Quick Controls</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredTutors.length > 0 ? (
                   filteredTutors.map((tutor) => (
-                    <TableRow key={tutor.id} className="hover:bg-muted/20">
-                      <TableCell className="font-medium text-foreground">
-                        {tutor.name}
+                    <TableRow key={tutor.id} className="hover:bg-slate-50/30 transition-colors border-b-slate-50/50">
+                      <TableCell className="px-8 py-6">
+                         <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-xl bg-slate-900 overflow-hidden shrink-0 border-2 border-white shadow-sm ring-1 ring-slate-100">
+                               <img src={tutor.avatar} alt={tutor.name} className="w-full h-full object-cover" />
+                            </div>
+                            <div className="space-y-0.5">
+                               <p className="text-sm font-bold text-slate-900 tracking-tight">{tutor.name}</p>
+                               <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Educator ID: {tutor.id}</p>
+                            </div>
+                         </div>
                       </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {tutor.email}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center">
-                          <span className="font-semibold">{tutor.totalStudentsCount}</span>
-                          <WorkloadBadge studentCount={tutor.totalStudentsCount} />
+                      <TableCell className="py-6">
+                        <div className="space-y-1">
+                           <div className="flex items-center gap-2 text-xs font-bold text-slate-600 italic">
+                             <Phone className="w-3 h-3 text-slate-300" /> {tutor.phone}
+                           </div>
+                           <p className="text-[10px] font-medium text-slate-400">{tutor.email}</p>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1.5 font-medium">
-                          <Users className="w-3.5 h-3.5 text-emerald-600" />
-                          {tutor.activeStudentsCount}
+                      <TableCell className="py-6">
+                        <div className="space-y-1.5">
+                           <div className="flex items-center gap-2">
+                             <BookOpen className="w-3 h-3 text-primary/50" />
+                             <span className="text-[10px] font-bold text-slate-600">{tutor.courses.length} Courses</span>
+                           </div>
+                           <div className="flex items-center gap-2">
+                             <Layers className="w-3 h-3 text-slate-300" />
+                             <span className="text-[10px] font-bold text-slate-400 italic">
+                                {tutor.courses.reduce((acc, curr) => acc + curr.batches.length, 0)} Batches
+                             </span>
+                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <StatusBadge status={tutor.status} />
+                      <TableCell className="py-6">
+                        {getStatusBadge(tutor.status)}
                       </TableCell>
-                      <TableCell className="text-muted-foreground whitespace-nowrap">
+                      <TableCell className="py-6 font-bold text-slate-500 text-xs">
                         {tutor.joinedDate}
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="px-8 py-6 text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <MoreVertical className="h-4 w-4 text-muted-foreground" />
+                            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-slate-50">
+                              <MoreVertical className="w-4 h-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-[180px]">
-                            <DropdownMenuItem
-                              className="cursor-pointer"
-                              onClick={() => navigate(`/admin/tutors/${tutor.id}`)}
+                          <DropdownMenuContent align="end" className="w-56 rounded-2xl border-none shadow-2xl p-2">
+                            <DropdownMenuLabel className="text-[10px] font-black uppercase text-slate-400 px-3 py-2">Profile Oversight</DropdownMenuLabel>
+                             <DropdownMenuItem 
+                              onClick={() => navigate(`/admin/tutor/${tutor.id}`)} 
+                              className="rounded-xl h-11 px-3 font-bold text-slate-600 gap-3"
                             >
-                              <Eye className="w-4 h-4 mr-2" />
-                              View Details
+                              <Eye className="w-4 h-4" /> View Full Profile
                             </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="cursor-pointer"
-                              onClick={() => setEditModalTutor(tutor)}
+                            <DropdownMenuItem 
+                              onClick={() => navigate(`/admin/tutor/edit/${tutor.id}`)} 
+                              className="rounded-xl h-11 px-3 font-bold text-slate-600 gap-3"
                             >
-                              <Edit2 className="w-4 h-4 mr-2" />
-                              Edit Tutor
+                              <Edit className="w-4 h-4" /> Modify Config
                             </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="cursor-pointer"
-                              onClick={() => setAssignModalTutor(tutor)}
+                            <DropdownMenuSeparator className="bg-slate-50 mx-1" />
+                            <DropdownMenuItem 
+                              onClick={() => handleToggleBlock(tutor.id, tutor.name, tutor.status === "Inactive")}
+                              className="rounded-xl h-11 px-3 font-bold text-slate-600 gap-3"
                             >
-                              <UserPlus className="w-4 h-4 mr-2" />
-                              Assign Students
+                              <Ban className="w-4 h-4" /> {tutor.status === "Inactive" ? "Unblock Account" : "Block Access"}
                             </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="cursor-pointer text-orange-600 focus:text-orange-600 focus:bg-orange-50 dark:focus:bg-orange-950/50"
-                              onClick={() => handleToggleStatus(tutor.id, tutor.status)}
+                            <DropdownMenuItem 
+                              onClick={() => handleDelete(tutor.id, tutor.name)}
+                              className="rounded-xl h-11 px-3 font-bold text-rose-500 hover:text-rose-600 gap-3"
                             >
-                              <Power className="w-4 h-4 mr-2" />
-                              {tutor.status === "Active" ? "Deactivate Account" : "Activate Account"}
+                              <Trash2 className="w-4 h-4" /> Purge Explorer
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -329,8 +353,14 @@ const AdminTutors = () => {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
-                      No tutors found matching your filters.
+                    <TableCell colSpan={6} className="h-60 text-center">
+                      <div className="flex flex-col items-center justify-center space-y-3">
+                         <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center">
+                            <Users className="w-8 h-8 text-slate-200" />
+                         </div>
+                         <p className="text-sm font-bold text-slate-500 italic">No tutors found in this view</p>
+                         <Button variant="outline" onClick={resetFilters} className="rounded-xl font-bold h-10 border-slate-200">Reset Filters</Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 )}
@@ -339,106 +369,32 @@ const AdminTutors = () => {
           </div>
         </Card>
 
-        {/* Add Tutor Modal */}
-        <AddTutorModal
-          isOpen={isAddModalOpen}
-          onClose={() => setIsAddModalOpen(false)}
-          onSave={handleSaveNewTutor}
-        />
+        {/* Pagination */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-6 rounded-2xl ring-1 ring-slate-100 shadow-sm">
+           <div className="flex items-center gap-3">
+              <p className="text-[10px] font-black uppercase text-slate-400">Rows per page</p>
+              <Select value={rowsPerPage} onValueChange={setRowsPerPage}>
+                <SelectTrigger className="w-20 h-9 bg-slate-50 border-none rounded-lg text-xs font-bold ring-0">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-none shadow-xl min-w-[5rem]">
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="25">25</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                </SelectContent>
+              </Select>
+           </div>
 
-        {/* Edit Tutor Modal */}
-        <EditTutorModal
-          tutor={editModalTutor}
-          isOpen={!!editModalTutor}
-          onClose={() => setEditModalTutor(null)}
-          onSave={handleSaveEditTutor}
-        />
-
-        {/* Assign Students Modal */}
-        <Dialog open={!!assignModalTutor} onOpenChange={(open) => {
-          if (!open) {
-            setAssignModalTutor(null);
-            setSelectedStudentIds([]);
-          }
-        }}>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Assign Students</DialogTitle>
-            </DialogHeader>
-            <div className="py-4 space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Assign new students to <span className="font-medium text-foreground">{assignModalTutor?.name}</span>.
-              </p>
-
-              <div className="space-y-3 border rounded-md p-3 bg-muted/10">
-                <div className="flex justify-between items-center pb-2 border-b">
-                  <span className="text-xs font-semibold uppercase text-muted-foreground">
-                    Available Unassigned Students
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 text-xs"
-                    onClick={() => {
-                      const allUnassigned = students.filter(s => s.assignedTutorId === null).map(s => s.id);
-                      if (selectedStudentIds.length === allUnassigned.length) {
-                        setSelectedStudentIds([]);
-                      } else {
-                        setSelectedStudentIds(allUnassigned);
-                      }
-                    }}
-                  >
-                    {selectedStudentIds.length === students.filter(s => s.assignedTutorId === null).length && students.filter(s => s.assignedTutorId === null).length > 0
-                      ? "Deselect All"
-                      : "Select All"}
-                  </Button>
-                </div>
-
-                <div className="max-h-[200px] overflow-y-auto space-y-2 pr-2">
-                  {students.filter(s => s.assignedTutorId === null).length === 0 ? (
-                    <div className="text-sm text-center text-muted-foreground py-4">
-                      No unassigned students available
-                    </div>
-                  ) : (
-                    students.filter(s => s.assignedTutorId === null).map(unassignedStudent => (
-                      <div key={unassignedStudent.id} className="flex items-center space-x-2 p-2 hover:bg-muted/50 rounded-md transition-colors">
-                        <Checkbox
-                          id={`student-${unassignedStudent.id}`}
-                          checked={selectedStudentIds.includes(unassignedStudent.id)}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              setSelectedStudentIds([...selectedStudentIds, unassignedStudent.id]);
-                            } else {
-                              setSelectedStudentIds(selectedStudentIds.filter(id => id !== unassignedStudent.id));
-                            }
-                          }}
-                        />
-                        <label
-                          htmlFor={`student-${unassignedStudent.id}`}
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
-                        >
-                          {unassignedStudent.name} <span className="text-muted-foreground font-normal ml-1">({unassignedStudent.batch})</span>
-                        </label>
-                      </div>
-                    ))
-                  )}
-                </div>
+           <div className="flex items-center gap-2">
+              <Button variant="outline" className="h-9 rounded-xl font-bold text-xs px-4" disabled>Previous</Button>
+              <div className="flex items-center gap-1 mx-2">
+                 {[1].map(p => (
+                   <Button key={p} variant={currentPage === p ? "default" : "ghost"} className="w-9 h-9 rounded-xl font-bold text-xs p-0">{p}</Button>
+                 ))}
               </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => {
-                setAssignModalTutor(null);
-                setSelectedStudentIds([]);
-              }}>Cancel</Button>
-              <Button
-                onClick={handleAssignStudentSave}
-                disabled={selectedStudentIds.length === 0}
-              >
-                {selectedStudentIds.length > 0 ? `Assign ${selectedStudentIds.length} Student(s)` : 'Assign Students'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+              <Button variant="outline" className="h-9 rounded-xl font-bold text-xs px-4" disabled>Next</Button>
+           </div>
+        </div>
 
       </div>
     </DashboardLayout>
