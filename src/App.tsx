@@ -93,6 +93,8 @@ import TutorManagement from "./pages/mentor/TutorManagement";
 import MentorTutorDetails from "./pages/mentor/TutorDetails";
 import MentorTutorSessions from "./pages/mentor/TutorSessions";
 import MentorLiveSessions from "./pages/mentor/LiveSessions";
+import MentorCreateSession from "./pages/mentor/CreateSession";
+import MentorSessionDetails from "./pages/mentor/SessionDetails";
 import MentorBatchManagement from "./pages/mentor/BatchManagement";
 import MentorStudents from "./pages/mentor/Students";
 import MentorStudentDetails from "./pages/mentor/StudentDetails";
@@ -287,7 +289,10 @@ const App = () => (
           <Route path="/mentor/feedback" element={<MentorFeedback />} />
           <Route path="/mentor/my-batches/tutors" element={<TutorManagement />} />
           <Route path="/mentor/my-batches/tutors/:id" element={<MentorTutorDetails />} />
-          <Route path="/mentor/my-batches/tutors/:id/sessions" element={<MentorTutorSessions />} />
+          <Route path="/mentor/my-batches/live-sessions" element={<MentorLiveSessions />} />
+          <Route path="/mentor/my-batches/live-sessions/schedule" element={<MentorCreateSession mode="create" />} />
+          <Route path="/mentor/my-batches/live-sessions/:id" element={<MentorSessionDetails />} />
+          <Route path="/mentor/my-batches/live-sessions/edit/:id" element={<MentorCreateSession mode="edit" />} />
           <Route path="/mentor/live-sessions" element={<MentorLiveSessions />} />
           <Route path="/mentor/batches" element={<MentorBatchManagement />} />
           <Route path="/mentor/chat" element={<MentorChat />} />
