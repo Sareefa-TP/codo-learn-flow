@@ -63,6 +63,7 @@ import TutorWallet from "@/pages/tutor/Wallet";
 import TutorProfile from "./pages/tutor/Profile";
 import TutorFeedback from "./pages/tutor/Feedback";
 import TutorTeachingFlow from "./pages/tutor/TeachingFlow";
+import TutorSupportTicket from "./pages/tutor/SupportTicket";
 
 import MentorSupportTicket from "@/pages/mentor/SupportTicket";
 import MentorMeet from "@/pages/mentor/Meet";
@@ -70,7 +71,6 @@ import MentorAssignments from "@/pages/mentor/Assignments";
 import MentorAnnouncements from "@/pages/mentor/Announcements";
 import MentorMaterials from "@/pages/mentor/Materials";
 import MentorWallet from "@/pages/mentor/Wallet";
-import TutorSupportTicket from "./pages/tutor/SupportTicket";
 
 // Mentor Pages
 import MentorDashboard from "./pages/mentor/Dashboard";
@@ -93,11 +93,11 @@ import TutorManagement from "./pages/mentor/TutorManagement";
 import MentorTutorDetails from "./pages/mentor/TutorDetails";
 import MentorTutorSessions from "./pages/mentor/TutorSessions";
 import MentorLiveSessions from "./pages/mentor/LiveSessions";
-import MentorCreateSession from "./pages/mentor/CreateSession";
-import MentorSessionDetails from "./pages/mentor/SessionDetails";
+import MentorCreateSession from "./pages/mentor/CreateSession.tsx";
+import MentorSessionDetails from "./pages/mentor/SessionDetails.tsx";
 import MentorBatchManagement from "./pages/mentor/BatchManagement";
 import MentorStudents from "./pages/mentor/Students";
-import MentorStudentDetails from "./pages/mentor/StudentDetails";
+import MentorStudentDetails from "./pages/mentor/StudentDetails.tsx";
 import MentorChat from "./pages/mentor/Chat";
 
 // Admin Pages
@@ -106,15 +106,20 @@ import StudentList from "./pages/admin/students/StudentList";
 import StudentDetails from "./pages/admin/students/StudentDetails";
 import AddEditStudent from "./pages/admin/students/AddEditStudent";
 import AdminInterns from "./pages/admin/Interns";
+import AdminInternDetails from "./pages/admin/InternDetails";
+import AddEditIntern from "./pages/admin/AddEditIntern";
 import AdminTutorDetails from "./pages/admin/TutorDetails";
-import AddEditTutor from "./pages/admin/AddEditTutor";
+import AddEditTutor from "./pages/admin/AddEditTutor.tsx";
 import AdminTutors from "./pages/admin/Tutors";
 import AdminMentors from "./pages/admin/Mentors";
-import AddEditMentor from "./pages/admin/AddEditMentor";
+import AddEditMentor from "./pages/admin/AddEditMentor.tsx";
 import AdminMentorDetails from "./pages/admin/MentorDetails";
-import AdminCourses from "./pages/admin/Courses";
-import CoursePage from "./pages/admin/CoursePage";
-import AdminBatchManagement from "./pages/admin/BatchManagement";
+import CoursesList from "./pages/admin/courses/CourseList.tsx";
+import CreateCourse from "./pages/admin/courses/AddEditCourse.tsx";
+import { courses } from "./data/courseData.ts";
+import BatchList from "./pages/admin/batch/BatchList";
+import BatchForm from "./pages/admin/batch/BatchForm";
+import BatchDetails from "./pages/admin/batch/BatchDetails";
 import AdminAttendance from "./pages/admin/Attendance";
 import AdminAssessments from "./pages/admin/Assessments";
 import AdminFinance from "./pages/admin/FinanceOverview";
@@ -125,7 +130,10 @@ import AdminProfile from "./pages/admin/Profile";
 import AdminMeetList from "./pages/admin/meet/MeetList";
 import AdminCreateMeet from "./pages/admin/meet/CreateMeet";
 import AdminMeetDetails from "./pages/admin/meet/MeetDetails";
-import AdminScheduleMeet from "./pages/admin/meet/ScheduleMeet";
+import AdminScheduleMeet from "./pages/admin/meet/ScheduleMeet.tsx";
+import AssignmentList from "./pages/admin/assignment/AssignmentList";
+import AssignmentForm from "./pages/admin/assignment/AssignmentForm";
+import AssignmentDetails from "./pages/admin/assignment/AssignmentDetails";
 
 // Finance Pages
 import FinanceDashboard from "./pages/finance/Dashboard";
@@ -255,7 +263,9 @@ const App = () => (
           <Route path="/tutor/batches" element={<TutorBatches />} />
           <Route path="/tutor/batches/:batchId/teaching" element={<TutorTeachingFlow />} />
           <Route path="/tutor/batches/:batchId/teaching/:moduleSlug" element={<TutorTeachingFlow />} />
-          <Route path="/tutor/batches/:batchId/teaching/:moduleSlug/:sessionSlug" element={<TutorTeachingFlow />} />
+          <Route path="/tutor/batches/:batchId/teaching/:moduleSlug/:sessionSlug" element={<TutorTeachingFlow role="tutor" />} />
+          <Route path="/tutor/live-sessions/schedule" element={<MentorCreateSession mode="create" role="tutor" />} />
+          <Route path="/tutor/live-sessions/edit/:id" element={<MentorCreateSession mode="edit" role="tutor" />} />
           <Route path="/tutor/batches/:batchId/students" element={<TutorBatchStudents />} />
           <Route path="/tutor/students" element={<TutorStudents />} />
           <Route path="/tutor/students/:studentId" element={<TutorStudentDashboard />} />
@@ -295,6 +305,10 @@ const App = () => (
           <Route path="/mentor/my-batches/live-sessions/edit/:id" element={<MentorCreateSession mode="edit" />} />
           <Route path="/mentor/live-sessions" element={<MentorLiveSessions />} />
           <Route path="/mentor/batches" element={<MentorBatchManagement />} />
+          <Route path="/mentor/my-batches/batches" element={<MentorBatchManagement />} />
+          <Route path="/mentor/my-batches/batches/:batchId/monitor" element={<TutorTeachingFlow role="mentor" />} />
+          <Route path="/mentor/my-batches/batches/:batchId/monitor/:moduleSlug" element={<TutorTeachingFlow role="mentor" />} />
+          <Route path="/mentor/my-batches/batches/:batchId/monitor/:moduleSlug/:sessionSlug" element={<TutorTeachingFlow role="mentor" />} />
           <Route path="/mentor/chat" element={<MentorChat />} />
           <Route path="/mentor/meet" element={<MentorMeet />} />
           <Route path="/mentor/assignments" element={<MentorAssignments />} />
@@ -313,19 +327,33 @@ const App = () => (
           <Route path="/admin/students/add" element={<AddEditStudent mode="add" />} />
           <Route path="/admin/students/edit/:id" element={<AddEditStudent mode="edit" />} />
           <Route path="/admin/interns" element={<AdminInterns />} />
+          <Route path="/admin/interns/create" element={<AddEditIntern />} />
+          <Route path="/admin/interns/:id" element={<AdminInternDetails />} />
           <Route path="/admin/tutor" element={<AdminTutors />} />
           <Route path="/admin/tutor/:id" element={<AdminTutorDetails />} />
           <Route path="/admin/tutor/add" element={<AddEditTutor mode="add" />} />
           <Route path="/admin/tutor/edit/:id" element={<AddEditTutor mode="edit" />} />
-          <Route path="/admin/mentor" element={<AdminMentors />} />
-          <Route path="/admin/mentor/add" element={<AddEditMentor mode="add" />} />
-          <Route path="/admin/mentor/edit/:id" element={<AddEditMentor mode="edit" />} />
-          <Route path="/admin/mentor/:id" element={<AdminMentorDetails />} />
-          <Route path="/admin/courses" element={<CoursePage />} />
-          <Route path="/admin/batch" element={<AdminBatchManagement />} />
+          <Route path="/admin/mentors" element={<AdminMentors />} />
+          <Route path="/admin/mentors/add" element={<AddEditMentor mode="add" />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/courses" element={<TutorBatches role="admin" batches={courses} />} />
+          <Route path="/admin/courses/create" element={<CreateCourse mode="create" />} />
+          <Route path="/admin/courses/:batchId/teaching" element={<TutorTeachingFlow role="admin" />} />
+          <Route path="/admin/courses/:batchId/teaching/:moduleSlug" element={<TutorTeachingFlow role="admin" />} />
+          <Route path="/admin/courses/:batchId/teaching/:moduleSlug/:sessionSlug" element={<TutorTeachingFlow role="admin" />} />
+          <Route path="/admin/courses/edit/:id" element={<CreateCourse mode="edit" />} />
+          {/* Admin Batch Routes */}
+          <Route path="/admin/batch" element={<BatchList />} />
+          <Route path="/admin/batch/create" element={<BatchForm mode="create" />} />
+          <Route path="/admin/batch/:id" element={<BatchDetails />} />
+          <Route path="/admin/batch/:id/edit" element={<BatchForm mode="edit" />} />
+          <Route path="/admin/assignments" element={<AssignmentList />} />
+          <Route path="/admin/assignments/create" element={<AssignmentForm mode="create" />} />
+          <Route path="/admin/assignments/:id" element={<AssignmentDetails />} />
+          <Route path="/admin/assignments/:id/edit" element={<AssignmentForm mode="edit" />} />
           <Route path="/admin/attendance" element={<AdminAttendance />} />
           <Route path="/admin/assessments" element={<AdminAssessments />} />
-          <Route path="/admin/assignments" element={<AdminAssessments />} />
           <Route path="/admin/finance" element={<AdminFinance />} />
           <Route path="/admin/finance/batch/:batchId" element={<AdminFinanceBatchDetails />} />
           <Route path="/admin/reports" element={<AdminReports />} />

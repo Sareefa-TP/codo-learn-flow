@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { scheduleLiveClassForSession } from "@/data/courseData";
+import { SHARED_BATCHES } from "@/data/batchData";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -92,6 +94,13 @@ const participantOptions = {
 
 const AdminScheduleMeet = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const sessionContext = location.state as { 
+    courseId: string; 
+    moduleId: string; 
+    sessionId: string; 
+    sessionName: string; 
+  } | null;
   
   const [participantType, setParticipantType] = useState<"batch" | "custom">("batch");
   const [formData, setFormData] = useState({
@@ -123,6 +132,19 @@ const AdminScheduleMeet = () => {
     setSelectedParticipants([]);
     setSearchTerm("");
   };
+
+  // Prefill from session context
+  useEffect(() => {
+    if (sessionContext) {
+      setFormData(prev => ({
+        ...prev,
+        title: `Live Class: ${sessionContext.sessionName}`,
+        courseId: "fullstack", // Mock logic - normally derived from courseId
+        batchId: sessionContext.courseId // In our reused UI, batchId is used as key
+      }));
+      setParticipantType("batch");
+    }
+  }, [sessionContext]);
 
   // Auto-load students from batch (Batch Mode)
   useEffect(() => {
@@ -174,8 +196,25 @@ const AdminScheduleMeet = () => {
       return;
     }
 
-    toast.success("Meet session scheduled successfully!");
-    navigate("/admin/meet");
+    if (sessionContext) {
+      scheduleLiveClassForSession(
+        sessionContext.courseId,
+        sessionContext.moduleId,
+        sessionContext.sessionId,
+        {
+          id: `MT-${Date.now()}`,
+          scheduledAt: `${formData.date}T${formData.startTime}:00Z`,
+          duration: `${formData.duration} min`,
+          meetingLink: formData.link,
+          status: "Scheduled"
+        }
+      );
+      toast.success("Linked to curriculum session!");
+    } else {
+      toast.success("Meet session scheduled successfully!");
+    }
+
+    navigate(sessionContext ? `/admin/courses/${sessionContext.courseId}/teaching` : "/admin/meet");
   };
 
   const filteredParticipants = (category: keyof typeof participantOptions) => {

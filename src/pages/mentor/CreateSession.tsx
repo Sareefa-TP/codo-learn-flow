@@ -42,11 +42,14 @@ import {
 
 interface CreateSessionProps {
   mode: "create" | "edit";
+  role?: "tutor" | "mentor";
 }
 
-const MentorCreateSession = ({ mode }: CreateSessionProps) => {
+const MentorCreateSession = ({ mode, role = "mentor" }: CreateSessionProps) => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const isMentor = role === "mentor";
+  const sessionListPath = isMentor ? "/mentor/my-batches/live-sessions" : "/tutor/live-sessions";
   
   const [formData, setFormData] = useState<Partial<LiveSession>>({
     title: "",
@@ -74,7 +77,7 @@ const MentorCreateSession = ({ mode }: CreateSessionProps) => {
         setFormData(session);
       } else {
         toast.error("Session not found");
-        navigate("/mentor/my-batches/live-sessions");
+        navigate(sessionListPath);
       }
     }
   }, [mode, id, navigate]);
@@ -101,7 +104,7 @@ const MentorCreateSession = ({ mode }: CreateSessionProps) => {
     }
 
     toast.success(mode === "create" ? "Session scheduled successfully!" : "Session updated successfully!");
-    navigate("/mentor/my-batches/live-sessions");
+    navigate(sessionListPath);
   };
 
   const currentBatches = formData.course ? BATCHES[formData.course as string] || [] : [];
@@ -119,7 +122,7 @@ const MentorCreateSession = ({ mode }: CreateSessionProps) => {
               variant="ghost" 
               size="icon" 
               className="rounded-full hover:bg-muted"
-              onClick={() => navigate("/mentor/my-batches/live-sessions")}
+              onClick={() => navigate(sessionListPath)}
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
@@ -133,7 +136,7 @@ const MentorCreateSession = ({ mode }: CreateSessionProps) => {
             </div>
           </div>
           <div className="flex gap-3">
-            <Button variant="outline" className="rounded-xl px-6" onClick={() => navigate("/mentor/my-batches/live-sessions")}>
+            <Button variant="outline" className="rounded-xl px-6" onClick={() => navigate(sessionListPath)}>
               Cancel
             </Button>
             <Button className="rounded-xl px-6 gap-2 shadow-lg shadow-primary/20" onClick={handleSave}>

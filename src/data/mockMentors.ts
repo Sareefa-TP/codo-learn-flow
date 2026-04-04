@@ -18,7 +18,7 @@ export interface MentorStudent {
   progressStatus: "Good" | "Average" | "Needs Attention";
 }
 
-export const mockMentors = [
+export let mockMentors = [
   { 
     id: "M1", 
     name: "Vikram Singh", 
@@ -138,3 +138,11 @@ export const mockInterns = Array.from({ length: 20 }).map((_, i) => {
         assignedMentorId
     };
 });
+
+export const updateMentor = (updatedMentor: any) => {
+  mockMentors = mockMentors.map(m => m.id === updatedMentor.id ? { ...m, ...updatedMentor } : m);
+};
+
+export const addMentor = (newMentor: any) => {
+  mockMentors = [newMentor, ...mockMentors];
+};

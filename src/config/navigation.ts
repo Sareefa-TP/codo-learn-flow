@@ -140,6 +140,7 @@ export const mentorNavigation: RoleNavigation = {
       url: "#",
       icon: BookOpen,
       children: [
+        { title: "Batches", url: "/mentor/my-batches/batches", icon: Layers },
         { title: "Tutors", url: "/mentor/my-batches/tutors", icon: GraduationCap },
         { title: "Students", url: "/mentor/my-batches/students", icon: GraduationCap },
         { title: "Live Sessions", url: "/mentor/my-batches/live-sessions", icon: Video },
@@ -175,8 +176,8 @@ export const adminNavigation: RoleNavigation = {
     { title: "Students", url: "/admin/students", icon: GraduationCap },
     { title: "Interns", url: "/admin/interns", icon: Briefcase },
     { title: "Tutors", url: "/admin/tutor", icon: BookOpen },
-    { title: "Mentors", url: "/admin/mentor", icon: Users },
-    { title: "Course", url: "/admin/courses", icon: Package },
+    { title: "Mentors", url: "/admin/mentors", icon: Users },
+    { title: "Courses", url: "/admin/courses", icon: Package },
     { title: "Batch", url: "/admin/batch", icon: Layers },
     { title: "Meet", url: "/admin/meet", icon: Video },
     { title: "Assignments", url: "/admin/assignments", icon: ClipboardList },

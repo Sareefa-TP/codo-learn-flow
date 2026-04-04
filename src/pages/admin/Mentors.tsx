@@ -55,13 +55,13 @@ const AdminMentors = () => {
   ];
 
   // Unique courses for filter
-  const courses = Array.from(new Set(mockMentors.flatMap(m => m.assignedCourses.map(c => c.courseName))));
+  const courses = Array.from(new Set(mockMentors.flatMap(m => m.assignedCourses.map(c => c.name))));
 
   // Filter Logic
   const filteredMentors = mockMentors.filter(mentor => {
     const matchesSearch = mentor.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                          mentor.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCourse = filterCourse === "All" || mentor.assignedCourses.some(c => c.courseName === filterCourse);
+    const matchesCourse = filterCourse === "All" || mentor.assignedCourses.some(c => c.name === filterCourse);
     const matchesStatus = filterStatus === "All" || mentor.status === filterStatus;
     
     return matchesSearch && matchesCourse && matchesStatus;
@@ -78,7 +78,7 @@ const AdminMentors = () => {
           </div>
           <Button 
             className="bg-primary hover:bg-primary/90 text-white rounded-xl px-6"
-            onClick={() => navigate("/admin/mentor/add")}
+            onClick={() => navigate("/admin/mentors/add")}
           >
             <UserPlus className="w-4 h-4 mr-2" />
             Add Mentor
@@ -168,7 +168,7 @@ const AdminMentors = () => {
                         <div className="flex flex-wrap gap-1">
                           {mentor.assignedCourses.map((c, i) => (
                             <Badge key={i} variant="secondary" className="bg-blue-50 text-blue-700 border-none rounded-lg text-[10px] font-medium">
-                              {c.courseName} ({c.batches.join(", ")})
+                              {c.name} ({c.batches.join(", ")})
                             </Badge>
                           ))}
                         </div>
@@ -192,13 +192,13 @@ const AdminMentors = () => {
                           <DropdownMenuContent align="end" className="w-[180px] rounded-xl border-slate-200 shadow-lg">
                             <DropdownMenuItem 
                               className="cursor-pointer gap-2 py-2.5 focus:bg-slate-50"
-                              onClick={() => navigate(`/admin/mentor/${mentor.id}`)}
+                              onClick={() => navigate(`/admin/mentors/${mentor.id}`)}
                             >
                               <Eye className="w-4 h-4 text-slate-500" /> View Details
                             </DropdownMenuItem>
                             <DropdownMenuItem 
                               className="cursor-pointer gap-2 py-2.5 focus:bg-slate-50"
-                              onClick={() => navigate(`/admin/mentor/edit/${mentor.id}`)}
+                              onClick={() => navigate(`/admin/mentors/edit/${mentor.id}`)}
                             >
                               <Edit2 className="w-4 h-4 text-slate-500" /> Edit Mentor
                             </DropdownMenuItem>

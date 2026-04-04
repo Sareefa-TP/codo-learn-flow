@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { ArrowLeft, Save, Plus, X, BookOpen, User, Phone, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { mockMentors } from "@/data/mockMentors";
+import { mockMentors, updateMentor, addMentor } from "@/data/mockMentors";
 import { Badge } from "@/components/ui/badge";
 
 interface AddEditMentorProps {
@@ -31,7 +31,7 @@ const AddEditMentor = ({ mode }: AddEditMentorProps) => {
     email: "",
     phone: "",
     status: "Active",
-    assignedCourses: [] as { courseName: string; batches: string[] }[],
+    assignedCourses: [] as { name: string; batches: string[] }[],
   });
 
   // Mock Courses and Batches for assignment
@@ -60,7 +60,7 @@ const AddEditMentor = ({ mode }: AddEditMentorProps) => {
   const handleAddCourse = () => {
     setFormData({
       ...formData,
-      assignedCourses: [...formData.assignedCourses, { courseName: "", batches: [] }],
+      assignedCourses: [...formData.assignedCourses, { name: "", batches: [] }],
     });
   };
 
@@ -70,9 +70,9 @@ const AddEditMentor = ({ mode }: AddEditMentorProps) => {
     setFormData({ ...formData, assignedCourses: updated });
   };
 
-  const handleCourseChange = (index: number, courseName: string) => {
+  const handleCourseChange = (index: number, name: string) => {
     const updated = [...formData.assignedCourses];
-    updated[index] = { courseName, batches: [] };
+    updated[index] = { name, batches: [] };
     setFormData({ ...formData, assignedCourses: updated });
   };
 
@@ -89,12 +89,24 @@ const AddEditMentor = ({ mode }: AddEditMentorProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate API call
-    toast({
-      title: mode === "add" ? "Mentor Added" : "Mentor Updated",
-      description: `${formData.name} has been successfully ${mode === "add" ? "added" : "updated"}.`,
-    });
-    navigate("/admin/mentor");
+    if (mode === "edit" && id) {
+      updateMentor({
+        id,
+        ...formData
+      });
+    } else if (mode === "add") {
+      addMentor({
+        id: `M${mockMentors.length + 1}`,
+        ...formData,
+        joinedDate: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+        assignedInternIds: [],
+        sessions: [],
+        performance: { totalSessions: 0, rating: 0 },
+        studentProgress: []
+      });
+    }
+
+    navigate("/admin/mentors");
   };
 
   return (
@@ -104,7 +116,7 @@ const AddEditMentor = ({ mode }: AddEditMentorProps) => {
         <div className="flex flex-col gap-2">
           <Button
             variant="ghost"
-            onClick={() => navigate("/admin/mentor")}
+            onClick={() => navigate("/admin/mentors")}
             className="w-fit -ml-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -231,7 +243,7 @@ const AddEditMentor = ({ mode }: AddEditMentorProps) => {
                       <div className="space-y-2">
                         <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Select Course</Label>
                         <Select
-                          value={assignment.courseName}
+                          value={assignment.name}
                           onValueChange={(val) => handleCourseChange(courseIdx, val)}
                         >
                           <SelectTrigger className="h-10 bg-white border-slate-200 rounded-lg">
@@ -245,11 +257,11 @@ const AddEditMentor = ({ mode }: AddEditMentorProps) => {
                         </Select>
                       </div>
 
-                      {assignment.courseName && (
+                      {assignment.name && (
                         <div className="space-y-2">
                           <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Select Batches</Label>
                           <div className="flex flex-wrap gap-2 pt-1">
-                            {availableBatches[assignment.courseName]?.map((batch) => (
+                            {availableBatches[assignment.name]?.map((batch) => (
                               <button
                                 key={batch}
                                 type="button"
@@ -278,7 +290,7 @@ const AddEditMentor = ({ mode }: AddEditMentorProps) => {
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate("/admin/mentor")}
+              onClick={() => navigate("/admin/mentors")}
               className="h-11 px-8 rounded-xl border-slate-200"
             >
               Cancel
