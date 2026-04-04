@@ -1,16 +1,8 @@
-import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -29,8 +21,7 @@ import {
   Award,
   TrendingUp,
   Clock,
-  ExternalLink,
-  Edit2
+  Briefcase
 } from "lucide-react";
 import { mockMentors } from "@/data/mockMentors";
 
@@ -42,9 +33,16 @@ const AdminMentorDetails = () => {
   if (!mentor) {
     return (
       <DashboardLayout>
-        <div className="p-6 text-center">
-          <h2 className="text-xl font-semibold">Mentor not found</h2>
-          <Button onClick={() => navigate("/admin/mentor")} className="mt-4">
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+          <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
+            <Users className="w-8 h-8" />
+          </div>
+          <div className="text-center">
+            <h2 className="text-xl font-bold">Mentor Not Found</h2>
+            <p className="text-muted-foreground">The mentor you are looking for does not exist or has been removed.</p>
+          </div>
+          <Button onClick={() => navigate("/admin/mentors")} variant="outline" className="rounded-xl gap-2">
+            <ArrowLeft className="w-4 h-4" />
             Back to Mentors
           </Button>
         </div>
@@ -52,320 +50,184 @@ const AdminMentorDetails = () => {
     );
   }
 
+  // Calculate stats
+  const totalBatches = mentor.assignedCourses.reduce((acc, curr) => acc + curr.batches.length, 0);
+  const totalStudents = mentor.studentProgress.length;
+  const sessionCount = mentor.sessions.length;
+  const feedbackRating = mentor.performance.rating;
+
   return (
     <DashboardLayout>
-      <div className="p-6 space-y-6 bg-slate-50/50 min-h-screen">
-        {/* Header */}
-        <div className="flex flex-col gap-4">
-          <Button
-            variant="ghost"
-            onClick={() => navigate("/admin/mentor")}
-            className="w-fit -ml-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Mentors
-          </Button>
-          
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary text-2xl font-bold border border-primary/20 shadow-sm">
-                {mentor.name.charAt(0)}
+      <div className="animate-fade-in space-y-6 max-w-[1200px] mx-auto pb-10 px-4 md:px-6">
+        
+        {/* SECTION A: HEADER */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="rounded-full h-10 w-10 shrink-0 border-border/50 bg-white"
+              onClick={() => navigate("/admin/mentors")}
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <div>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-black tracking-tight text-slate-900">{mentor.name}</h1>
+                <Badge className={
+                  mentor.status === "Active" 
+                    ? "bg-emerald-50 text-emerald-700 border-emerald-100" 
+                    : "bg-slate-100 text-slate-600 border-slate-200"
+                }>
+                  {mentor.status}
+                </Badge>
               </div>
-              <div>
-                <h1 className="text-2xl font-bold text-slate-900">{mentor.name}</h1>
-                <div className="flex flex-wrap gap-3 mt-1">
-                  <span className="flex items-center text-sm text-slate-500"><Mail className="w-3.5 h-3.5 mr-1.5" /> {mentor.email}</span>
-                  <span className="flex items-center text-sm text-slate-500"><Phone className="w-3.5 h-3.5 mr-1.5" /> {mentor.phone}</span>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Badge className={mentor.status === "Active" ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-emerald-100" : "bg-slate-100 text-slate-600"}>
-                {mentor.status}
-              </Badge>
-              <Button 
-                variant="outline" 
-                className="rounded-xl border-slate-200"
-                onClick={() => navigate(`/admin/mentor/edit/${mentor.id}`)}
-              >
-                <Edit2 className="w-4 h-4 mr-2" />
-                Edit Profile
-              </Button>
+              <p className="text-slate-500 text-sm font-medium">Academic Mentor Profile</p>
             </div>
           </div>
         </div>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="border-none shadow-sm rounded-2xl bg-white">
-            <CardContent className="p-6 flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-blue-50 text-blue-600">
-                <BookOpen className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-slate-900">{mentor.assignedCourses.length}</p>
-                <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Courses</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="border-none shadow-sm rounded-2xl bg-white">
-            <CardContent className="p-6 flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-purple-50 text-purple-600">
-                <Users className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-slate-900">{mentor.studentProgress.length}</p>
-                <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Students</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="border-none shadow-sm rounded-2xl bg-white">
-            <CardContent className="p-6 flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-amber-50 text-amber-600">
-                <TrendingUp className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-slate-900">{mentor.performance.studentSatisfaction}%</p>
-                <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Satisfaction</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="border-none shadow-sm rounded-2xl bg-white">
-            <CardContent className="p-6 flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-emerald-50 text-emerald-600">
-                <Award className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-slate-900">{mentor.performance.sessionAttendance}%</p>
-                <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Attendance</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          <div className="lg:col-span-2 space-y-6">
+            {/* SECTION B: BASIC INFO */}
+            <Card className="rounded-2xl border-none shadow-sm overflow-hidden bg-white">
+              <CardHeader className="bg-slate-50/50 border-b border-slate-100 py-4">
+                <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                  <div className="p-1.5 bg-indigo-50 rounded-lg"><Users className="w-3.5 h-3.5 text-indigo-600" /></div>
+                  Identification Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                <div className="space-y-1">
+                  <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest pl-0.5 font-sans">Full Name</p>
+                  <p className="text-sm font-bold text-slate-900 bg-slate-50/50 p-2.5 rounded-xl border border-slate-100">{mentor.name}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest pl-0.5 font-sans">Email Address</p>
+                  <p className="text-sm font-bold text-slate-900 bg-slate-50/50 p-2.5 rounded-xl border border-slate-100">{mentor.email}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest pl-0.5 font-sans">Phone Number</p>
+                  <p className="text-sm font-bold text-slate-900 bg-slate-50/50 p-2.5 rounded-xl border border-slate-100">{mentor.phone}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest pl-0.5 font-sans">Designation / Role</p>
+                  <p className="text-sm font-bold text-slate-900 bg-slate-50/50 p-2.5 rounded-xl border border-slate-100">Senior Mentor</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest pl-0.5 font-sans">Joined Date</p>
+                  <div className="flex items-center gap-2 text-sm font-bold text-slate-900 bg-slate-50/50 p-2.5 rounded-xl border border-slate-100">
+                    <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                    {mentor.joinedDate}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="bg-white p-1 rounded-xl shadow-sm border border-slate-100 overflow-x-auto inline-flex whitespace-nowrap">
-            <TabsTrigger value="overview" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white px-6">Overview</TabsTrigger>
-            <TabsTrigger value="students" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white px-6">Students & Progress</TabsTrigger>
-            <TabsTrigger value="sessions" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white px-6">Session History</TabsTrigger>
-            <TabsTrigger value="performance" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white px-6">Performance</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Assigned Batches */}
-              <Card className="border-none shadow-sm rounded-2xl bg-white">
-                <CardHeader className="border-b border-slate-50">
-                  <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                    <BookOpen className="w-5 h-5 text-primary" />
-                    Current Assignments
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <Table>
-                    <TableHeader className="bg-slate-50/50">
-                      <TableRow className="hover:bg-transparent">
-                        <TableHead className="px-6">Course</TableHead>
-                        <TableHead className="px-6">Batches</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {mentor.assignedCourses.map((c, i) => (
-                        <TableRow key={i} className="hover:bg-slate-50/30">
-                          <TableCell className="px-6 font-medium text-slate-900">{c.courseName}</TableCell>
-                          <TableCell className="px-6">
-                            <div className="flex flex-wrap gap-1">
-                              {c.batches.map((b, bi) => (
-                                <Badge key={bi} variant="secondary" className="bg-slate-100 text-slate-700 border-none rounded-md px-2 py-0">
-                                  {b}
+            {/* SECTION C: ASSIGNED BATCHES */}
+            <Card className="rounded-2xl border-none shadow-sm overflow-hidden bg-white">
+              <CardHeader className="bg-slate-50/50 border-b border-slate-100 py-4">
+                <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                  <div className="p-1.5 bg-emerald-50 rounded-lg"><BookOpen className="w-3.5 h-3.5 text-emerald-600" /></div>
+                  Academic Assignments
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader className="bg-slate-50/30">
+                    <TableRow className="hover:bg-transparent border-slate-100">
+                      <TableHead className="px-6 py-4 font-bold text-slate-700">Course Track</TableHead>
+                      <TableHead className="px-6 py-4 font-bold text-slate-700">Assigned Batches</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {mentor.assignedCourses.length > 0 ? (
+                      mentor.assignedCourses.map((track, i) => (
+                        <TableRow key={i} className="border-slate-50 hover:bg-slate-50/30 transition-colors">
+                          <TableCell className="px-6 py-4 font-black text-slate-900 text-xs uppercase tracking-tight">{track.name}</TableCell>
+                          <TableCell className="px-6 py-4">
+                            <div className="flex flex-wrap gap-1.5">
+                              {track.batches.map((batch, bi) => (
+                                <Badge key={bi} variant="secondary" className="bg-primary/5 text-primary border-primary/10 rounded-lg text-[10px] font-bold px-2 py-0.5">
+                                  {batch}
                                 </Badge>
                               ))}
                             </div>
                           </TableCell>
                         </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={2} className="h-24 text-center text-slate-400 italic">No courses currently assigned</TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="space-y-6">
+            {/* SECTION D: PERFORMANCE SUMMARY */}
+            <Card className="rounded-2xl border-none shadow-sm overflow-hidden bg-white bg-gradient-to-br from-white to-slate-50/50">
+              <CardHeader className="bg-slate-50/50 border-b border-slate-100 py-4">
+                <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                  <div className="p-1.5 bg-amber-50 rounded-lg"><TrendingUp className="w-3.5 h-3.5 text-amber-600" /></div>
+                  Performance Index
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 grid grid-cols-1 gap-4">
+                <div className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl shadow-sm">
+                  <div className="space-y-0.5">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Batches</p>
+                    <h4 className="text-2xl font-black text-slate-900">{totalBatches}</h4>
+                  </div>
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100">
+                    <BookOpen className="w-5 h-5" />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl shadow-sm">
+                  <div className="space-y-0.5">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Mentored Students</p>
+                    <h4 className="text-2xl font-black text-slate-900">{totalStudents}</h4>
+                  </div>
+                  <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600 border border-purple-100">
+                    <Users className="w-5 h-5" />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl shadow-sm">
+                  <div className="space-y-0.5">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Service Sessions</p>
+                    <h4 className="text-2xl font-black text-slate-900">{sessionCount}</h4>
+                  </div>
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-100">
+                    <Clock className="w-5 h-5" />
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-center justify-center p-6 bg-primary/5 rounded-2xl border-2 border-dashed border-primary/20 mt-2">
+                   <div className="flex items-center gap-1.5 mb-2">
+                      <Award className="w-5 h-5 text-primary" />
+                      <p className="text-[10px] font-black uppercase tracking-widest text-primary">Feedback Rating</p>
+                   </div>
+                   <div className="flex items-baseline gap-1">
+                      <h3 className="text-4xl font-black text-slate-900">{feedbackRating}</h3>
+                      <span className="text-slate-400 font-bold text-lg">/5.0</span>
+                   </div>
+                   <div className="flex gap-1 mt-3">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                         <div key={star} className={`w-2 h-2 rounded-full ${star <= feedbackRating ? "bg-primary" : "bg-slate-200"}`} />
                       ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-
-              {/* Performance Summary */}
-              <Card className="border-none shadow-sm rounded-2xl bg-white">
-                <CardHeader className="border-b border-slate-50">
-                  <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-primary" />
-                    Performance Overview
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6 space-y-6">
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-slate-600 font-medium whitespace-nowrap">Average Student Progress</span>
-                      <span className="text-slate-900 font-bold">{mentor.performance.averageStudentProgress}%</span>
-                    </div>
-                    <Progress value={mentor.performance.averageStudentProgress} className="h-2 rounded-full" />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-slate-600 font-medium whitespace-nowrap">Review Session Completion</span>
-                      <span className="text-slate-900 font-bold">{mentor.performance.sessionAttendance}%</span>
-                    </div>
-                    <Progress value={mentor.performance.sessionAttendance} className="h-2 rounded-full bg-slate-100 shadow-inner overflow-hidden" />
-                  </div>
-                  <div className="pt-4 grid grid-cols-2 gap-4">
-                    <div className="p-4 bg-slate-50 rounded-2xl text-center">
-                      <p className="text-2xl font-bold text-slate-900">{mentor.performance.studentSatisfaction}/100</p>
-                      <p className="text-xs text-slate-500 font-medium mt-1 uppercase tracking-widest whitespace-nowrap overflow-hidden text-ellipsis">Satisfaction Index</p>
-                    </div>
-                    <div className="p-4 bg-slate-50 rounded-2xl text-center">
-                      <p className="text-2xl font-bold text-slate-900">{mentor.sessions.length}</p>
-                      <p className="text-xs text-slate-500 font-medium mt-1 uppercase tracking-widest whitespace-nowrap overflow-hidden text-ellipsis">Total Sessions</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="students" className="space-y-6">
-            <Card className="border-none shadow-sm rounded-2xl bg-white overflow-hidden">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader className="bg-slate-50 border-b border-slate-100">
-                    <TableRow className="hover:bg-transparent">
-                      <TableHead className="py-4 px-6 font-semibold text-slate-700">Student Name</TableHead>
-                      <TableHead className="py-4 px-6 font-semibold text-slate-700">Batch</TableHead>
-                      <TableHead className="py-4 px-6 font-semibold text-slate-700">Attendance</TableHead>
-                      <TableHead className="py-4 px-6 font-semibold text-slate-700">Assignments</TableHead>
-                      <TableHead className="py-4 px-6 font-semibold text-slate-700">Progress</TableHead>
-                      <TableHead className="py-4 px-6 font-semibold text-slate-700 text-right">Last Activity</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {mentor.studentProgress.map((student) => (
-                      <TableRow key={student.id} className="hover:bg-slate-50/50 border-b border-slate-50">
-                        <TableCell className="py-4 px-6 font-medium text-slate-900">{student.name}</TableCell>
-                        <TableCell className="py-4 px-6 text-slate-600">{student.batch}</TableCell>
-                        <TableCell className="py-4 px-6 text-slate-600">{student.attendanceRate}%</TableCell>
-                        <TableCell className="py-4 px-6 text-slate-600">{student.assignmentCompletion}%</TableCell>
-                        <TableCell className="py-4 px-6">
-                          <div className="flex items-center gap-3">
-                            <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden min-w-[60px]">
-                              <div 
-                                className={`h-full rounded-full ${
-                                  student.overallProgress > 80 ? "bg-emerald-500" : student.overallProgress > 50 ? "bg-amber-500" : "bg-rose-500"
-                                }`} 
-                                style={{ width: `${student.overallProgress}%` }} 
-                              />
-                            </div>
-                            <span className="text-xs font-bold text-slate-700">{student.overallProgress}%</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="py-4 px-6 text-right text-xs text-slate-500">2 days ago</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                   </div>
+                </div>
+              </CardContent>
             </Card>
-          </TabsContent>
+          </div>
+        </div>
 
-          <TabsContent value="sessions" className="space-y-6">
-            <Card className="border-none shadow-sm rounded-2xl bg-white overflow-hidden">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader className="bg-slate-50 border-b border-slate-100">
-                    <TableRow className="hover:bg-transparent">
-                      <TableHead className="py-4 px-6 font-semibold text-slate-700">Session Name</TableHead>
-                      <TableHead className="py-4 px-6 font-semibold text-slate-700">Date & Time</TableHead>
-                      <TableHead className="py-4 px-6 font-semibold text-slate-700">Batch</TableHead>
-                      <TableHead className="py-4 px-6 font-semibold text-slate-700">Duration</TableHead>
-                      <TableHead className="py-4 px-6 font-semibold text-slate-700">Status</TableHead>
-                      <TableHead className="py-4 px-6 font-semibold text-slate-700 text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {mentor.sessions.map((session) => (
-                      <TableRow key={session.id} className="hover:bg-slate-50/50 border-b border-slate-50">
-                        <TableCell className="py-4 px-6 font-medium text-slate-900">{session.title}</TableCell>
-                        <TableCell className="py-4 px-6">
-                          <div className="flex flex-col">
-                            <span className="text-slate-900">{session.date}</span>
-                            <span className="text-xs text-slate-500">{session.time}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="py-4 px-6 text-slate-600 font-medium">{session.batch}</TableCell>
-                        <TableCell className="py-4 px-6 text-slate-600 flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {session.duration}</TableCell>
-                        <TableCell className="py-4 px-6">
-                          <Badge className={`rounded-lg px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-                            session.status === "Completed" 
-                              ? "bg-slate-100 text-slate-600" 
-                              : session.status === "Upcoming" 
-                              ? "bg-blue-50 text-blue-700 hover:bg-blue-50 border-blue-100" 
-                              : "bg-emerald-50 text-emerald-700"
-                          }`}>
-                            {session.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="py-4 px-6 text-right">
-                          <Button variant="ghost" size="sm" className="h-8 rounded-lg hover:bg-slate-100 text-primary">
-                            <ExternalLink className="w-4 h-4 mr-1.5" /> Session Details
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="performance" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card className="border-none shadow-sm rounded-2xl bg-white p-6 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="p-3 rounded-xl bg-emerald-50 text-emerald-600">
-                    <UserCheck className="w-6 h-6" />
-                  </div>
-                  <Badge className="bg-emerald-50 text-emerald-700 border-none rounded-md px-2 py-0.5 text-[10px]">EXCELLENT</Badge>
-                </div>
-                <div>
-                  <h4 className="text-sm font-semibold text-color-primary flex items-center gap-2 mb-2 p-1.5 rounded-lg border-primary/10">Teaching Quality</h4>
-                  <p className="text-3xl font-bold text-slate-900">4.8<span className="text-slate-400 text-base font-medium ml-1">/5.0</span></p>
-                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">Based on student feedback and review session audits conducted by administrators.</p>
-                </div>
-              </Card>
-
-              <Card className="border-none shadow-sm rounded-2xl bg-white p-6 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="p-3 rounded-xl bg-blue-50 text-blue-600">
-                    <Calendar className="w-6 h-6" />
-                  </div>
-                  <Badge className="bg-blue-50 text-blue-700 border-none rounded-md px-2 py-0.5 text-[10px]">ON TRACK</Badge>
-                </div>
-                <div>
-                  <h4 className="text-sm font-semibold text-color-primary flex items-center gap-2 mb-2 p-1.5 rounded-lg border-primary/10">Punctuality</h4>
-                  <p className="text-3xl font-bold text-slate-900">96<span className="text-slate-400 text-base font-medium ml-1">%</span></p>
-                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">System-tracked attendance and start time consistency for all scheduled mentor sessions.</p>
-                </div>
-              </Card>
-
-              <Card className="border-none shadow-sm rounded-2xl bg-white p-6 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="p-3 rounded-xl bg-purple-50 text-purple-600">
-                    <Users className="w-6 h-6" />
-                  </div>
-                  <Badge className="bg-purple-50 text-purple-700 border-none rounded-md px-2 py-0.5 text-[10px]">IMPROVING</Badge>
-                </div>
-                <div>
-                  <h4 className="text-sm font-semibold text-color-primary flex items-center gap-2 mb-2 p-1.5 rounded-lg border-primary/10">Response Time</h4>
-                  <p className="text-3xl font-bold text-slate-900">2.4<span className="text-slate-400 text-base font-medium ml-1">hrs</span></p>
-                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">Average time taken to respond to student queries and evaluation requests in the system.</p>
-                </div>
-              </Card>
-            </div>
-          </TabsContent>
-        </Tabs>
       </div>
     </DashboardLayout>
   );
