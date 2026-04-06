@@ -27,7 +27,11 @@ export const COURSES = [
 
 export const BATCHES: Record<string, string[]> = {
   "Full Stack Web Dev": ["Jan 2026 Batch", "Feb 2026 Batch", "Mar 2026 Batch"],
+<<<<<<< HEAD
   "Data Science Mastery": ["Python Masters Jan", "AI Cohort Feb"],
+=======
+  "Data Science Mastery": ["Python Masters Jan", "Data Cohort Feb"],
+>>>>>>> 75f5dee4 (updated)
   "UI/UX Design Pro": ["Design Thinking Jan", "UX Research Feb"],
 };
 

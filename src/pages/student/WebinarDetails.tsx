@@ -78,7 +78,11 @@ const webinars: Webinar[] = [
         title: "Designing for Accessibility in 2026",
         speaker: "Michael Chen",
         dateTime: "20 Mar 2026, 11:00 AM",
+<<<<<<< HEAD
         description: "Why inclusive design is more important than ever and how to implement it effectively. We'll explore WCAG 3.0 standards and AI-driven accessibility tools.",
+=======
+        description: "Why inclusive design is more important than ever and how to implement it effectively. We'll explore WCAG 3.0 standards and modern accessibility tooling.",
+>>>>>>> 75f5dee4 (updated)
         abstract: "As web applications become more complex, accessibility often takes a back seat. Michael shows how to make accessibility a core part of your design process from the start.",
         status: "Upcoming",
         isRegistered: false,

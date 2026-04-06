@@ -126,7 +126,11 @@ export const gradebookEntries: GradebookEntry[] = [
   { id: "GB002", studentName: "Sneha Iyer", studentId: "STU004", course: "Full Stack Web Dev", attendance: 96, quiz1: 92, quiz2: 88, midterm: 91, project: 95, final: null },
   { id: "GB003", studentName: "Meera Bhat", studentId: "STU006", course: "React Advanced", attendance: 78, quiz1: 72, quiz2: 68, midterm: 70, project: 75, final: null },
   { id: "GB004", studentName: "Diya Krishnan", studentId: "STU002", course: "Data Science Mastery", attendance: 98, quiz1: 95, quiz2: 92, midterm: 96, project: 98, final: null },
+<<<<<<< HEAD
   { id: "GB005", studentName: "Karthik Rajan", studentId: "STU005", course: "Python & AI Bootcamp", attendance: 88, quiz1: 80, quiz2: 85, midterm: 82, project: 88, final: 90 },
+=======
+  { id: "GB005", studentName: "Karthik Rajan", studentId: "STU005", course: "Python Advanced Bootcamp", attendance: 88, quiz1: 80, quiz2: 85, midterm: 82, project: 88, final: 90 },
+>>>>>>> 75f5dee4 (updated)
   { id: "GB006", studentName: "Rohan Joshi", studentId: "STU003", course: "UI/UX Design Pro", attendance: 65, quiz1: 70, quiz2: null, midterm: null, project: null, final: null },
   { id: "GB007", studentName: "Aditya Verma", studentId: "STU007", course: "Cloud & DevOps", attendance: 85, quiz1: 78, quiz2: 82, midterm: null, project: null, final: null },
   { id: "GB008", studentName: "Nisha Agarwal", studentId: "STU008", course: "Data Science Mastery", attendance: 72, quiz1: 65, quiz2: null, midterm: null, project: null, final: null },
