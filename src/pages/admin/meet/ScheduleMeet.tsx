@@ -319,11 +319,7 @@ const AdminScheduleMeet = () => {
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     className="h-13 bg-slate-50/50 border-slate-100/50 rounded-xl focus-visible:ring-primary/20 font-bold text-slate-900 placeholder:text-slate-300 placeholder:font-normal" 
-<<<<<<< HEAD
                     placeholder="e.g. Advanced AI Prompt Engineering Session"
-=======
-                    placeholder="e.g. Advanced Prompt Engineering Session"
->>>>>>> 75f5dee4 (updated)
                   />
                 </div>
                 <div className="space-y-2">

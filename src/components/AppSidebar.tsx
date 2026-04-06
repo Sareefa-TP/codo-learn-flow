@@ -51,11 +51,7 @@ const getStudentBadges = (): Record<string, SidebarBadge> => ({
     count: studentData.notifications.filter(n => !n.is_read).length
   },
   "/student/my-course": {
-<<<<<<< HEAD
     upsell: "Advance AI Mastery"
-=======
-    upsell: "Advanced Mastery"
->>>>>>> 75f5dee4 (updated)
   },
 });
 
