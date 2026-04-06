@@ -97,11 +97,7 @@ export const studentRecords: StudentRecord[] = [
   { id: "STU002", name: "Diya Krishnan", email: "diya.k@gmail.com", type: "student", status: "active", course: "Data Science Mastery", joinedDate: "2025-01-15", phone: "+91 88776 65544", mentorId: "S005", feePaid: 45000, feeTotal: 45000 },
   { id: "STU003", name: "Rohan Joshi", email: "rohan.j@gmail.com", type: "student", status: "demo_pending", course: "UI/UX Design Pro", joinedDate: "2025-02-01", phone: "+91 77665 54433", mentorId: null, feePaid: 0, feeTotal: 35000 },
   { id: "STU004", name: "Sneha Iyer", email: "sneha.i@gmail.com", type: "student", status: "active", course: "Full Stack Web Dev", joinedDate: "2024-11-20", phone: "+91 66554 43322", mentorId: "S004", feePaid: 45000, feeTotal: 45000 },
-<<<<<<< HEAD
   { id: "STU005", name: "Karthik Rajan", email: "karthik.r@gmail.com", type: "student", status: "completed", course: "Python & AI Bootcamp", joinedDate: "2024-06-01", phone: "+91 55443 32211", mentorId: "S005", feePaid: 40000, feeTotal: 40000 },
-=======
-  { id: "STU005", name: "Karthik Rajan", email: "karthik.r@gmail.com", type: "student", status: "completed", course: "Python Advanced Bootcamp", joinedDate: "2024-06-01", phone: "+91 55443 32211", mentorId: "S005", feePaid: 40000, feeTotal: 40000 },
->>>>>>> 75f5dee4 (updated)
   { id: "STU006", name: "Meera Bhat", email: "meera.b@gmail.com", type: "student", status: "active", course: "React Advanced", joinedDate: "2025-01-20", phone: "+91 44332 21100", mentorId: "S004", feePaid: 15000, feeTotal: 38000 },
   { id: "INT001", name: "Rahul Desai", email: "rahul.d@gmail.com", type: "intern", status: "active", course: "Full Stack Internship", joinedDate: "2025-01-05", phone: "+91 99001 12233", mentorId: "S005", stipendStatus: "paid", taskCompletion: 72, feePaid: 0, feeTotal: 0 },
   { id: "INT002", name: "Ananya Pillai", email: "ananya.p@gmail.com", type: "intern", status: "active", course: "Data Science Internship", joinedDate: "2025-01-10", phone: "+91 88112 23344", mentorId: "S005", stipendStatus: "unpaid", taskCompletion: 45, feePaid: 0, feeTotal: 0 },
@@ -117,11 +113,7 @@ export const coursePackages: CoursePackage[] = [
   { id: "CRS001", name: "Full Stack Web Dev", duration: "6 months", fee: 45000, tutorId: "S002", syllabusUrl: "/syllabus/fullstack.pdf", driveId: "1abc_FullStack", studentsEnrolled: 14, status: "active" },
   { id: "CRS002", name: "Data Science Mastery", duration: "4 months", fee: 45000, tutorId: "S003", syllabusUrl: "/syllabus/datascience.pdf", driveId: "1def_DataSci", studentsEnrolled: 8, status: "active" },
   { id: "CRS003", name: "UI/UX Design Pro", duration: "3 months", fee: 35000, tutorId: "S008", syllabusUrl: "/syllabus/uiux.pdf", driveId: "1ghi_UIUX", studentsEnrolled: 5, status: "active" },
-<<<<<<< HEAD
   { id: "CRS004", name: "Python & AI Bootcamp", duration: "5 months", fee: 40000, tutorId: "S003", syllabusUrl: "/syllabus/python-ai.pdf", driveId: "1jkl_Python", studentsEnrolled: 3, status: "active" },
-=======
-  { id: "CRS004", name: "Python Advanced Bootcamp", duration: "5 months", fee: 40000, tutorId: "S003", syllabusUrl: "/syllabus/python-advanced.pdf", driveId: "1jkl_Python", studentsEnrolled: 3, status: "active" },
->>>>>>> 75f5dee4 (updated)
   { id: "CRS005", name: "React Advanced", duration: "2 months", fee: 38000, tutorId: "S002", syllabusUrl: "/syllabus/react.pdf", driveId: "1mno_React", studentsEnrolled: 6, status: "active" },
   { id: "CRS006", name: "Cloud & DevOps", duration: "4 months", fee: 42000, tutorId: "S008", syllabusUrl: "/syllabus/devops.pdf", driveId: "1pqr_DevOps", studentsEnrolled: 4, status: "draft" },
   { id: "CRS007", name: "Mobile App Development", duration: "5 months", fee: 48000, tutorId: "S002", syllabusUrl: "/syllabus/mobile.pdf", driveId: "1stu_Mobile", studentsEnrolled: 0, status: "draft" },
