@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface LogoProps {
@@ -6,71 +7,76 @@ interface LogoProps {
 }
 
 const Logo = ({ className, size = "md" }: LogoProps) => {
+  const [hasImageError, setHasImageError] = useState(false);
+
   const sizeClasses = {
-    sm: "h-8",
-    md: "h-10",
-    lg: "h-14",
+    sm: {
+      wrapper: "h-8",
+      mark: "w-8 h-8",
+      text: "h-6",
+      fallbackLetter: "text-sm",
+      title: "text-lg",
+      subtitle: "text-xs",
+    },
+    md: {
+      wrapper: "h-10",
+      mark: "w-10 h-10",
+      text: "h-7",
+      fallbackLetter: "text-base",
+      title: "text-xl",
+      subtitle: "text-xs",
+    },
+    lg: {
+      wrapper: "h-14",
+      mark: "w-14 h-14",
+      text: "h-9",
+      fallbackLetter: "text-xl",
+      title: "text-2xl",
+      subtitle: "text-sm",
+    },
   };
+
+  const currentSize = sizeClasses[size];
 
   return (
     <div className={cn("flex items-center gap-3", className)}>
-      {/* Logo mark */}
-      <div
-        className={cn(
-          "flex items-center justify-center rounded-xl bg-primary",
-          sizeClasses[size],
-          size === "sm" ? "w-8" : size === "md" ? "w-10" : "w-14"
-        )}
-      >
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          className={cn(
-            "text-primary-foreground",
-            size === "sm" ? "w-5 h-5" : size === "md" ? "w-6 h-6" : "w-8 h-8"
-          )}
-        >
-          {/* Stylized "C" for CODO */}
-          <path
-            d="M12 4C7.58 4 4 7.58 4 12s3.58 8 8 8c1.85 0 3.55-.63 4.9-1.69"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            fill="none"
+      {hasImageError ? (
+        <>
+          <div
+            className={cn(
+              "flex items-center justify-center rounded-xl bg-primary shadow-sm",
+              currentSize.mark
+            )}
+          >
+            <span className={cn("font-semibold text-primary-foreground", currentSize.fallbackLetter)}>
+              C
+            </span>
+          </div>
+          <div className="flex flex-col">
+            <span className={cn("font-semibold tracking-tight text-foreground", currentSize.title)}>
+              CODO
+            </span>
+            <span className={cn("font-medium text-muted-foreground -mt-1", currentSize.subtitle)}>
+              Academy
+            </span>
+          </div>
+        </>
+      ) : (
+        <>
+          <img
+            src="/codo-logo-dark.webp"
+            alt="CODO Academy"
+            className={cn("block dark:hidden w-auto object-contain", currentSize.wrapper)}
+            onError={() => setHasImageError(true)}
           />
-          {/* Academic cap accent */}
-          <path
-            d="M14 8l4 2-4 2-4-2 4-2z"
-            fill="currentColor"
+          <img
+            src="/codo-logo-light.webp"
+            alt="CODO Academy"
+            className={cn("hidden dark:block w-auto object-contain", currentSize.wrapper)}
+            onError={() => setHasImageError(true)}
           />
-          <path
-            d="M14 12v3"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-          />
-        </svg>
-      </div>
-
-      {/* Wordmark */}
-      <div className="flex flex-col">
-        <span
-          className={cn(
-            "font-semibold tracking-tight text-foreground",
-            size === "sm" ? "text-lg" : size === "md" ? "text-xl" : "text-2xl"
-          )}
-        >
-          CODO
-        </span>
-        <span
-          className={cn(
-            "font-medium text-muted-foreground -mt-1",
-            size === "sm" ? "text-xs" : size === "md" ? "text-xs" : "text-sm"
-          )}
-        >
-          Academy
-        </span>
-      </div>
+        </>
+      )}
     </div>
   );
 };

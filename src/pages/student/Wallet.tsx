@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -26,7 +27,7 @@ import {
   ChevronRight,
   BookOpen,
   Layout,
-  Search
+  Search,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import CourseCard from "@/components/student/CourseCard";
@@ -151,6 +152,20 @@ const StudentWallet = () => {
   const [courseData, setCourseData] = useState<CourseFinance | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Coupon state (applies to the "Next Payment Due" amount)
+  const [couponCode, setCouponCode] = useState("");
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [finalAmount, setFinalAmount] = useState(0);
+  const [couponApplied, setCouponApplied] = useState(false);
+  const [message, setMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const coupons: Array<{ code: string; type: "percentage" | "fixed"; value: number }> = [
+    { code: "WELCOME10", type: "percentage", value: 10 },
+    { code: "SAVE500", type: "fixed", value: 500 },
+    { code: "STUDENT20", type: "percentage", value: 20 },
+  ];
+
   useEffect(() => {
     if (courseId && COURSES_FINANCE[courseId]) {
       setCourseData(COURSES_FINANCE[courseId]);
@@ -158,6 +173,60 @@ const StudentWallet = () => {
       setCourseData(null);
     }
   }, [courseId]);
+
+  useEffect(() => {
+    const amount = courseData?.nextPayment.amount ?? 0;
+    setFinalAmount(amount);
+    setDiscountAmount(0);
+    setCouponApplied(false);
+    setMessage("");
+    setErrorMessage("");
+    setCouponCode("");
+  }, [courseData?.id, courseData?.nextPayment.amount]);
+
+  const applyCoupon = () => {
+    if (couponApplied) return;
+
+    const code = couponCode.trim().toUpperCase();
+    if (!code) {
+      setErrorMessage("Please enter a coupon code");
+      setMessage("");
+      return;
+    }
+
+    setErrorMessage("");
+    setMessage("");
+
+    const original = courseData?.nextPayment.amount ?? 0;
+    const match = coupons.find((c) => c.code === code);
+    if (!match) {
+      setErrorMessage("Invalid coupon code");
+      return;
+    }
+
+    const rawDiscount =
+      match.type === "percentage" ? (original * match.value) / 100 : match.value;
+
+    const appliedDiscount = Math.min(Math.max(0, Math.round(rawDiscount)), original);
+    const nextFinal = Math.max(0, original - appliedDiscount);
+
+    setCouponApplied(true);
+    setCouponCode(code);
+    setDiscountAmount(appliedDiscount);
+    setFinalAmount(nextFinal);
+    setMessage("Coupon applied successfully!");
+    setErrorMessage("");
+  };
+
+  const removeCoupon = () => {
+    const original = courseData?.nextPayment.amount ?? 0;
+    setCouponApplied(false);
+    setCouponCode("");
+    setDiscountAmount(0);
+    setFinalAmount(original);
+    setMessage("");
+    setErrorMessage("");
+  };
 
   const filteredCourses = Object.values(COURSES_FINANCE).filter(course =>
     course.courseName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -321,8 +390,90 @@ const StudentWallet = () => {
                     <div className="flex items-center gap-1">
                       <IndianRupee className="w-6 h-6 text-foreground" />
                       <span className="text-3xl font-bold tracking-tight text-foreground">
-                        {courseData.nextPayment.amount.toLocaleString("en-IN")}
+                        {finalAmount.toLocaleString("en-IN")}
                       </span>
+                    </div>
+                  </div>
+
+                  {/* Coupon Code */}
+                  <div className="space-y-3 mb-4">
+                    <div className="flex items-center gap-2">
+                      <Input
+                        placeholder="Enter coupon code"
+                        value={couponCode}
+                        disabled={couponApplied}
+                        onChange={(e) => {
+                          const next = e.target.value.toUpperCase();
+                          setCouponCode(next);
+                          if (errorMessage) setErrorMessage("");
+                          if (message) setMessage("");
+                        }}
+                        className="h-11 rounded-xl"
+                      />
+
+                      {couponApplied ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="h-11 rounded-xl font-bold"
+                          onClick={removeCoupon}
+                        >
+                          Remove
+                        </Button>
+                      ) : (
+                        <Button
+                          type="button"
+                          className="h-11 rounded-xl font-bold"
+                          onClick={applyCoupon}
+                        >
+                          Apply Coupon
+                        </Button>
+                      )}
+                    </div>
+
+                    {errorMessage ? (
+                      <p className="text-xs font-semibold text-destructive">{errorMessage}</p>
+                    ) : message ? (
+                      <div className="space-y-1">
+                        <p className="text-xs font-semibold text-primary">{message}</p>
+                        {discountAmount > 0 && (
+                          <p className="text-xs font-semibold text-muted-foreground">
+                            You saved <span className="text-foreground">₹{discountAmount.toLocaleString("en-IN")}</span>
+                          </p>
+                        )}
+                      </div>
+                    ) : null}
+                  </div>
+
+                  {/* Price Breakdown */}
+                  <div className="bg-background rounded-xl p-4 border border-warning/20 mb-6">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
+                        <span>Original Price</span>
+                        <span className="flex items-center">
+                          <IndianRupee className="w-3.5 h-3.5" />
+                          {(courseData.nextPayment.amount ?? 0).toLocaleString("en-IN")}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
+                        <span>Discount</span>
+                        <span className={cn(
+                          "flex items-center",
+                          discountAmount > 0 ? "text-primary" : "text-muted-foreground"
+                        )}>
+                          <span className="mr-0.5">-</span>
+                          <IndianRupee className="w-3.5 h-3.5" />
+                          {discountAmount.toLocaleString("en-IN")}
+                        </span>
+                      </div>
+                      <div className="h-px bg-warning/15" />
+                      <div className="flex items-center justify-between text-sm font-bold text-foreground">
+                        <span>Final Amount</span>
+                        <span className="flex items-center">
+                          <IndianRupee className="w-4 h-4" />
+                          {finalAmount.toLocaleString("en-IN")}
+                        </span>
+                      </div>
                     </div>
                   </div>
 

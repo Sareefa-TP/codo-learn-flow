@@ -4,7 +4,8 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ChevronDown, ChevronUp, PlayCircle, BookOpen, Clock, CheckCircle2, FileText, Eye, UploadCloud, X, Info, Play, ArrowLeft, Search, Globe, Video, ExternalLink, Layout, MessageSquare, GraduationCap, ChevronRight, Home } from "lucide-react";
-import { useState, useRef, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -321,6 +322,12 @@ const coursesData = [
 
 const StudentPackages = () => {
   const navigate = useNavigate();
+  const handleWatchRecording = (recordingUrl: string | undefined | null) => {
+    // Debug (remove later if not needed)
+    console.log("recordingUrl:", recordingUrl);
+    if (!recordingUrl || recordingUrl === "#") return;
+    navigate(`/student/video-player?url=${encodeURIComponent(recordingUrl)}`);
+  };
   const { courseSlug, moduleSlug, sessionSlug } = useParams();
 
   // Derived State from URL Params
@@ -341,8 +348,18 @@ const StudentPackages = () => {
   // View State Management
   const [viewingCourseDetailsId, setViewingCourseDetailsId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [contentSearchQuery, setContentSearchQuery] = useState("");
   const [expandedSectionId, setExpandedSectionId] = useState<string | null>(null); // e.g., "notes-101", "assignment-101"
   const [viewingAssignmentId, setViewingAssignmentId] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (viewingCourseDetailsId === null) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [viewingCourseDetailsId]);
 
   // File Upload State for Inline Submission
   const [dragActive, setDragActive] = useState(false);
@@ -384,6 +401,154 @@ const StudentPackages = () => {
   };
 
   const detailsCourse = coursesData.find(c => c.id === viewingCourseDetailsId);
+
+  const courseDetailsModal =
+    detailsCourse && viewingCourseDetailsId !== null
+      ? createPortal(
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+            <div
+              className="bg-background border border-border/50 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col animate-in fade-in zoom-in duration-200"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="flex items-center justify-between p-6 border-b border-border/50 bg-muted/5 flex-shrink-0">
+                <div>
+                  <h2 className="text-xl font-bold tracking-tight">Course Details</h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Comprehensive overview of your enrollment details.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setViewingCourseDetailsId(null)}
+                  className="p-2 rounded-xl hover:bg-muted transition-colors text-muted-foreground flex-shrink-0"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div className="flex-1 overflow-y-auto p-8 space-y-6">
+                {/* Main Course Info Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Course Name</p>
+                    <p className="text-sm font-semibold leading-relaxed bg-muted/50 rounded-xl px-4 py-3 border border-border/30">
+                      {detailsCourse.title}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Lead Mentor</p>
+                    <p className="text-sm font-semibold leading-relaxed bg-muted/50 rounded-xl px-4 py-3 border border-border/30">
+                      {detailsCourse.mentor}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Duration / Speed</p>
+                    <div className="bg-muted/50 rounded-xl px-4 py-3 border border-border/30 flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-primary" />
+                      <span className="text-sm font-semibold">{detailsCourse.duration}</span>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Course Timeline</p>
+                    <div className="bg-muted/50 rounded-xl px-4 py-3 border border-border/30 flex items-center gap-2">
+                      <span className="text-sm font-semibold">{detailsCourse.startDate}</span>
+                      <span className="text-muted-foreground/50">→</span>
+                      <span className="text-sm font-semibold">{detailsCourse.endDate}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Course Description */}
+                <div className="space-y-2">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Course Description</p>
+                  <div className="text-sm leading-relaxed bg-muted/30 rounded-xl px-4 py-3 border border-border/30 min-h-[80px]">
+                    {detailsCourse.description}
+                  </div>
+                </div>
+
+                {/* Requirements & Outcomes Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                  <div className="space-y-3">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-primary flex items-center gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Prerequisites
+                    </p>
+                    <ul className="space-y-2">
+                      {detailsCourse.requirements?.map((req: string, idx: number) => (
+                        <li key={idx} className="flex items-start gap-2.5 text-xs text-muted-foreground">
+                          <div className="w-1 h-1 rounded-full bg-primary/40 mt-1.5 shrink-0" />
+                          <span>{req}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="space-y-3">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-primary flex items-center gap-1.5">
+                      <GraduationCap className="w-3.5 h-3.5" /> Core Outcomes
+                    </p>
+                    <ul className="space-y-2">
+                      {detailsCourse.outcomes?.map((outcome: string, idx: number) => (
+                        <li key={idx} className="flex items-start gap-2.5 text-xs text-muted-foreground">
+                          <div className="w-1 h-1 rounded-full bg-primary/40 mt-1.5 shrink-0" />
+                          <span>{outcome}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Curriculum Summary Badge Grid */}
+                <div className="space-y-3">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Enrollment Includes</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    <div className="flex items-center gap-2 text-[11px] font-semibold text-foreground/70 bg-muted/20 p-2.5 rounded-xl border border-border/20">
+                      <BookOpen className="w-3.5 h-3.5 shrink-0 text-primary/60" />
+                      <span>{detailsCourse.modules.length} Modules</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-[11px] font-semibold text-foreground/70 bg-muted/20 p-2.5 rounded-xl border border-border/20">
+                      <Play className="w-3.5 h-3.5 shrink-0 text-primary/60" />
+                      <span>Sessions</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-[11px] font-semibold text-foreground/70 bg-muted/20 p-2.5 rounded-xl border border-border/20">
+                      <FileText className="w-3.5 h-3.5 shrink-0 text-primary/60" />
+                      <span>Projects</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-6 border-t border-border/50 bg-muted/5 flex items-center justify-end gap-3 flex-shrink-0">
+                <Button
+                  variant="outline"
+                  className="rounded-xl px-6"
+                  onClick={() => setViewingCourseDetailsId(null)}
+                >
+                  Close
+                </Button>
+                <Button
+                  className="rounded-xl px-6 bg-primary hover:bg-primary/90"
+                  onClick={() => {
+                    const firstIncompleteMod =
+                      detailsCourse.modules.find((m: any) => m.progress < 100 && m.progress > -1) ||
+                      detailsCourse.modules[0];
+                    if (firstIncompleteMod) {
+                      navigate(`/student/my-course/${detailsCourse.slug}/${firstIncompleteMod.slug}`);
+                    } else {
+                      navigate(`/student/my-course/${detailsCourse.slug}`);
+                    }
+                    setViewingCourseDetailsId(null);
+                    window.scrollTo({ top: 300, behavior: "smooth" });
+                  }}
+                >
+                  Start Learning
+                </Button>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )
+      : null;
 
   // Drag and Drop Handlers
   const processFiles = (files: FileList | File[]) => {
@@ -535,12 +700,12 @@ const StudentPackages = () => {
 
         {/* Search Bar for Course List - New Full-Width Position */}
         {!activeCourse && (
-          <div className="relative mb-10 group animate-in fade-in slide-in-from-top-4 duration-700 delay-100">
+          <div className="relative mb-6 sm:mb-10 group animate-in fade-in slide-in-from-top-4 duration-700 delay-100">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-all duration-300" />
             <input
               type="text"
               placeholder="Search courses by title, category, or mentor..."
-              className="w-full bg-card border border-border/60 rounded-[1.25rem] py-4 pl-12 pr-6 text-sm font-medium focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-sm placeholder:text-muted-foreground/50"
+              className="w-full bg-card border border-border/60 rounded-[1.25rem] py-3.5 sm:py-4 pl-12 pr-6 text-sm font-medium focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-sm placeholder:text-muted-foreground/50"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -549,7 +714,7 @@ const StudentPackages = () => {
 
         {/* Course List / Dynamic Content */}
         {!activeCourse ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
             {filteredCourses.map((course) => (
               <CourseCard
                 key={course.id}
@@ -637,8 +802,28 @@ const StudentPackages = () => {
             <div className="space-y-4">
               <h2 className="text-xl font-semibold text-foreground mb-4">Course Content</h2>
 
+              {/* Search Bar (matches "My Enrolled Courses" searchbar styling) */}
+              <div className="relative group animate-in fade-in slide-in-from-top-4 duration-700 delay-100">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-all duration-300" />
+                <input
+                  type="text"
+                  placeholder="Search modules or sessions..."
+                  className="w-full bg-card border border-border/60 rounded-[1.25rem] py-4 pl-12 pr-6 text-sm font-medium focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-sm placeholder:text-muted-foreground/50"
+                  value={contentSearchQuery}
+                  onChange={(e) => setContentSearchQuery(e.target.value)}
+                />
+              </div>
+
               <div className="flex flex-col gap-3">
                 {activeCourse.modules.map((mod) => {
+                  const q = contentSearchQuery.trim().toLowerCase();
+                  const matchesModule = q.length === 0 || mod.title.toLowerCase().includes(q);
+                  const filteredSessions =
+                    q.length === 0
+                      ? mod.sessions
+                      : mod.sessions.filter((s: any) => s.title.toLowerCase().includes(q));
+                  if (!matchesModule && filteredSessions.length === 0) return null;
+
                   const isOpen = activeModule?.id === mod.id;
                   const isNotStarted = mod.progress === -1;
                   const isCompleted = mod.progress === 100;
@@ -689,9 +874,9 @@ const StudentPackages = () => {
                       {/* Accordion Content (Sessions List) */}
                       {isOpen && (
                         <div className="bg-muted/5 border-t border-border/50 animate-in fade-in slide-in-from-top-2 duration-300">
-                          {mod.sessions && mod.sessions.length > 0 ? (
+                          {filteredSessions && filteredSessions.length > 0 ? (
                             <div className="divide-y divide-border/30">
-                              {mod.sessions.map((session, sIdx) => {
+                              {filteredSessions.map((session: any, sIdx: number) => {
                                 const isSessionOpen = activeSession?.id === session.id;
                                 return (
                                   <div key={session.id} className="group/session">
@@ -966,9 +1151,10 @@ const StudentPackages = () => {
                                             <Button
                                               variant="outline"
                                               className="border-purple-200 text-purple-700 hover:bg-purple-50 text-xs font-bold px-6 h-9 rounded-full"
-                                              onClick={() => window.open(session.recordingLink, '_blank')}
+                                              onClick={() => handleWatchRecording(session.recordingLink)}
+                                              disabled={!session.recordingLink}
                                             >
-                                              Watch Recording
+                                              {session.recordingLink ? "Watch Recording" : "No Recording Available"}
                                             </Button>
                                           </div>
                                         )}
@@ -1000,148 +1186,7 @@ const StudentPackages = () => {
         )}
       </div>
 
-      {/* Course Details Modal (Standardized Design) */}
-      {detailsCourse && viewingCourseDetailsId !== null && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-300">
-          <div
-            className="bg-background border border-border/50 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col animate-in zoom-in duration-200"
-            onClick={e => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-border/50 bg-muted/5 flex-shrink-0">
-              <div>
-                <h2 className="text-xl font-bold tracking-tight">Course Details</h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Comprehensive overview of your enrollment details.
-                </p>
-              </div>
-              <button
-                onClick={() => setViewingCourseDetailsId(null)}
-                className="p-2 rounded-xl hover:bg-muted transition-colors text-muted-foreground flex-shrink-0"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
-              {/* Main Course Info Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Course Name</p>
-                  <p className="text-sm font-semibold leading-relaxed bg-muted/50 rounded-xl px-4 py-3 border border-border/30">
-                    {detailsCourse.title}
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Lead Mentor</p>
-                  <p className="text-sm font-semibold leading-relaxed bg-muted/50 rounded-xl px-4 py-3 border border-border/30">
-                    {detailsCourse.mentor}
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Duration / Speed</p>
-                  <div className="bg-muted/50 rounded-xl px-4 py-3 border border-border/30 flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-primary" />
-                    <span className="text-sm font-semibold">{detailsCourse.duration}</span>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Course Timeline</p>
-                  <div className="bg-muted/50 rounded-xl px-4 py-3 border border-border/30 flex items-center gap-2">
-                    <span className="text-sm font-semibold">{detailsCourse.startDate}</span>
-                    <span className="text-muted-foreground/50">→</span>
-                    <span className="text-sm font-semibold">{detailsCourse.endDate}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Course Description */}
-              <div className="space-y-2">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Course Description</p>
-                <div className="text-sm leading-relaxed bg-muted/30 rounded-xl px-4 py-3 border border-border/30 min-h-[80px]">
-                  {detailsCourse.description}
-                </div>
-              </div>
-
-              {/* Requirements & Outcomes Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-                <div className="space-y-3">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-primary flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5" /> Prerequisites
-                  </p>
-                  <ul className="space-y-2">
-                    {detailsCourse.requirements?.map((req: string, idx: number) => (
-                      <li key={idx} className="flex items-start gap-2.5 text-xs text-muted-foreground">
-                        <div className="w-1 h-1 rounded-full bg-primary/40 mt-1.5 shrink-0" />
-                        <span>{req}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="space-y-3">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-primary flex items-center gap-1.5">
-                    <GraduationCap className="w-3.5 h-3.5" /> Core Outcomes
-                  </p>
-                  <ul className="space-y-2">
-                    {detailsCourse.outcomes?.map((outcome: string, idx: number) => (
-                      <li key={idx} className="flex items-start gap-2.5 text-xs text-muted-foreground">
-                        <div className="w-1 h-1 rounded-full bg-primary/40 mt-1.5 shrink-0" />
-                        <span>{outcome}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              {/* Curriculum Summary Badge Grid */}
-              <div className="space-y-3">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Enrollment Includes</p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  <div className="flex items-center gap-2 text-[11px] font-semibold text-foreground/70 bg-muted/20 p-2.5 rounded-xl border border-border/20">
-                    <BookOpen className="w-3.5 h-3.5 shrink-0 text-primary/60" />
-                    <span>{detailsCourse.modules.length} Modules</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-[11px] font-semibold text-foreground/70 bg-muted/20 p-2.5 rounded-xl border border-border/20">
-                    <Play className="w-3.5 h-3.5 shrink-0 text-primary/60" />
-                    <span>Sessions</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-[11px] font-semibold text-foreground/70 bg-muted/20 p-2.5 rounded-xl border border-border/20">
-                    <FileText className="w-3.5 h-3.5 shrink-0 text-primary/60" />
-                    <span>Projects</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Modal Footer */}
-            <div className="p-6 border-t border-border/50 bg-muted/5 flex items-center justify-end gap-3 flex-shrink-0">
-              <Button
-                variant="outline"
-                className="rounded-xl px-8 font-bold text-xs"
-                onClick={() => setViewingCourseDetailsId(null)}
-              >
-                Close
-              </Button>
-              <Button
-                className="bg-primary hover:bg-primary/90 gap-2 rounded-xl px-8 font-bold text-xs shadow-md shadow-primary/20"
-                onClick={() => {
-                  const firstIncompleteMod = detailsCourse.modules.find((m: any) => m.progress < 100 && m.progress > -1) || detailsCourse.modules[0];
-                  if (firstIncompleteMod) {
-                    navigate(`/student/my-course/${detailsCourse.slug}/${firstIncompleteMod.slug}`);
-                  } else {
-                    navigate(`/student/my-course/${detailsCourse.slug}`);
-                  }
-                  setViewingCourseDetailsId(null);
-                  window.scrollTo({ top: 300, behavior: 'smooth' });
-                }}
-              >
-                Start Learning
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      {courseDetailsModal}
     </DashboardLayout>
   );
 };

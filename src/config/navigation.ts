@@ -33,8 +33,6 @@ import {
   Gamepad2,
   LifeBuoy,
   PencilLine,
-  History,
-  Star,
 } from "lucide-react";
 
 export type UserRole = "student" | "intern" | "tutor" | "mentor" | "admin" | "finance" | "superadmin" | "coordinator" | "advisor";
@@ -71,16 +69,6 @@ export const studentNavigation: RoleNavigation = {
     { title: "Support Tickets", url: "/student/support-tickets", icon: LifeBuoy },
     { title: "Game", url: "/student/game", icon: Gamepad2 },
     { title: "Feedback", url: "/student/feedback", icon: MessageSquare },
-    {
-      title: "My Courses",
-      url: "/student/my-course",
-      icon: BookOpen,
-      children: [
-        { title: "Live Sessions", url: "/student/live-sessions", icon: Video },
-        { title: "Learning Materials", url: "/student/materials", icon: FileText },
-        { title: "Assignments", url: "/student/assignments", icon: ClipboardList },
-      ]
-    },
   ],
   secondaryNav: [],
 };
@@ -184,6 +172,7 @@ export const adminNavigation: RoleNavigation = {
     { title: "Attendance", url: "/admin/attendance", icon: UserCheck },
     { title: "Finance Overview", url: "/admin/finance", icon: Wallet },
     { title: "Reports", url: "/admin/reports", icon: FileBarChart },
+    { title: "Support Tickets", url: "/admin/support-tickets", icon: LifeBuoy },
   ],
   secondaryNav: [],
 };
@@ -257,14 +246,8 @@ export const advisorNavigation: RoleNavigation = {
   baseUrl: "/advisor",
   mainNav: [
     { title: "Dashboard", url: "/advisor/dashboard", icon: LayoutDashboard },
-    { title: "Leads", url: "/advisor/leads", icon: Users },
     { title: "Students", url: "/advisor/students", icon: GraduationCap },
-    { title: "Courses", url: "/advisor/courses", icon: BookOpen },
-    { title: "Follow-ups", url: "/advisor/follow-ups", icon: History },
-    { title: "Meet", url: "/advisor/meet", icon: Video },
-    { title: "Chat", url: "/advisor/chat", icon: MessageSquare },
     { title: "Support Ticket", url: "/advisor/support-ticket", icon: LifeBuoy },
-    { title: "Feedback", url: "/advisor/feedback", icon: Star },
   ],
   secondaryNav: [],
 };

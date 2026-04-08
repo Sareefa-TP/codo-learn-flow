@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { CheckOutDialog } from "@/modules/intern/attendance/dialogs";
+import { todayISO, upsertCheckIn, updateCheckOut } from "@/modules/intern/attendance/store";
 
 // ─── Mock Data ────────────────────────────────────────────────────────────────
 
@@ -21,6 +23,32 @@ const intern = {
   endDate: "Mar 2026",
 };
 
+const INTERN_ID = "intern-1";
+
+type LocalAttendance = {
+  date: string; // yyyy-mm-dd
+  checkInTime?: string; // ISO
+  checkOutTime?: string; // ISO
+  tasksCompleted?: string;
+  blockers?: string;
+  status: "checked-in" | "checked-out";
+};
+
+const ATTENDANCE_KEY = "attendance";
+
+const readAttendance = (): LocalAttendance | null => {
+  const raw = localStorage.getItem(ATTENDANCE_KEY);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as LocalAttendance;
+  } catch {
+    return null;
+  }
+};
+
+const writeAttendance = (data: LocalAttendance) => {
+  localStorage.setItem(ATTENDANCE_KEY, JSON.stringify(data));
+};
 const stats = {
   tasksCompleted: 12,
   totalTasks: 18,
@@ -87,19 +115,20 @@ const StatCard = ({ label, value, sub, icon: Icon, iconBg, iconColor, valueColor
 // ─── Attendance Card Component ───────────────────────────────────────────────
 
 const AttendanceCard = () => {
-  const [checkIn, setCheckIn] = useState<string | null>(localStorage.getItem("attendance_checkin"));
-  const [checkOut, setCheckOut] = useState<string | null>(localStorage.getItem("attendance_checkout"));
+  const [checkIn, setCheckIn] = useState<string | null>(null);
+  const [checkOut, setCheckOut] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [isCheckOutOpen, setIsCheckOutOpen] = useState(false);
+  const [isSubmittingCheckOut, setIsSubmittingCheckOut] = useState(false);
 
   useEffect(() => {
-    // Daily Reset Logic
-    const today = new Date().toISOString().split("T")[0];
-    const storedDate = localStorage.getItem("attendance_date");
-    
-    if (storedDate !== today) {
-      localStorage.removeItem("attendance_checkin");
-      localStorage.removeItem("attendance_checkout");
-      localStorage.setItem("attendance_date", today);
+    // Read Check-In state from localStorage["attendance"]
+    const today = todayISO();
+    const data = readAttendance();
+    if (data && data.date === today) {
+      setCheckIn(data.checkInTime ?? null);
+      setCheckOut(data.checkOutTime ?? null);
+    } else {
       setCheckIn(null);
       setCheckOut(null);
     }
@@ -110,16 +139,68 @@ const AttendanceCard = () => {
 
   const handleCheckIn = () => {
     const now = new Date().toISOString();
-    localStorage.setItem("attendance_checkin", now);
     setCheckIn(now);
+    const today = todayISO();
+    writeAttendance({
+      date: today,
+      checkInTime: now,
+      status: "checked-in",
+    });
+    // keep history store in sync (for Attendance page list/details)
+    upsertCheckIn(INTERN_ID, today, now);
     toast.success("Checked in successfully!");
   };
 
-  const handleCheckOut = () => {
-    const now = new Date().toISOString();
-    localStorage.setItem("attendance_checkout", now);
-    setCheckOut(now);
-    toast.success("Checked out successfully!");
+  const handleCheckOutClick = () => {
+    // Rule: clicking Check Out opens modal first.
+    const today = todayISO();
+    const data = readAttendance();
+    if (!data || data.date !== today) {
+      toast.error("No check-in found for today. Please check-in first.");
+      return;
+    }
+    if (data.status !== "checked-in" || !data.checkInTime) {
+      toast.error("No check-in found for today. Please check-in first.");
+      return;
+    }
+    setIsCheckOutOpen(true);
+  };
+
+  const handleSubmitCheckOut = async (data: { tasksCompleted: string; blockers: string }) => {
+    if (!data.tasksCompleted.trim()) return;
+
+    setIsSubmittingCheckOut(true);
+    try {
+      const now = new Date().toISOString();
+      const today = todayISO();
+      const stored = readAttendance();
+      if (!stored || stored.date !== today || stored.status !== "checked-in" || !stored.checkInTime) {
+        toast.error("No check-in found for today. Please check-in first.");
+        return;
+      }
+
+      const next: LocalAttendance = {
+        ...stored,
+        checkOutTime: now,
+        tasksCompleted: data.tasksCompleted.trim(),
+        blockers: data.blockers.trim(),
+        status: "checked-out",
+      };
+      writeAttendance(next);
+
+      // keep history store in sync (for Attendance page list/details)
+      updateCheckOut(INTERN_ID, today, {
+        checkOutTime: now,
+        tasksCompleted: next.tasksCompleted,
+        blockers: next.blockers,
+      });
+
+      setCheckOut(now);
+      setIsCheckOutOpen(false);
+      toast.success("Checked out successfully!");
+    } finally {
+      setIsSubmittingCheckOut(false);
+    }
   };
 
   const formatTime = (isoString: string | null) => {
@@ -140,7 +221,8 @@ const AttendanceCard = () => {
   const status = !checkIn ? "Not Started" : (!checkOut ? "Working" : "Completed");
 
   return (
-    <Card className="border-border/50 shadow-sm rounded-xl overflow-hidden group">
+    <>
+      <Card className="border-border/50 shadow-sm rounded-xl overflow-hidden group">
       <CardHeader className="pb-3 px-6 pt-5 border-b border-border/20 bg-muted/5">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base font-semibold flex items-center gap-2">
@@ -184,7 +266,7 @@ const AttendanceCard = () => {
                 Check-In
               </Button>
             ) : !checkOut ? (
-              <Button onClick={handleCheckOut} className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl h-11 shadow-md shadow-orange-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
+              <Button onClick={handleCheckOutClick} className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl h-11 shadow-md shadow-orange-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
                 Check-Out
               </Button>
             ) : (
@@ -201,7 +283,15 @@ const AttendanceCard = () => {
           </div>
         </div>
       </CardContent>
-    </Card>
+      </Card>
+
+      <CheckOutDialog
+        open={isCheckOutOpen}
+        onOpenChange={setIsCheckOutOpen}
+        submitting={isSubmittingCheckOut}
+        onSubmit={handleSubmitCheckOut}
+      />
+    </>
   );
 };
 

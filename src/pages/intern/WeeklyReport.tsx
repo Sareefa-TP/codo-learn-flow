@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
+import { StandardModal } from "@/components/modals/StandardModal";
+import { InternSearchBar } from "@/components/inputs/InternSearchBar";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -239,51 +241,64 @@ const SubmitReportModal = ({ onClose, onSubmit, initialData }: SubmitModalProps)
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-            <div
-                className="bg-background border border-border/50 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col animate-in fade-in zoom-in duration-200"
-                onClick={e => e.stopPropagation()}
-            >
-                {/* Discard Confirmation Dialog */}
-                {showDiscardConfirm && (
-                    <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/30 rounded-2xl">
-                        <div className="bg-background border border-border/60 rounded-2xl shadow-xl p-6 mx-6 max-w-sm w-full">
-                            <h3 className="text-base font-bold mb-1">Discard changes?</h3>
-                            <p className="text-sm text-muted-foreground mb-6">You have unsaved input. If you leave, your progress will be lost.</p>
-                            <div className="flex justify-end gap-3">
-                                <button
-                                    onClick={() => setShowDiscardConfirm(false)}
-                                    className="px-4 py-2 rounded-xl text-sm font-semibold border border-border/50 hover:bg-muted transition-colors"
-                                >
-                                    Stay
-                                </button>
-                                <button
-                                    onClick={onClose}
-                                    className="px-4 py-2 rounded-xl text-sm font-semibold bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors"
-                                >
-                                    Discard
-                                </button>
-                            </div>
+        <StandardModal
+            open
+            onOpenChange={(o) => {
+                if (!o) handleCloseRequest();
+            }}
+            title={initialData ? "Resubmit Weekly Report" : "Submit Weekly Report"}
+            subtitle={initialData ? "Update your report details and resubmit for review." : "Fill in the details for your weekly progress."}
+            closeOnBackdrop={false}
+            footer={
+                <>
+                    <Button
+                        variant="outline"
+                        onClick={handleCloseRequest}
+                        disabled={isSubmitting}
+                        className="rounded-xl px-6 h-10 font-semibold"
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={handleSubmit}
+                        disabled={isSubmitting || !formData.title || !formData.summary || !selectedWeek}
+                        className="rounded-xl px-6 h-10 font-semibold bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/10 transition-all"
+                    >
+                        {isSubmitting ? (
+                            <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                {initialData ? "Updating..." : "Submitting..."}
+                            </>
+                        ) : (initialData ? "Resubmit Report" : "Submit Report")}
+                    </Button>
+                </>
+            }
+        >
+            {/* Discard Confirmation Dialog */}
+            {showDiscardConfirm && (
+                <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/30 rounded-2xl">
+                    <div className="bg-background border border-border/60 rounded-2xl shadow-xl p-6 mx-6 max-w-sm w-full">
+                        <h3 className="text-base font-bold mb-1">Discard changes?</h3>
+                        <p className="text-sm text-muted-foreground mb-6">You have unsaved input. If you leave, your progress will be lost.</p>
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => setShowDiscardConfirm(false)}
+                                className="px-4 py-2 rounded-xl text-sm font-semibold border border-border/50 hover:bg-muted transition-colors"
+                            >
+                                Stay
+                            </button>
+                            <button
+                                onClick={onClose}
+                                className="px-4 py-2 rounded-xl text-sm font-semibold bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors"
+                            >
+                                Discard
+                            </button>
                         </div>
                     </div>
-                )}
-
-                {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-border/50 bg-muted/5">
-                    <div>
-                        <h2 className="text-xl font-bold tracking-tight">
-                            {initialData ? "Resubmit Weekly Report" : "Submit Weekly Report"}
-                        </h2>
-                        <p className="text-sm text-muted-foreground mt-1">
-                            {initialData ? "Update your report details and resubmit for review." : "Fill in the details for your weekly progress."}
-                        </p>
-                    </div>
-                    <button onClick={handleCloseRequest} className="p-2 rounded-xl hover:bg-muted transition-colors text-muted-foreground">
-                        <X className="w-5 h-5" />
-                    </button>
                 </div>
+            )}
 
-                <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
+            <form onSubmit={handleSubmit} className="space-y-6">
 
                     {/* Month + Week selector */}
                     <div className="space-y-4 p-4 rounded-xl bg-muted/30 border border-border/40">
@@ -471,33 +486,8 @@ const SubmitReportModal = ({ onClose, onSubmit, initialData }: SubmitModalProps)
                             </ul>
                         )}
                     </div>
-                </form>
-
-                {/* Footer */}
-                <div className="p-6 border-t border-border/50 bg-muted/5 flex items-center justify-end gap-3">
-                    <Button 
-                        variant="outline" 
-                        onClick={handleCloseRequest}
-                        disabled={isSubmitting}
-                        className="rounded-xl px-6"
-                    >
-                        Cancel
-                    </Button>
-                    <Button 
-                        onClick={handleSubmit}
-                        disabled={isSubmitting || !formData.title || !formData.summary || !selectedWeek}
-                        className="rounded-xl px-6 bg-primary hover:bg-primary/90"
-                    >
-                        {isSubmitting ? (
-                            <>
-                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                {initialData ? "Updating..." : "Submitting..."}
-                            </>
-                        ) : (initialData ? "Resubmit Report" : "Submit Report")}
-                    </Button>
-                </div>
-            </div>
-        </div>
+            </form>
+        </StandardModal>
     );
 };
 
@@ -523,9 +513,9 @@ const ViewReportModal = ({ report, onClose }: ViewModalProps) => {
     ];
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
             <div
-                className="bg-background border border-border/50 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col animate-in fade-in zoom-in duration-200"
+                className="bg-background border border-border/50 rounded-2xl shadow-2xl w-full max-w-2xl min-h-[600px] max-h-[90vh] flex flex-col animate-in fade-in zoom-in duration-200"
                 onClick={e => e.stopPropagation()}
             >
                 {/* Header */}
@@ -678,12 +668,20 @@ const WeeklyReport = () => {
     const [viewingReport, setViewingReport] = useState<WeeklyReport | null>(null);
     const [resubmittingReport, setResubmittingReport] = useState<WeeklyReport | null>(null);
     const [activeFilter, setActiveFilter] = useState<ReportStatus | null>(null);
+    const [searchQuery, setSearchQuery] = useState("");
 
     const isSubmitModalOpen = location.pathname === "/intern/weekly-report/submit-weekly-report" || !!resubmittingReport;
 
-    const filteredReports = activeFilter
-        ? reports.filter(r => r.status === activeFilter)
-        : reports;
+    const filteredReports = useMemo(() => {
+        const byStatus = activeFilter ? reports.filter(r => r.status === activeFilter) : reports;
+        const q = searchQuery.trim().toLowerCase();
+        if (!q) return byStatus;
+
+        return byStatus.filter(r => {
+            const hay = `${r.week} ${r.title} ${r.summary} ${r.challenges} ${r.submittedDate}`.toLowerCase();
+            return hay.includes(q);
+        });
+    }, [reports, activeFilter, searchQuery]);
 
     const handleCardClick = (status: ReportStatus) => {
         setActiveFilter(prev => (prev === status ? null : status));
@@ -749,6 +747,12 @@ const WeeklyReport = () => {
                             Submit Weekly Report
                         </Button>
                     </div>
+
+                    <InternSearchBar
+                        placeholder="Search reports..."
+                        value={searchQuery}
+                        onChange={setSearchQuery}
+                    />
 
                     {/* ── Summary Strip ── */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -818,7 +822,12 @@ const WeeklyReport = () => {
                                     <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
                                         <FileText className="w-8 h-8 opacity-20" />
                                     </div>
-                                    {activeFilter ? (
+                                    {searchQuery.trim() ? (
+                                        <>
+                                            <p className="font-bold text-lg">No reports found</p>
+                                            <p className="text-sm mt-1">No reports match your search.</p>
+                                        </>
+                                    ) : activeFilter ? (
                                         <>
                                             <p className="font-bold text-lg">No {activeFilter} reports</p>
                                             <p className="text-sm mt-1">You have no reports with "{activeFilter}" status.</p>

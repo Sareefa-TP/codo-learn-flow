@@ -17,6 +17,7 @@ import StudentMaterials from "./pages/student/Materials";
 import StudentAssignments from "./pages/student/Assignments";
 import StudentChat from "./pages/student/Chat";
 import StudentRecordings from "./pages/student/Recordings";
+import StudentRecordingPlayer from "./pages/student/RecordingPlayer";
 import StudentAssessments from "./pages/student/Assessments";
 import StudentAssessmentReport from "./pages/student/AssessmentReport";
 import StudentPackages from "./pages/student/Packages";
@@ -30,6 +31,7 @@ import StudentSupportTickets from "./pages/student/SupportTickets";
 import StudentWebinars from "./pages/student/Webinars";
 import WebinarDetails from "./pages/student/WebinarDetails";
 import StudentMeet from "./pages/student/Meet";
+import StudentGame from "./pages/student/Game";
 
 // Intern Pages
 import InternDashboard from "./pages/intern/Dashboard";
@@ -127,6 +129,8 @@ import AdminFinanceBatchDetails from "./pages/admin/FinanceBatchDetails";
 import AdminReports from "./pages/admin/AdminReports";
 import AdminNotifications from "./pages/admin/Notifications";
 import AdminProfile from "./pages/admin/Profile";
+import AdminSupportTickets from "./pages/admin/SupportTickets";
+import AdminSupportTicketDetails from "./pages/admin/SupportTicketDetails";
 import AdminMeetList from "./pages/admin/meet/MeetList";
 import AdminCreateMeet from "./pages/admin/meet/CreateMeet";
 import AdminMeetDetails from "./pages/admin/meet/MeetDetails";
@@ -189,6 +193,10 @@ import CoordinatorMeet from "./pages/coordinator/Meet";
 
 // Advisor Pages
 import AdvisorDashboard from "./pages/advisor/Dashboard";
+import AdvisorStudents from "./pages/advisor/Students";
+import AdvisorSupportTicket from "./pages/advisor/SupportTicket";
+import AdvisorProfile from "./pages/advisor/Profile";
+import { SupportTicketsProvider } from "@/modules/supportTickets/store";
 
 const queryClient = new QueryClient();
 
@@ -197,12 +205,18 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Landing />} />
-          <Route path="/select-role" element={<RoleSelection />} />
-          <Route path="/login" element={<Login />} />
+      <SupportTicketsProvider>
+        <BrowserRouter
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}
+        >
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<Landing />} />
+            <Route path="/select-role" element={<RoleSelection />} />
+            <Route path="/login" element={<Login />} />
 
           {/* Student Routes */}
           <Route path="/student" element={<StudentDashboard />} />
@@ -213,6 +227,8 @@ const App = () => (
           <Route path="/student/assignments" element={<StudentAssignments />} />
           <Route path="/student/chat" element={<StudentChat />} />
           <Route path="/student/recordings" element={<StudentRecordings />} />
+          <Route path="/student/recordings/watch" element={<StudentRecordingPlayer />} />
+          <Route path="/student/video-player" element={<StudentRecordingPlayer />} />
           <Route path="/student/assessments" element={<StudentAssessments />} />
           <Route path="/student/assessment-report" element={<StudentAssessmentReport />} />
           <Route path="/student/my-course" element={<StudentPackages />} />
@@ -237,6 +253,7 @@ const App = () => (
           <Route path="/student/webinar/:id" element={<WebinarDetails />} />
           <Route path="/student/meet" element={<StudentMeet />} />
           <Route path="/student/meet/:tab" element={<StudentMeet />} />
+          <Route path="/student/game" element={<StudentGame />} />
 
           {/* Intern Routes */}
           <Route path="/intern" element={<InternDashboard />} />
@@ -322,6 +339,8 @@ const App = () => (
           <Route path="/admin/meet" element={<AdminMeetList />} />
           <Route path="/admin/meet/schedule" element={<AdminScheduleMeet />} />
           <Route path="/admin/meet/:id" element={<AdminMeetDetails />} />
+          <Route path="/admin/support-tickets" element={<AdminSupportTickets />} />
+          <Route path="/admin/support-tickets/:id" element={<AdminSupportTicketDetails />} />
           <Route path="/admin/students" element={<StudentList />} />
           <Route path="/admin/students/:id" element={<StudentDetails />} />
           <Route path="/admin/students/add" element={<AddEditStudent mode="add" />} />
@@ -420,6 +439,9 @@ const App = () => (
           {/* Advisor Routes */}
           <Route path="/advisor" element={<DashboardLayout><AdvisorDashboard /></DashboardLayout>} />
           <Route path="/advisor/dashboard" element={<DashboardLayout><AdvisorDashboard /></DashboardLayout>} />
+          <Route path="/advisor/students" element={<DashboardLayout><AdvisorStudents /></DashboardLayout>} />
+          <Route path="/advisor/support-ticket" element={<AdvisorSupportTicket />} />
+          <Route path="/advisor/profile" element={<AdvisorProfile />} />
 
           {/* Legacy redirect */}
           <Route path="/dashboard" element={<Navigate to="/student" replace />} />
@@ -427,8 +449,9 @@ const App = () => (
 
           {/* Catch-all */}
           <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+          </Routes>
+        </BrowserRouter>
+      </SupportTicketsProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

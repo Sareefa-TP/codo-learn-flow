@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { InternSearchBar } from "@/components/inputs/InternSearchBar";
 import { 
   Select, 
   SelectContent, 
@@ -40,6 +41,7 @@ type TicketStatus = "Open" | "In Progress" | "Resolved";
 interface Ticket {
   id: string;
   title: string;
+  description: string;
   category: string;
   status: TicketStatus;
   createdAt: string;
@@ -51,6 +53,7 @@ const initialTickets: Ticket[] = [
   {
     id: "TIC-101",
     title: "Unable to access the 'Backend Scalability' recording",
+    description: "The session video won't load and shows an error on playback. Tried refreshing and logging out/in.",
     category: "Technical",
     status: "In Progress",
     createdAt: "Mar 22, 2026",
@@ -58,6 +61,7 @@ const initialTickets: Ticket[] = [
   {
     id: "TIC-102",
     title: "Inquiry about the upcoming hackathon registration",
+    description: "When will the registration open and what are the eligibility requirements? Is there a form link?",
     category: "Academic",
     status: "Open",
     createdAt: "Today",
@@ -65,6 +69,7 @@ const initialTickets: Ticket[] = [
   {
     id: "TIC-103",
     title: "Stipend for the month of February not credited",
+    description: "My stipend for February hasn't been credited yet. Please confirm the status and expected timeline.",
     category: "Admin",
     status: "Resolved",
     createdAt: "Mar 15, 2026",
@@ -429,6 +434,7 @@ const SupportTicket = () => {
   const [activeFilter, setActiveFilter] = useState("All");
   const [tickets, setTickets] = useState<Ticket[]>(initialTickets);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const filterTabs = [
     { label: "All", count: tickets.length },
@@ -437,14 +443,22 @@ const SupportTicket = () => {
     { label: "Resolved", count: tickets.filter(t => t.status === "Resolved").length },
   ];
 
-  const filteredTickets = tickets.filter(ticket => 
-    activeFilter === "All" || ticket.status === activeFilter
-  );
+  const filteredTickets = useMemo(() => {
+    const byStatus = tickets.filter(ticket => activeFilter === "All" || ticket.status === activeFilter);
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return byStatus;
 
-  const handleTicketSubmission = (ticketData: { title: string; category: string }) => {
+    return byStatus.filter(ticket => {
+      const hay = `${ticket.title} ${ticket.description} ${ticket.status}`.toLowerCase();
+      return hay.includes(q);
+    });
+  }, [tickets, activeFilter, searchQuery]);
+
+  const handleTicketSubmission = (ticketData: { title: string; category: string; description: string }) => {
     const ticketToAdd: Ticket = {
       id: `TIC-${Math.floor(Math.random() * 900) + 100}`,
       title: ticketData.title,
+      description: ticketData.description,
       category: ticketData.category,
       status: "Open",
       createdAt: "Today",
@@ -490,6 +504,12 @@ const SupportTicket = () => {
             onSubmit={handleTicketSubmission}
           />
         )}
+
+        <InternSearchBar
+          placeholder="Search support tickets..."
+          value={searchQuery}
+          onChange={setSearchQuery}
+        />
 
         {/* Filters Section */}
         <div className="space-y-6">
@@ -537,7 +557,9 @@ const SupportTicket = () => {
                 <div className="max-w-xs">
                   <p className="text-muted-foreground font-bold text-lg">No tickets found</p>
                   <p className="text-sm text-muted-foreground/60 mt-1">
-                    {activeFilter === "All" 
+                    {searchQuery.trim()
+                      ? "No tickets match your search."
+                      : activeFilter === "All" 
                       ? "You haven't raised any support tickets yet." 
                       : `You don't have any tickets with status "${activeFilter}".`}
                   </p>

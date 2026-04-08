@@ -136,22 +136,18 @@ const StudentFeedback = () => {
                 Feedback
               </h1>
             </div>
+          </div>
 
-            <div className="flex items-center gap-3 w-full md:w-auto">
-              <div className="relative flex-1 md:w-80 group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                <input 
-                  type="text" 
-                  placeholder="Search feedback..."
-                  className="w-full bg-card border border-border/60 rounded-2xl py-3 pl-11 pr-4 text-sm font-medium focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-sm"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <Button variant="outline" size="icon" className="rounded-2xl border-border/60 shrink-0">
-                <Filter className="w-4 h-4" />
-              </Button>
-            </div>
+          {/* Standardized Search Bar (matches Student → Exam exactly) */}
+          <div className="relative mb-10 group animate-in fade-in slide-in-from-top-4 duration-700 delay-100">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-all duration-300" />
+            <input
+              type="text"
+              placeholder="Search feedback..."
+              className="w-full bg-card border border-border/60 rounded-[1.25rem] py-4 pl-12 pr-6 text-sm font-medium focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-sm placeholder:text-muted-foreground/50"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
 
           {/* Tab-based Navigation */}

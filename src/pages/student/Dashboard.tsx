@@ -211,7 +211,7 @@ const StudentDashboard = () => {
                   </div>
                 </div>
                 <Button asChild size="lg" className="bg-primary hover:bg-primary/90 shadow-md group">
-                  <Link to="/student/my-course">
+                  <Link to="/student/courses">
                     Continue Learning
                     <BookOpen className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </Link>

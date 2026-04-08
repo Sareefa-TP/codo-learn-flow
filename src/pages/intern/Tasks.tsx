@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { InternSearchBar } from "@/components/inputs/InternSearchBar";
 import {
   ClipboardList, Clock, CheckCircle2, AlertCircle, Loader2,
   Calendar, Eye, Upload,
@@ -260,6 +261,7 @@ const TaskCard = ({ task, onView, onSubmit }: TaskCardProps) => {
 
 const InternTasks = () => {
   const [activeFilter, setActiveFilter] = useState<FilterTab | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
 
   // Summary counts
@@ -269,10 +271,18 @@ const InternTasks = () => {
   const completed = tasks.filter(t => t.status === "Completed").length;
   const overdue = tasks.filter(t => t.status === "Overdue").length;
 
-  // Filtered list — null means show all
-  const filtered = activeFilter === null || activeFilter === "All"
-    ? tasks
-    : tasks.filter(t => t.status === activeFilter);
+  const filtered = useMemo(() => {
+    const byStatus =
+      activeFilter === null || activeFilter === "All" ? tasks : tasks.filter((t) => t.status === activeFilter);
+
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return byStatus;
+
+    return byStatus.filter((t) => {
+      const hay = `${t.title} ${t.description} ${t.status}`.toLowerCase();
+      return hay.includes(q);
+    });
+  }, [activeFilter, searchQuery]);
 
   return (
     <DashboardLayout>
@@ -285,6 +295,12 @@ const InternTasks = () => {
             View and complete your assigned internship tasks
           </p>
         </div>
+
+        <InternSearchBar
+          placeholder="Search tasks..."
+          value={searchQuery}
+          onChange={setSearchQuery}
+        />
 
         {/* ── Summary Cards ── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -361,7 +377,11 @@ const InternTasks = () => {
           <div className="text-center py-16 text-muted-foreground border border-dashed border-border/40 rounded-xl">
             <ClipboardList className="w-10 h-10 mx-auto opacity-20 mb-3" />
             <p className="font-medium">No tasks found</p>
-            <p className="text-xs mt-1">No {activeFilter.toLowerCase()} tasks at the moment.</p>
+            <p className="text-xs mt-1">
+              {searchQuery.trim()
+                ? "No tasks match your search."
+                : `No ${(activeFilter ?? "All").toLowerCase()} tasks at the moment.`}
+            </p>
           </div>
         ) : (
           <div className="flex flex-col gap-3">

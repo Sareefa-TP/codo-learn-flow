@@ -12,7 +12,6 @@ import {
   Search,
   Filter,
   MoreVertical,
-  X,
   Eye,
   ChevronDown
 } from "lucide-react";
@@ -20,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { StandardModal } from "@/components/modals/StandardModal";
 
 interface FeedbackEntry {
   id: string;
@@ -281,199 +281,165 @@ const InternFeedback = () => {
 
         </div>
 
-        {/* Add Feedback Modal (Standardized exactly to Student Feedback) */}
-        {isModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-            <div 
-              className="bg-background border border-border/50 rounded-2xl shadow-2xl w-full max-w-2xl min-h-[600px] max-h-[90vh] flex flex-col animate-in fade-in zoom-in duration-200"
-              onClick={e => e.stopPropagation()}
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-border/50 bg-muted/5">
-                <div>
-                  <h2 className="text-xl font-bold tracking-tight">Add Feedback</h2>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Share your experience with your coordinator.
-                  </p>
+        <StandardModal
+          open={isModalOpen}
+          onOpenChange={setIsModalOpen}
+          title="Add Feedback"
+          subtitle="Share your experience with your coordinator."
+          closeOnBackdrop={false}
+          footer={
+            <>
+              <Button
+                variant="outline"
+                onClick={() => setIsModalOpen(false)}
+                className="rounded-xl px-6 h-10 font-semibold"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                disabled={!message.trim() || !selectedCoordinator}
+                className="rounded-xl px-6 h-10 font-semibold bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/10 transition-all"
+              >
+                Submit Feedback
+              </Button>
+            </>
+          }
+        >
+          <form className="space-y-6">
+            <div className="space-y-4 p-4 rounded-xl bg-muted/30 border border-border/40">
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-foreground">
+                  Overall Rating <span className="text-red-500">*</span>
+                </Label>
+                <div className="grid grid-cols-5 gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setRating(star)}
+                      className={cn(
+                        "h-10 rounded-xl flex items-center justify-center transition-all duration-150 border",
+                        rating >= star
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border/40 bg-background hover:border-primary/40 hover:bg-primary/5 text-muted-foreground",
+                      )}
+                    >
+                      <Star className={cn("w-4 h-4", rating >= star && "fill-primary")} />
+                    </button>
+                  ))}
                 </div>
-                <button 
-                  onClick={() => setIsModalOpen(false)} 
-                  className="p-2 rounded-xl hover:bg-muted transition-colors text-muted-foreground"
-                >
-                  <X className="w-5 h-5" />
-                </button>
               </div>
 
-              {/* Body */}
-              <form className="flex-1 overflow-y-auto p-6 space-y-6">
-                <div className="space-y-4 p-4 rounded-xl bg-muted/30 border border-border/40">
-                  {/* Overall Rating */}
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-foreground">
-                      Overall Rating <span className="text-red-500">*</span>
-                    </Label>
-                    <div className="grid grid-cols-5 gap-2">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                          key={star}
-                          type="button"
-                          onClick={() => setRating(star)}
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-foreground">
+                  Select Coordinator <span className="text-red-500">*</span>
+                </Label>
+                <div className="relative">
+                  <select
+                    value={selectedCoordinator}
+                    onChange={(e) => setSelectedCoordinator(e.target.value)}
+                    className="w-full h-10 rounded-xl border border-border/50 bg-background px-3 py-2 text-sm font-medium appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/40 pr-10"
+                  >
+                    <option value="" disabled>
+                      Select a coordinator
+                    </option>
+                    <option value="sarah">Sarah Williams</option>
+                    <option value="john">John Smith</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold text-foreground">
+                Your Thoughts <span className="text-red-500">*</span>
+              </Label>
+              <Textarea
+                placeholder="Tell us about your coordination experience..."
+                className="min-h-[120px] resize-none"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+              />
+            </div>
+          </form>
+        </StandardModal>
+
+        <StandardModal
+          open={isViewModalOpen && !!selectedFeedback}
+          onOpenChange={(o) => {
+            setIsViewModalOpen(o);
+            if (!o) setSelectedFeedback(null);
+          }}
+          title="Feedback Details"
+          subtitle="View the complete details of this feedback entry."
+          closeOnBackdrop={false}
+          footer={
+            <Button
+              onClick={() => setIsViewModalOpen(false)}
+              className="rounded-xl px-8 h-10 font-bold bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/10 transition-all active:scale-95"
+            >
+              Close Details
+            </Button>
+          }
+        >
+          {selectedFeedback && (
+            <div className="space-y-6">
+              <div className="space-y-4 p-4 rounded-xl bg-muted/30 border border-border/40">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Author</p>
+                    <div className="flex items-center gap-2">
+                      <UserCircle2 className="w-4 h-4 text-primary" />
+                      <p className="text-sm font-semibold text-foreground">{selectedFeedback.author}</p>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Type</p>
+                    <Badge variant="outline" className="rounded-lg text-[10px] border-border/60 font-bold uppercase py-0.5 px-2 bg-background">
+                      {selectedFeedback.type.replace(/_/g, " ")}
+                    </Badge>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 pt-2 border-t border-border/20">
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Rating</p>
+                    <div className="flex gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
                           className={cn(
-                            "h-10 rounded-xl flex items-center justify-center transition-all duration-150 border",
-                            rating >= star 
-                              ? "border-primary bg-primary/10 text-primary" 
-                              : "border-border/40 bg-background hover:border-primary/40 hover:bg-primary/5 text-muted-foreground"
+                            "w-4 h-4",
+                            i < (selectedFeedback.rating || 0) ? "fill-yellow-400 text-yellow-400" : "text-muted/20",
                           )}
-                        >
-                          <Star className={cn("w-4 h-4", rating >= star && "fill-primary")} />
-                        </button>
+                        />
                       ))}
                     </div>
                   </div>
-
-                  {/* Select Coordinator */}
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-foreground">
-                      Select Coordinator <span className="text-red-500">*</span>
-                    </Label>
-                    <div className="relative">
-                      <select
-                        value={selectedCoordinator}
-                        onChange={(e) => setSelectedCoordinator(e.target.value)}
-                        className="w-full h-10 rounded-xl border border-border/50 bg-background px-3 py-2 text-sm font-medium appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/40 pr-10"
-                      >
-                        <option value="" disabled>Select a coordinator</option>
-                        <option value="sarah">Sarah Williams</option>
-                        <option value="john">John Smith</option>
-                      </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                    </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Date</p>
+                    <p className="text-sm font-semibold text-foreground">{selectedFeedback.date}</p>
                   </div>
                 </div>
-
-                {/* Message Section */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-foreground">
-                    Your Thoughts <span className="text-red-500">*</span>
-                  </Label>
-                  <Textarea 
-                    placeholder="Tell us about your coordination experience..."
-                    className="min-h-[280px] rounded-xl border-border/50 bg-background focus:ring-2 focus:ring-primary/40 p-4 text-sm font-medium resize-none placeholder:text-muted-foreground/40"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                  />
-                </div>
-              </form>
-
-              {/* Footer */}
-              <div className="p-6 border-t border-border/50 bg-muted/5 flex items-center justify-end gap-3 mt-auto">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setIsModalOpen(false)}
-                  className="rounded-xl px-6 h-10 font-semibold"
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  onClick={handleSubmit}
-                  disabled={!message.trim() || !selectedCoordinator}
-                  className="rounded-xl px-6 h-10 font-semibold bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/10 transition-all"
-                >
-                  Submit Feedback
-                </Button>
               </div>
-            </div>
-          </div>
-        )}
 
-        {/* View Feedback Modal */}
-        {isViewModalOpen && selectedFeedback && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200" onClick={() => setIsViewModalOpen(false)}>
-            <div 
-              className="bg-background border border-border/50 rounded-2xl shadow-2xl w-full max-w-2xl min-h-[600px] max-h-[90vh] flex flex-col animate-in fade-in zoom-in duration-200"
-              onClick={e => e.stopPropagation()}
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-border/50 bg-muted/5">
-                <div>
-                  <h2 className="text-xl font-bold tracking-tight">Feedback Details</h2>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    View the complete details of this feedback entry.
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-foreground">Feedback Message</Label>
+                <div className="relative p-6 rounded-xl border border-border/40 bg-background min-h-[250px] shadow-sm">
+                  <span className="absolute left-4 top-2 text-6xl text-primary/5 font-serif leading-none select-none">"</span>
+                  <p className="text-sm text-foreground/80 leading-relaxed italic relative z-10 whitespace-pre-wrap">
+                    {selectedFeedback.message}
                   </p>
+                  <span className="absolute right-4 bottom-2 text-6xl text-primary/5 font-serif leading-none select-none rotate-180">
+                    "
+                  </span>
                 </div>
-                <button 
-                  onClick={() => setIsViewModalOpen(false)} 
-                  className="p-2 rounded-xl hover:bg-muted transition-colors text-muted-foreground"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Body */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                <div className="space-y-4 p-4 rounded-xl bg-muted/30 border border-border/40">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Author</p>
-                      <div className="flex items-center gap-2">
-                        <UserCircle2 className="w-4 h-4 text-primary" />
-                        <p className="text-sm font-semibold text-foreground">{selectedFeedback.author}</p>
-                      </div>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Type</p>
-                      <Badge variant="outline" className="rounded-lg text-[10px] border-border/60 font-bold uppercase py-0.5 px-2 bg-background">
-                        {selectedFeedback.type.replace(/_/g, ' ')}
-                      </Badge>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4 pt-2 border-t border-border/20">
-                    <div className="space-y-1">
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Rating</p>
-                      <div className="flex gap-1">
-                        {[...Array(5)].map((_, i) => (
-                          <Star 
-                            key={i} 
-                            className={cn(
-                              "w-4 h-4", 
-                              i < (selectedFeedback.rating || 0) ? "fill-yellow-400 text-yellow-400" : "text-muted/20"
-                            )} 
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Date</p>
-                      <p className="text-sm font-semibold text-foreground">{selectedFeedback.date}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-foreground">Feedback Message</Label>
-                  <div className="relative p-6 rounded-xl border border-border/40 bg-background min-h-[250px] shadow-sm">
-                    <span className="absolute left-4 top-2 text-6xl text-primary/5 font-serif leading-none select-none">"</span>
-                    <p className="text-sm text-foreground/80 leading-relaxed italic relative z-10 whitespace-pre-wrap">
-                      {selectedFeedback.message}
-                    </p>
-                    <span className="absolute right-4 bottom-2 text-6xl text-primary/5 font-serif leading-none select-none rotate-180">"</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Footer */}
-              <div className="p-6 border-t border-border/50 bg-muted/5 flex items-center justify-end mt-auto">
-                <Button 
-                  onClick={() => setIsViewModalOpen(false)}
-                  className="rounded-xl px-8 h-10 font-bold bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/10 transition-all active:scale-95"
-                >
-                  Close Details
-                </Button>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </StandardModal>
       </DashboardLayout>
     </>
   );
