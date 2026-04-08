@@ -11,11 +11,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, Paperclip, Send } from "lucide-react";
+import { ArrowLeft, Send } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSupportTickets } from "@/modules/supportTickets/store";
-import type { SupportTicketPriority, SupportTicketStatus } from "@/modules/supportTickets/types";
+import type { SupportTicketStatus } from "@/modules/supportTickets/types";
 
 const statusBadgeClass = (status: SupportTicketStatus) => {
   switch (status) {
@@ -25,19 +25,6 @@ const statusBadgeClass = (status: SupportTicketStatus) => {
       return "bg-blue-500/10 text-blue-700 border-blue-200";
     case "Resolved":
       return "bg-green-500/10 text-green-700 border-green-200";
-    default:
-      return "";
-  }
-};
-
-const priorityBadgeClass = (priority: SupportTicketPriority) => {
-  switch (priority) {
-    case "Low":
-      return "bg-gray-500/10 text-gray-700 border-gray-200";
-    case "Medium":
-      return "bg-orange-500/10 text-orange-700 border-orange-200";
-    case "High":
-      return "bg-red-500/10 text-red-700 border-red-200";
     default:
       return "";
   }
@@ -117,12 +104,6 @@ const AdminSupportTicketDetails = () => {
           <div className="flex items-center gap-2 flex-wrap">
             <Badge
               variant="outline"
-              className={cn("rounded-full border text-[10px] font-bold", priorityBadgeClass(ticket.priority))}
-            >
-              {ticket.priority} Priority
-            </Badge>
-            <Badge
-              variant="outline"
               className={cn("rounded-full border text-[10px] font-bold", statusBadgeClass(ticket.status))}
             >
               {ticket.status}
@@ -145,34 +126,6 @@ const AdminSupportTicketDetails = () => {
                   <p className="text-sm font-medium text-foreground mt-2 leading-relaxed">
                     {ticket.description}
                   </p>
-                </div>
-
-                <div>
-                  <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                    Attachments
-                  </p>
-                  {ticket.attachments?.length ? (
-                    <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {ticket.attachments.map((a) => (
-                        <div
-                          key={a.url}
-                          className="flex items-center gap-3 p-3 rounded-2xl border border-border/50 bg-muted/10"
-                        >
-                          <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-                            <Paperclip className="w-5 h-5 text-primary" />
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-sm font-semibold text-foreground truncate">{a.name}</p>
-                            <p className="text-xs text-muted-foreground truncate">{a.url}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="mt-3 p-4 rounded-2xl border border-dashed border-border/50 text-sm text-muted-foreground">
-                      No attachments provided.
-                    </div>
-                  )}
                 </div>
               </CardContent>
             </Card>
@@ -273,35 +226,19 @@ const AdminSupportTicketDetails = () => {
                   <p className="text-xs text-muted-foreground font-medium mt-1">{ticket.role}</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-4 rounded-2xl border border-border/50 bg-muted/10">
-                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">
-                      Priority
-                    </p>
-                    <Badge
-                      variant="outline"
-                      className={cn(
-                        "mt-2 rounded-full border text-[10px] font-bold",
-                        priorityBadgeClass(ticket.priority),
-                      )}
-                    >
-                      {ticket.priority}
-                    </Badge>
-                  </div>
-                  <div className="p-4 rounded-2xl border border-border/50 bg-muted/10">
-                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">
-                      Status
-                    </p>
-                    <Badge
-                      variant="outline"
-                      className={cn(
-                        "mt-2 rounded-full border text-[10px] font-bold",
-                        statusBadgeClass(ticket.status),
-                      )}
-                    >
-                      {ticket.status}
-                    </Badge>
-                  </div>
+                <div className="p-4 rounded-2xl border border-border/50 bg-muted/10">
+                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">
+                    Status
+                  </p>
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      "mt-2 rounded-full border text-[10px] font-bold",
+                      statusBadgeClass(ticket.status),
+                    )}
+                  >
+                    {ticket.status}
+                  </Badge>
                 </div>
 
                 <div className="pt-2">

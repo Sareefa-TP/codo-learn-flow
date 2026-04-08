@@ -58,6 +58,13 @@ const TutorDashboard = () => {
 
   const sessionsToday = liveClasses.filter(lc => lc.date === todayStr).length;
 
+  const formatTimeParts = (timeStr: string): { hhmm: string; meridiem?: string } => {
+    const trimmed = timeStr.trim();
+    const match = trimmed.match(/^(\d{1,2}:\d{2})\s*(AM|PM)$/i);
+    if (!match) return { hhmm: trimmed };
+    return { hhmm: match[1], meridiem: match[2].toUpperCase() };
+  };
+
   // Logic for Next Session & Upcoming
   const allUpcoming = useMemo(() => {
     return liveClasses
@@ -81,21 +88,21 @@ const TutorDashboard = () => {
 
   return (
     <DashboardLayout>
-      <div className="animate-fade-in space-y-10 lg:space-y-12 max-w-5xl mx-auto pb-10">
+      <div className="animate-fade-in mx-auto w-full max-w-[1320px] space-y-8 pb-10">
 
         {/* Welcome Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border/50 pb-10 mt-4">
-          <div>
-            <h1 className="text-3xl lg:text-4xl font-black text-foreground tracking-tight">
+        <div className="grid grid-cols-1 gap-6 rounded-xl border border-border/60 bg-background/40 p-6 shadow-sm backdrop-blur-sm md:grid-cols-12 md:items-end">
+          <div className="md:col-span-8">
+            <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl lg:text-4xl">
               {getGreeting()}, John
             </h1>
-            <p className="text-muted-foreground font-medium mt-2 text-lg">
+            <p className="mt-2 text-sm font-medium text-muted-foreground sm:text-base">
               Here’s your schedule and updates for today
             </p>
           </div>
-          <div className="text-left md:text-right space-y-3">
-            <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">{todayStr}</p>
-            <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 font-black px-4 py-1.5 rounded-lg text-xs">
+          <div className="space-y-2 text-left md:col-span-4 md:text-right">
+            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{todayStr}</p>
+            <Badge className="inline-flex bg-emerald-500/10 text-emerald-700 border-emerald-500/20 font-bold px-3.5 py-1.5 rounded-xl text-xs">
               {sessionsToday} Sessions Today
             </Badge>
           </div>
@@ -104,42 +111,49 @@ const TutorDashboard = () => {
         {/* 1. Next Sessions (Priority 1) */}
         <div className="space-y-5">
            <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
               <Video className="w-4 h-4 text-primary" />
             </div>
-            <h2 className="text-2xl font-bold text-foreground">Next Session</h2>
+            <h2 className="text-lg font-bold tracking-tight text-foreground sm:text-xl">Next Session</h2>
           </div>
 
           {nextSession ? (
-            <Card className="border-2 border-primary/20 bg-primary/5 shadow-xl shadow-primary/5 overflow-hidden rounded-2xl relative group">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none group-hover:bg-primary/20 transition-all duration-500" />
+            <Card className="relative overflow-hidden rounded-xl border border-primary/20 bg-primary/5 shadow-sm">
+              <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/10 blur-3xl" />
               <CardContent className="p-0">
-                <div className="flex flex-col md:flex-row md:items-center justify-between p-6 md:p-8 gap-6 relative z-10">
-                  <div className="flex items-center gap-6">
-                    <div className="w-20 h-20 rounded-2xl bg-primary text-white flex flex-col items-center justify-center shadow-lg shadow-primary/30 shrink-0">
-                      <span className="text-[10px] font-bold uppercase opacity-80 mb-0.5">Time</span>
-                      <span className="text-xl font-black tracking-tighter">{nextSession.time}</span>
+                <div className="relative z-10 flex flex-col gap-6 p-6 md:flex-row md:items-center md:justify-between md:p-8">
+                  <div className="flex items-start gap-5">
+                    <div className="flex h-[76px] w-[76px] flex-col items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md shadow-primary/15 shrink-0">
+                      <span className="mb-0.5 text-[10px] font-bold uppercase opacity-80">Time</span>
+                      <span className="text-lg font-extrabold leading-none tracking-tight sm:text-xl">
+                        {formatTimeParts(nextSession.time).hhmm}
+                      </span>
+                      {formatTimeParts(nextSession.time).meridiem ? (
+                        <span className="-mt-0.5 text-[10px] font-bold uppercase opacity-85">
+                          {formatTimeParts(nextSession.time).meridiem}
+                        </span>
+                      ) : null}
                     </div>
                     <div>
-                      <Badge className="bg-primary/20 text-primary border-primary/20 hover:bg-primary/30 transition-all font-bold uppercase text-[10px] mb-2 px-3">
+                      <Badge className="mb-2 bg-primary/15 text-primary border-primary/20 font-bold uppercase text-[10px] px-3 py-1 rounded-xl">
                         {nextSession.batch}
                       </Badge>
-                      <h3 className="text-2xl font-bold text-foreground tracking-tight">{nextSession.topic}</h3>
-                      <div className="flex items-center gap-4 mt-3">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground font-semibold">
+                      <h3 className="text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">{nextSession.topic}</h3>
+                      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+                        <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground sm:text-sm">
                           <Clock className="w-4 h-4 text-primary" />
                           <span>Duration: {nextSession.duration}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground font-semibold border-l pl-4">
+                        <div className="flex items-center gap-2 border-l pl-4 text-xs font-semibold text-muted-foreground sm:text-sm">
                           <CalendarIcon className="w-4 h-4 text-primary" />
                           <span>{nextSession.date}</span>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div className="shrink-0 flex items-center gap-4 border-t md:border-t-0 pt-6 md:pt-0">
-                    <a href={nextSession.link} target="_blank" rel="noopener noreferrer" className="w-full">
-                      <Button className="w-full md:w-auto h-14 px-10 rounded-xl font-bold shadow-lg shadow-emerald-500/20 bg-emerald-600 hover:bg-emerald-700 gap-2 text-base transition-all hover:scale-[1.02]">
+                  <div className="shrink-0 border-t pt-5 md:border-t-0 md:pt-0">
+                    <a href={nextSession.link} target="_blank" rel="noopener noreferrer" className="block w-full md:inline-block">
+                      <Button className="h-12 w-full rounded-xl bg-emerald-600 px-8 text-sm font-bold shadow-md shadow-emerald-600/15 transition-colors hover:bg-emerald-700 md:w-auto">
                         Start Session
                       </Button>
                     </a>
@@ -148,7 +162,7 @@ const TutorDashboard = () => {
               </CardContent>
             </Card>
           ) : (
-            <div className="p-10 border-2 border-dashed border-border/60 rounded-3xl text-center bg-muted/10">
+            <div className="rounded-xl border border-dashed border-border/60 bg-muted/10 p-10 text-center">
               <p className="text-muted-foreground font-medium">No sessions scheduled at the moment.</p>
             </div>
           )}
@@ -157,41 +171,54 @@ const TutorDashboard = () => {
         {/* 2. Upcoming Sessions (Next 24 Hours) (Priority 2) */}
         <div className="space-y-5">
            <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/10">
               <CalendarIcon className="w-4 h-4 text-blue-600" />
             </div>
-            <h2 className="text-xl font-bold text-foreground font-display">Upcoming (Next 24 Hours)</h2>
+            <h2 className="text-base font-bold tracking-tight text-foreground sm:text-lg">Upcoming (Next 24 Hours)</h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {upcoming24h.length > 0 ? (
               upcoming24h.map((lc) => (
-                <Card key={lc.id} className="border-border/50 hover:border-primary/30 transition-all shadow-sm group">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-4">
-                        <div className="bg-muted w-14 h-14 rounded-xl flex flex-col items-center justify-center shrink-0 border border-border/50 group-hover:bg-primary/5 group-hover:border-primary/20 transition-colors">
+                <Card key={lc.id} className="group rounded-xl border border-border/60 bg-card/40 shadow-sm transition-colors hover:border-primary/30">
+                  <CardContent className="p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex min-w-0 items-start gap-4">
+                        <div className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-xl border border-border/60 bg-muted/40 transition-colors group-hover:border-primary/20 group-hover:bg-primary/5">
                           <span className="text-[9px] font-bold uppercase opacity-60">Time</span>
-                          <span className="text-sm font-black">{lc.time}</span>
+                          <span className="text-sm font-extrabold leading-none">
+                            {formatTimeParts(lc.time).hhmm}
+                          </span>
+                          {formatTimeParts(lc.time).meridiem ? (
+                            <span className="mt-0.5 text-[9px] font-bold uppercase text-muted-foreground/80">
+                              {formatTimeParts(lc.time).meridiem}
+                            </span>
+                          ) : null}
                         </div>
                         <div className="min-w-0">
-                          <p className="text-[10px] font-extrabold text-blue-600 uppercase tracking-widest mb-0.5">{lc.batch}</p>
-                          <h4 className="font-bold text-foreground text-sm truncate">{lc.topic}</h4>
-                          <div className="flex items-center gap-1.5 mt-1">
+                          <p className="mb-0.5 text-[10px] font-bold uppercase tracking-widest text-blue-700">{lc.batch}</p>
+                          <h4 className="truncate text-sm font-bold text-foreground">{lc.topic}</h4>
+                          <div className="mt-1 flex items-center gap-1.5">
                              <CalendarIcon className="w-3 h-3 text-muted-foreground" />
                              <p className="text-[10px] text-muted-foreground font-semibold">{lc.date}</p>
                           </div>
                         </div>
                       </div>
                       <a href={lc.link} target="_blank" rel="noopener noreferrer">
-                        <Button variant="outline" size="sm" className="h-9 px-4 font-bold text-[11px] rounded-lg border-primary/20 hover:bg-primary hover:text-white transition-all shadow-sm shadow-primary/5">Join</Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-9 rounded-xl border-primary/20 px-4 text-[11px] font-bold shadow-sm shadow-primary/5 transition-colors hover:bg-primary hover:text-white"
+                        >
+                          Join
+                        </Button>
                       </a>
                     </div>
                   </CardContent>
                 </Card>
               ))
             ) : (
-              <div className="col-span-full p-8 border border-dashed border-border/60 rounded-2xl text-center bg-muted/5">
+              <div className="col-span-full rounded-xl border border-dashed border-border/60 bg-muted/5 p-8 text-center">
                 <p className="text-muted-foreground text-sm font-medium italic opacity-70">No other sessions scheduled for the next 24 hours.</p>
               </div>
             )}
@@ -201,23 +228,25 @@ const TutorDashboard = () => {
         {/* 3. Cancelled Classes (Priority 3) */}
         <div className="space-y-5">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center border border-rose-500/20">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-rose-500/20 bg-rose-500/10">
               <XCircle className="w-4 h-4 text-rose-600" />
             </div>
-            <h2 className="text-xl font-bold text-foreground tracking-tight">Cancelled Classes</h2>
+            <h2 className="text-base font-bold tracking-tight text-foreground sm:text-lg">Cancelled Classes</h2>
           </div>
           <div className="space-y-4">
             {cancelledClasses.map((cc) => (
-              <Card key={cc.id} className="border-border/40 bg-card/60 backdrop-blur-sm hover:border-rose-300 transition-all group overflow-hidden">
-                <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-xl bg-rose-50 flex items-center justify-center border border-rose-100 text-rose-600 shrink-0 group-hover:scale-95 transition-transform">
+              <Card key={cc.id} className="group overflow-hidden rounded-xl border border-border/60 bg-card/50 shadow-sm transition-colors hover:border-rose-300">
+                <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-rose-100 bg-rose-50 text-rose-700">
                       <CalendarIcon className="w-7 h-7" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <h4 className="font-bold text-foreground text-base tracking-tight">{cc.batch}</h4>
-                        <Badge variant="outline" className="h-5 text-[9px] border-rose-200 bg-rose-50 text-rose-600 font-black tracking-widest">CANCELLED</Badge>
+                        <h4 className="text-base font-bold tracking-tight text-foreground">{cc.batch}</h4>
+                        <Badge variant="outline" className="h-6 rounded-xl border-rose-200 bg-rose-50 px-2 text-[10px] font-bold tracking-widest text-rose-700">
+                          CANCELLED
+                        </Badge>
                       </div>
                       <div className="flex items-center gap-3 mt-1">
                         <p className="text-xs text-muted-foreground/80 font-bold flex items-center gap-1">
@@ -229,9 +258,9 @@ const TutorDashboard = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="text-right border-t sm:border-t-0 pt-3 sm:pt-0">
-                    <p className="text-[10px] font-black text-rose-600 uppercase tracking-widest opacity-80">Reason for cancellation</p>
-                    <p className="text-sm font-bold text-muted-foreground italic mt-0.5 group-hover:text-rose-600 transition-colors">"{cc.reason}"</p>
+                  <div className="border-t pt-3 text-left sm:border-t-0 sm:pt-0 sm:text-right">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-rose-700/80">Reason</p>
+                    <p className="mt-0.5 text-sm font-semibold text-muted-foreground italic">"{cc.reason}"</p>
                   </div>
                 </CardContent>
               </Card>
@@ -242,37 +271,39 @@ const TutorDashboard = () => {
         {/* 4. Assignment Reviews (Priority 4) */}
         <div className="space-y-5 pb-12">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-orange-500/20 bg-orange-500/10">
               <ClipboardList className="w-4 h-4 text-orange-600" />
             </div>
             <div className="flex items-center gap-2">
-              <h2 className="text-xl font-bold text-foreground">Assignment Reviews</h2>
-              <Badge className="bg-orange-100 text-orange-700 border-orange-200 font-black h-5 px-3">
+              <h2 className="text-base font-bold tracking-tight text-foreground sm:text-lg">Assignment Reviews</h2>
+              <Badge className="h-6 rounded-xl bg-orange-100 px-3 text-xs font-bold text-orange-800 border-orange-200">
                 {pendingSubmissions.length} Action Items
               </Badge>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
             {pendingSubmissions.map((sub) => (
-              <Card key={sub.id} className="border-border/50 hover:border-primary/40 transition-all shadow-sm flex flex-col h-full bg-card/40 group relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-20 h-20 bg-primary/5 rounded-full blur-xl -translate-y-1/2 translate-x-1/2" />
+              <Card key={sub.id} className="group relative flex h-full flex-col overflow-hidden rounded-xl border border-border/60 bg-card/40 shadow-sm transition-colors hover:border-primary/40">
+                <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-primary/5 blur-xl" />
                 <CardContent className="p-6 flex flex-col h-full space-y-5 relative z-10">
                   <div className="flex-1">
                     <div className="flex justify-between items-start gap-4 mb-4">
-                      <p className="text-[10px] font-black text-primary uppercase tracking-widest">{sub.batch}</p>
-                      <Badge variant="secondary" className="text-[9px] h-4 font-bold bg-muted/80 border-border/40">PENDING</Badge>
+                      <p className="text-[10px] font-bold text-primary uppercase tracking-widest">{sub.batch}</p>
+                      <Badge variant="secondary" className="h-6 rounded-xl bg-muted/80 px-2 text-[10px] font-bold border-border/40">
+                        PENDING
+                      </Badge>
                     </div>
-                    <h4 className="font-extrabold text-foreground text-lg leading-tight group-hover:text-primary transition-colors line-clamp-2 underline-offset-4 decoration-primary/20 decoration-2">
+                    <h4 className="line-clamp-2 text-base font-extrabold leading-snug text-foreground transition-colors group-hover:text-primary sm:text-lg">
                       {sub.assignment}
                     </h4>
-                    <div className="flex items-center gap-2 mt-5 text-xs text-muted-foreground font-bold p-2 bg-muted/30 rounded-lg">
+                    <div className="mt-5 flex items-center gap-2 rounded-xl bg-muted/30 p-2 text-xs font-semibold text-muted-foreground">
                       <Clock className="w-3.5 h-3.5 text-primary" />
                       <span>Submitted: {sub.date}</span>
                     </div>
                   </div>
                   <Button 
-                    className="w-full font-black text-xs h-11 bg-primary/5 hover:bg-primary hover:text-white border border-primary/20 transition-all shadow-md shadow-primary/5 mt-auto text-primary rounded-xl"
+                    className="mt-auto h-11 w-full rounded-xl border border-primary/20 bg-primary/5 text-xs font-bold text-primary shadow-sm shadow-primary/5 transition-colors hover:bg-primary hover:text-white"
                     onClick={() => navigate("/tutor/assignments")}
                   >
                     Review Now
@@ -286,37 +317,37 @@ const TutorDashboard = () => {
         {/* 5. Earnings Section (Priority 5) */}
         <div className="space-y-5 pb-12">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
-              <span className="text-lg font-bold text-emerald-600">₹</span>
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/10">
+              <span className="text-base font-bold text-emerald-700">₹</span>
             </div>
-            <h2 className="text-xl font-bold text-foreground">Earnings</h2>
+            <h2 className="text-base font-bold tracking-tight text-foreground sm:text-lg">Earnings</h2>
           </div>
 
-          <Card className="border-border/50 shadow-sm bg-card hover:border-primary/30 transition-all overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
+          <Card className="relative overflow-hidden rounded-xl border border-border/60 bg-card/60 shadow-sm transition-colors hover:border-primary/30">
+            <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-emerald-500/5 blur-3xl" />
             <CardContent className="p-8 relative z-10">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-8">
                   <div className="space-y-1">
-                    <p className="text-xs font-black text-muted-foreground uppercase tracking-widest">This Month Earnings</p>
-                    <h3 className="text-4xl font-black text-foreground tracking-tight">₹18,000</h3>
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">This Month</p>
+                    <h3 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">₹18,000</h3>
                   </div>
                   <div className="hidden sm:block w-px h-12 bg-border/60" />
                   <div className="space-y-4">
                     <div className="flex items-center gap-10">
                       <div className="space-y-0.5">
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Hours Worked</p>
-                        <p className="text-lg font-black text-foreground">90 Hours</p>
+                        <p className="text-lg font-extrabold text-foreground">90 Hours</p>
                       </div>
                       <div className="space-y-0.5 text-right">
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Hourly Rate</p>
-                        <p className="text-lg font-black text-emerald-600">₹200/hr</p>
+                        <p className="text-lg font-extrabold text-emerald-700">₹200/hr</p>
                       </div>
                     </div>
                   </div>
                 </div>
                 <Button 
-                  className="bg-primary hover:bg-primary/90 font-bold px-8 h-12 rounded-xl shadow-lg shadow-primary/10 transition-all hover:scale-105 active:scale-95"
+                  className="h-12 rounded-xl bg-primary px-8 font-bold shadow-sm shadow-primary/10 transition-colors hover:bg-primary/90"
                   onClick={() => navigate("/tutor/wallet")}
                 >
                   View Details

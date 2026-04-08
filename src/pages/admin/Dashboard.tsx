@@ -9,6 +9,7 @@ import {
   GraduationCap,
   Users2,
   BookOpen,
+  Briefcase,
   Calendar,
   Clock,
   CircleDollarSign,
@@ -24,7 +25,8 @@ import {
   User,
   ArrowUpRight,
   ArrowDownRight,
-  MoreHorizontal
+  MoreHorizontal,
+  Layers
 } from "lucide-react";
 import {
   LineChart,
@@ -44,6 +46,7 @@ import {
   Legend
 } from "recharts";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 // --- Mock Data ---
 
@@ -112,10 +115,10 @@ const financeTransactions = [
 // --- Sub-components ---
 
 const StatCard = ({ stat }: { stat: typeof summaryStats[0] }) => (
-  <Card className="border-none shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-all duration-300 group">
-    <CardContent className="p-5 flex flex-col justify-between h-full">
+  <Card className="group rounded-xl border border-border/60 bg-card/60 shadow-sm transition-colors hover:border-primary/20">
+    <CardContent className="flex h-full flex-col justify-between p-5">
       <div className="flex items-center justify-between mb-4">
-        <div className={cn("p-2.5 rounded-xl group-hover:scale-110 transition-transform duration-300", stat.bg, stat.color)}>
+        <div className={cn("rounded-xl p-2.5 transition-transform duration-300 group-hover:scale-[1.04]", stat.bg, stat.color)}>
           <stat.icon className="w-5 h-5" />
         </div>
         <div className={cn(
@@ -126,21 +129,27 @@ const StatCard = ({ stat }: { stat: typeof summaryStats[0] }) => (
         </div>
       </div>
       <div>
-        <h3 className="text-2xl font-bold text-foreground mb-1">{stat.value}</h3>
-        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{stat.label}</p>
+        <h3 className="mb-1 text-2xl font-extrabold tracking-tight text-foreground">{stat.value}</h3>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{stat.label}</p>
       </div>
     </CardContent>
   </Card>
 );
 
 const ChartCard = ({ title, children, icon: Icon }: { title: string, children: React.ReactNode, icon?: any }) => (
-  <Card className="border-none shadow-sm rounded-2xl overflow-hidden min-h-[350px]">
-    <CardHeader className="flex flex-row items-center justify-between py-4 px-6 border-b border-border/50">
-      <CardTitle className="text-sm font-bold flex items-center gap-2">
+  <Card className="min-h-[350px] overflow-hidden rounded-xl border border-border/60 bg-card/60 shadow-sm">
+    <CardHeader className="flex flex-row items-center justify-between border-b border-border/60 px-6 py-4">
+      <CardTitle className="flex items-center gap-2 text-sm font-bold">
         {Icon && <Icon className="w-4 h-4 text-primary" />}
         {title}
       </CardTitle>
-      <MoreHorizontal className="w-4 h-4 text-muted-foreground cursor-pointer" />
+      <button
+        type="button"
+        className="rounded-lg p-1 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        aria-label="More"
+      >
+        <MoreHorizontal className="h-4 w-4" />
+      </button>
     </CardHeader>
     <CardContent className="p-6 h-[300px]">
       {children}
@@ -149,49 +158,132 @@ const ChartCard = ({ title, children, icon: Icon }: { title: string, children: R
 );
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
+
+  const quickActions = [
+    {
+      title: "Add Course",
+      description: "Create and publish a new course",
+      icon: BookOpen,
+      iconWrap: "bg-primary/10 text-primary border-primary/20",
+      to: "/admin/courses/create",
+      variant: "default" as const,
+    },
+    {
+      title: "Create Batch",
+      description: "Set up a new batch schedule",
+      icon: Layers,
+      iconWrap: "bg-blue-500/10 text-blue-600 border-blue-200",
+      // Note: existing route in this repo is singular: /admin/batch/create
+      to: "/admin/batch/create",
+      variant: "outline" as const,
+    },
+    {
+      title: "Add Tutor",
+      description: "Onboard a tutor to the platform",
+      icon: GraduationCap,
+      iconWrap: "bg-emerald-500/10 text-emerald-600 border-emerald-200",
+      // Note: existing route in this repo is singular: /admin/tutor/add
+      to: "/admin/tutor/add",
+      variant: "outline" as const,
+    },
+    {
+      title: "Add Mentor",
+      description: "Create a mentor profile",
+      icon: Users2,
+      iconWrap: "bg-purple-500/10 text-purple-600 border-purple-200",
+      // Note: existing route in this repo is /admin/mentors/add
+      to: "/admin/mentors/add",
+      variant: "outline" as const,
+    },
+    {
+      title: "Add Student",
+      description: "Register a student manually",
+      icon: Users,
+      iconWrap: "bg-amber-500/10 text-amber-700 border-amber-200",
+      // Note: existing route in this repo is /admin/students/add
+      to: "/admin/students/add",
+      variant: "outline" as const,
+    },
+    {
+      title: "Add Intern",
+      description: "Create a new intern entry",
+      icon: Briefcase,
+      iconWrap: "bg-cyan-500/10 text-cyan-700 border-cyan-200",
+      // Note: existing route in this repo is /admin/interns/create
+      to: "/admin/interns/create",
+      variant: "outline" as const,
+    },
+  ];
+
   return (
     <DashboardLayout>
-      <div className="animate-fade-in space-y-6 max-w-[1600px] mx-auto pb-10 px-6">
+      <div className="animate-fade-in mx-auto w-full max-w-[1320px] space-y-6 pb-10">
         
         {/* Header + Quick Actions */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-2">
-          <div>
-            <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-foreground">
+        <div className="grid grid-cols-1 gap-5 rounded-xl border border-border/60 bg-background/40 p-6 shadow-sm backdrop-blur-sm lg:grid-cols-12 lg:items-center">
+          <div className="lg:col-span-8">
+            <h1 className="text-2xl font-extrabold tracking-tight text-foreground lg:text-3xl">
               Platform Overview
             </h1>
-            <p className="text-muted-foreground mt-1 font-medium">
+            <p className="mt-1 text-sm font-medium text-muted-foreground sm:text-base">
               Welcome back, Admin. Here's what's happening across the system today.
             </p>
           </div>
-          
-          <div className="flex flex-wrap items-center gap-3">
-            <Button className="rounded-xl shadow-sm hover:shadow-md transition-all gap-2 bg-primary">
-              <Plus className="w-4 h-4" /> Add Course
-            </Button>
-            <Button variant="outline" className="rounded-xl shadow-sm hover:shadow-md transition-all gap-2 bg-background">
-              <Calendar className="w-4 h-4" /> Create Batch
-            </Button>
-            <Button variant="outline" className="rounded-xl shadow-sm hover:shadow-md transition-all gap-2 bg-background">
-              <UserCheck className="w-4 h-4" /> Approve Users
-            </Button>
-            <Button variant="outline" className="rounded-xl shadow-sm hover:shadow-md transition-all gap-2 bg-background">
-              <Plus className="w-4 h-4" /> Add Tutor
-            </Button>
-            <Button variant="outline" className="rounded-xl shadow-sm hover:shadow-md transition-all gap-2 bg-background">
-              <Activity className="w-4 h-4" /> Create Announcement
-            </Button>
-          </div>
         </div>
 
+        {/* Quick Actions (clickable navigation cards) */}
+        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {quickActions.map((a) => (
+            <button
+              key={a.title}
+              type="button"
+              onClick={() => navigate(a.to)}
+              className={cn(
+                "group w-full cursor-pointer rounded-xl border border-border/60 bg-card/60 text-left shadow-sm transition-colors",
+                "hover:border-primary/20 hover:bg-card/80",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+              )}
+            >
+              <div className="flex h-full items-start gap-4 p-5">
+                <div className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border", a.iconWrap)}>
+                  <a.icon className="w-5 h-5" />
+                </div>
+                <div className="flex min-w-0 flex-1 flex-col">
+                  <p className="text-sm font-extrabold tracking-tight text-foreground transition-colors group-hover:text-primary">
+                    {a.title}
+                  </p>
+                  <p className="mt-1 text-xs font-medium text-muted-foreground">
+                    {a.description}
+                  </p>
+                  <div className="mt-4 pt-2">
+                    <Button
+                      variant={a.variant}
+                      size="sm"
+                      className={cn(
+                        "pointer-events-none gap-2 rounded-xl",
+                        a.variant === "default" && "bg-primary shadow-sm shadow-primary/10",
+                      )}
+                    >
+                      <Plus className="w-4 h-4" />
+                      {a.title}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </button>
+          ))}
+        </section>
+
         {/* Section 1: Summary Cards */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {summaryStats.map((stat, idx) => (
             <StatCard key={idx} stat={stat} />
           ))}
         </section>
 
         {/* Section 2: Charts Section */}
-        <section className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <section className="grid grid-cols-1 gap-6 xl:grid-cols-2">
           <ChartCard title="Student Growth" icon={TrendingUp}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={growthData}>
@@ -258,12 +350,12 @@ const AdminDashboard = () => {
         </section>
 
         {/* Section 3 & 4: Role Overview + Activity & Finance */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
           
           {/* Recent Registrations (Role Overview) */}
-          <Card className="border-none shadow-sm rounded-2xl overflow-hidden xl:col-span-2">
-            <CardHeader className="border-b border-border/50 py-4 px-6 flex flex-row items-center justify-between">
-              <CardTitle className="text-sm font-bold flex items-center gap-2">
+          <Card className="overflow-hidden rounded-xl border border-border/60 bg-card/60 shadow-sm xl:col-span-2">
+            <CardHeader className="flex flex-row items-center justify-between border-b border-border/60 px-6 py-4">
+              <CardTitle className="flex items-center gap-2 text-sm font-bold">
                 <Users className="w-4 h-4 text-primary" />
                 Recent Registrations
               </CardTitle>
@@ -280,9 +372,9 @@ const AdminDashboard = () => {
                       <th className="px-6 py-3">Joined</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border/50">
+                  <tbody className="divide-y divide-border/60">
                     {recentRegistrations.map((user, idx) => (
-                      <tr key={idx} className="hover:bg-muted/10 transition-colors">
+                      <tr key={idx} className="transition-colors hover:bg-muted/10">
                         <td className="px-6 py-4 font-semibold text-sm">{user.name}</td>
                         <td className="px-6 py-4 text-xs font-medium text-muted-foreground">{user.role}</td>
                         <td className="px-6 py-4">
@@ -303,9 +395,9 @@ const AdminDashboard = () => {
           </Card>
 
           {/* Activity Feed */}
-          <Card className="border-none shadow-sm rounded-2xl overflow-hidden">
-            <CardHeader className="border-b border-border/50 py-4 px-6">
-              <CardTitle className="text-sm font-bold flex items-center gap-2">
+          <Card className="overflow-hidden rounded-xl border border-border/60 bg-card/60 shadow-sm">
+            <CardHeader className="border-b border-border/60 px-6 py-4">
+              <CardTitle className="flex items-center gap-2 text-sm font-bold">
                 <Activity className="w-4 h-4 text-primary" />
                 Activity Feed
               </CardTitle>
@@ -333,26 +425,26 @@ const AdminDashboard = () => {
         </div>
 
         {/* Section 4: Finance Snapshot */}
-        <section className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          <Card className="border-none shadow-sm rounded-2xl overflow-hidden xl:col-span-1">
-            <CardHeader className="border-b border-border/50 py-4 px-6 bg-gradient-to-r from-cyan-50 to-transparent">
-              <CardTitle className="text-sm font-bold flex items-center gap-2">
+        <section className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+          <Card className="overflow-hidden rounded-xl border border-border/60 bg-card/60 shadow-sm xl:col-span-1">
+            <CardHeader className="border-b border-border/60 bg-gradient-to-r from-cyan-50 to-transparent px-6 py-4">
+              <CardTitle className="flex items-center gap-2 text-sm font-bold">
                 <CircleDollarSign className="w-4 h-4 text-cyan-600" />
                 Finance Snapshot
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-6">
               <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-muted/20 rounded-2xl border border-border/50">
+                <div className="rounded-xl border border-border/60 bg-muted/20 p-4">
                   <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">Revenue</p>
-                  <p className="text-xl font-black text-foreground">$45,280</p>
+                  <p className="text-xl font-extrabold tracking-tight text-foreground">$45,280</p>
                   <div className="flex items-center text-[10px] text-emerald-600 font-bold mt-1">
                     <ArrowUpRight className="w-3 h-3" /> 12.5%
                   </div>
                 </div>
-                <div className="p-4 bg-muted/20 rounded-2xl border border-border/50">
+                <div className="rounded-xl border border-border/60 bg-muted/20 p-4">
                   <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">Pending</p>
-                  <p className="text-xl font-black text-foreground">$8,420</p>
+                  <p className="text-xl font-extrabold tracking-tight text-foreground">$8,420</p>
                   <div className="flex items-center text-[10px] text-amber-600 font-bold mt-1">
                     <ArrowDownRight className="w-3 h-3" /> 3.2%
                   </div>
@@ -363,9 +455,9 @@ const AdminDashboard = () => {
                 <p className="text-[11px] font-black text-muted-foreground uppercase tracking-widest px-1">Recent Transactions</p>
                 <div className="space-y-3">
                   {financeTransactions.map((tx, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-3 bg-muted/10 rounded-xl hover:bg-muted/20 transition-all border border-border/20">
+                    <div key={idx} className="flex items-center justify-between rounded-xl border border-border/40 bg-muted/10 p-3 transition-colors hover:bg-muted/20">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-background flex items-center justify-center border border-border shadow-sm">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full border border-border/60 bg-background shadow-sm">
                           <User className="w-4 h-4 text-muted-foreground" />
                         </div>
                         <div>
@@ -374,7 +466,7 @@ const AdminDashboard = () => {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-xs font-black text-foreground">{tx.amount}</p>
+                        <p className="text-xs font-extrabold text-foreground">{tx.amount}</p>
                         <Badge className={cn(
                           "text-[9px] font-black h-4 px-1.5",
                           tx.status === "Paid" ? "bg-emerald-50 text-emerald-600 border-none" : "bg-amber-50 text-amber-600 border-none"

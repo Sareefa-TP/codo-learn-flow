@@ -19,11 +19,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { Search, SlidersHorizontal, Eye, LifeBuoy } from "lucide-react";
+import { Search, Eye, LifeBuoy } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSupportTickets } from "@/modules/supportTickets/store";
-import type { SupportTicketPriority, SupportTicketRole, SupportTicketStatus } from "@/modules/supportTickets/types";
+import type { SupportTicketRole, SupportTicketStatus } from "@/modules/supportTickets/types";
 
 const statusBadgeClass = (status: SupportTicketStatus) => {
   switch (status) {
@@ -33,19 +33,6 @@ const statusBadgeClass = (status: SupportTicketStatus) => {
       return "bg-blue-500/10 text-blue-700 border-blue-200";
     case "Resolved":
       return "bg-green-500/10 text-green-700 border-green-200";
-    default:
-      return "";
-  }
-};
-
-const priorityBadgeClass = (priority: SupportTicketPriority) => {
-  switch (priority) {
-    case "Low":
-      return "bg-gray-500/10 text-gray-700 border-gray-200";
-    case "Medium":
-      return "bg-orange-500/10 text-orange-700 border-orange-200";
-    case "High":
-      return "bg-red-500/10 text-red-700 border-red-200";
     default:
       return "";
   }
@@ -83,7 +70,6 @@ const AdminSupportTickets = () => {
 
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<SupportTicketStatus | "All">("All");
-  const [priority, setPriority] = useState<SupportTicketPriority | "All">("All");
   const [role, setRole] = useState<SupportTicketRole | "All">("All");
   const [dateFrom, setDateFrom] = useState<string>("");
   const [dateTo, setDateTo] = useState<string>("");
@@ -92,8 +78,7 @@ const AdminSupportTickets = () => {
     const open = tickets.filter((t) => t.status === "Open").length;
     const inProgress = tickets.filter((t) => t.status === "In Progress").length;
     const resolved = tickets.filter((t) => t.status === "Resolved").length;
-    const highPriority = tickets.filter((t) => t.priority === "High").length;
-    return { open, inProgress, resolved, highPriority };
+    return { open, inProgress, resolved };
   }, [tickets]);
 
   const filtered = useMemo(() => {
@@ -105,7 +90,6 @@ const AdminSupportTickets = () => {
       }
 
       if (status !== "All" && t.status !== status) return false;
-      if (priority !== "All" && t.priority !== priority) return false;
       if (role !== "All" && t.role !== role) return false;
 
       if (dateFrom && t.createdAt < dateFrom) return false;
@@ -113,7 +97,7 @@ const AdminSupportTickets = () => {
 
       return true;
     });
-  }, [tickets, search, status, priority, role, dateFrom, dateTo]);
+  }, [tickets, search, status, role, dateFrom, dateTo]);
 
   return (
     <DashboardLayout>
@@ -128,26 +112,21 @@ const AdminSupportTickets = () => {
               View, filter, and manage tickets from students and advisors.
             </p>
           </div>
+        </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full lg:w-auto">
-            <div className="relative w-full sm:w-[320px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search by name or ticket ID"
-                className="pl-9 rounded-xl"
-              />
-            </div>
-            <Button variant="outline" className="rounded-xl gap-2 bg-background">
-              <SlidersHorizontal className="w-4 h-4" />
-              Filters
-            </Button>
-          </div>
+        {/* Search (below header) */}
+        <div className="relative w-full mb-2">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by name or ticket ID"
+            className="h-12 pl-12 pr-4 rounded-2xl shadow-sm"
+          />
         </div>
 
         {/* Summary cards */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           <SummaryCard
             title="Open Tickets"
             count={summary.open}
@@ -163,11 +142,6 @@ const AdminSupportTickets = () => {
             count={summary.resolved}
             accentClass="bg-green-500/10 text-green-700 border-green-200"
           />
-          <SummaryCard
-            title="High Priority"
-            count={summary.highPriority}
-            accentClass="bg-red-500/10 text-red-700 border-red-200"
-          />
         </section>
 
         {/* Filters */}
@@ -176,7 +150,7 @@ const AdminSupportTickets = () => {
             <CardTitle className="text-sm font-bold">Filters</CardTitle>
           </CardHeader>
           <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                   Status
@@ -190,23 +164,6 @@ const AdminSupportTickets = () => {
                     <SelectItem value="Open">Open</SelectItem>
                     <SelectItem value="In Progress">In Progress</SelectItem>
                     <SelectItem value="Resolved">Resolved</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                  Priority
-                </p>
-                <Select value={priority} onValueChange={(v) => setPriority(v as any)}>
-                  <SelectTrigger className="rounded-xl">
-                    <SelectValue placeholder="All" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="All">All</SelectItem>
-                    <SelectItem value="Low">Low</SelectItem>
-                    <SelectItem value="Medium">Medium</SelectItem>
-                    <SelectItem value="High">High</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -272,7 +229,6 @@ const AdminSupportTickets = () => {
                   <TableHead>User Name</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead>Subject</TableHead>
-                  <TableHead>Priority</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Created Date</TableHead>
                   <TableHead className="text-right">Action</TableHead>
@@ -286,11 +242,6 @@ const AdminSupportTickets = () => {
                       <TableCell className="font-semibold">{t.name}</TableCell>
                       <TableCell className="text-xs font-medium text-muted-foreground">{t.role}</TableCell>
                       <TableCell className="max-w-[420px] truncate font-medium">{t.subject}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={cn("rounded-full border text-[10px] font-bold", priorityBadgeClass(t.priority))}>
-                          {t.priority}
-                        </Badge>
-                      </TableCell>
                       <TableCell>
                         <Badge variant="outline" className={cn("rounded-full border text-[10px] font-bold", statusBadgeClass(t.status))}>
                           {t.status}
@@ -312,7 +263,7 @@ const AdminSupportTickets = () => {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={8} className="py-16">
+                    <TableCell colSpan={7} className="py-16">
                       <div className="flex flex-col items-center justify-center text-center gap-2">
                         <div className="w-12 h-12 rounded-2xl bg-muted/40 flex items-center justify-center border border-border/50">
                           <LifeBuoy className="w-6 h-6 text-muted-foreground/60" />
