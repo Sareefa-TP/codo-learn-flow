@@ -1,10 +1,17 @@
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -14,388 +21,505 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { 
-  Users, 
-  UserCheck, 
-  UserX, 
-  UserPlus, 
-  Search, 
-  MoreVertical, 
-  Eye, 
-  Edit, 
-  Trash2, 
-  Ban,
-  FilterX,
+  Users,
+  CheckCircle2,
+  UserX,
+  UserPlus,
+  Search,
   Plus,
-  BookOpen,
-  Layers,
-  Phone
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
-import { toast } from "sonner";
 import { mockTutors as initialTutors } from "@/data/mockTutors";
 import { cn } from "@/lib/utils";
 
+type TutorRow = (typeof initialTutors)[number];
+
+function tutorInitials(name: string) {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
+
+function tutorSearchHaystack(t: TutorRow): string {
+  const courseText = t.courses.map((c) => `${c.name} ${c.batches.join(" ")}`).join(" ");
+  return [t.name, t.email, t.phone, t.joinedDate, courseText].join(" ").toLowerCase();
+}
+
+function primaryBatchLabel(t: TutorRow): string {
+  const all = t.courses.flatMap((c) => c.batches);
+  if (all.length === 0) return "—";
+  const unique = [...new Set(all)];
+  return unique.slice(0, 2).join(", ") + (unique.length > 2 ? "…" : "");
+}
+
+function isNewTutor(t: TutorRow): boolean {
+  return t.joinedDate.includes("2025");
+}
+
 const AdminTutors = () => {
   const navigate = useNavigate();
-  const [tutors, setTutors] = useState(initialTutors);
-  
-  // Filters State
-  const [search, setSearch] = useState("");
-  const [courseFilter, setCourseFilter] = useState("all");
-  const [batchFilter, setBatchFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [tutors] = useState<TutorRow[]>(initialTutors);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive" | "new">("all");
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
-  // Pagination State
-  const [rowsPerPage, setRowsPerPage] = useState("10");
-  const [currentPage, setCurrentPage] = useState(1);
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm, statusFilter]);
 
-  // Summary Metrics
-  const metrics = {
-    total: tutors.length,
-    active: tutors.filter(t => t.status === "Active").length,
-    inactive: tutors.filter(t => t.status === "Inactive").length,
-    new: tutors.filter(t => {
-        // Mocking "New" as joined in the last 30 days logic for UI purposes
-        return t.joinedDate.includes("2025"); 
-    }).length
-  };
-
-  // Filtering Logic
   const filteredTutors = useMemo(() => {
-    return tutors.filter(tutor => {
-      const matchesSearch = 
-        tutor.name.toLowerCase().includes(search.toLowerCase()) || 
-        tutor.email.toLowerCase().includes(search.toLowerCase());
-      
-      const matchesCourse = courseFilter === "all" || tutor.courses.some(c => c.name === courseFilter);
-      const matchesStatus = statusFilter === "all" || tutor.status === statusFilter;
-      
-      // Batch filtering would ideally be more complex, but for now:
-      const matchesBatch = batchFilter === "all" || tutor.courses.some(c => c.batches.includes(batchFilter));
-
-      return matchesSearch && matchesCourse && matchesStatus && matchesBatch;
+    const q = searchTerm.trim().toLowerCase();
+    return tutors.filter((t) => {
+      const matchesSearch = !q || tutorSearchHaystack(t).includes(q);
+      const matchesStatus =
+        statusFilter === "all" ||
+        (statusFilter === "active" && t.status === "Active") ||
+        (statusFilter === "inactive" && t.status === "Inactive") ||
+        (statusFilter === "new" && isNewTutor(t));
+      return matchesSearch && matchesStatus;
     });
-  }, [tutors, search, courseFilter, batchFilter, statusFilter]);
+  }, [tutors, searchTerm, statusFilter]);
 
-  const resetFilters = () => {
-    setSearch("");
-    setCourseFilter("all");
-    setBatchFilter("all");
-    setStatusFilter("all");
-  };
+  const summaryCards = useMemo(() => {
+    const total = tutors.length;
+    const active = tutors.filter((t) => t.status === "Active").length;
+    const inactive = tutors.filter((t) => t.status === "Inactive").length;
+    const newCount = tutors.filter(isNewTutor).length;
+    return [
+      { label: "Total Tutors", value: total.toLocaleString(), icon: Users, color: "text-blue-600", bg: "bg-blue-50", filter: "all" as const },
+      { label: "Active Tutors", value: active.toLocaleString(), icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50", filter: "active" as const },
+      { label: "Inactive Tutors", value: inactive.toLocaleString(), icon: UserX, color: "text-red-600", bg: "bg-red-50", filter: "inactive" as const },
+      { label: "New Tutors", value: newCount.toLocaleString(), icon: UserPlus, color: "text-amber-600", bg: "bg-amber-50", filter: "new" as const },
+    ];
+  }, [tutors]);
 
-  const handleDelete = (id: string, name: string) => {
-    if (window.confirm(`Are you sure you want to delete tutor ${name}?`)) {
-      setTutors(tutors.filter(t => t.id !== id));
-      toast.success("Tutor deleted successfully");
+  const pageCount = Math.max(1, Math.ceil(filteredTutors.length / pageSize));
+  const currentPage = Math.min(Math.max(1, page), pageCount);
+
+  useEffect(() => {
+    if (page !== currentPage) setPage(currentPage);
+  }, [page, currentPage]);
+
+  const pagedTutors = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredTutors.slice(start, start + pageSize);
+  }, [currentPage, filteredTutors]);
+
+  const pageItems = useMemo(() => {
+    const last = pageCount;
+    const cur = currentPage;
+    const items: Array<number | "ellipsis"> = [];
+    if (last <= 1) return [1];
+    if (last <= 5) {
+      for (let i = 1; i <= last; i++) items.push(i);
+      return items;
     }
-  };
-
-  const handleToggleBlock = (id: string, name: string, isBlocked: boolean) => {
-    const action = isBlocked ? "unblock" : "block";
-    if (window.confirm(`Are you sure you want to ${action} tutor ${name}?`)) {
-      setTutors(tutors.map(t => t.id === id ? { ...t, status: isBlocked ? "Active" : "Inactive" } : t));
-      toast.success(`Tutor ${name} ${isBlocked ? "unblocked" : "blocked"} successfully`);
+    if (cur <= 2) {
+      items.push(1, 2, 3, "ellipsis", last);
+      return items;
     }
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "Active":
-        return <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-none font-bold text-[10px] uppercase rounded-lg px-2.5">Active</Badge>;
-      case "Inactive":
-        return <Badge className="bg-slate-100 text-slate-500 hover:bg-slate-100 border-none font-bold text-[10px] uppercase rounded-lg px-2.5">Inactive</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
+    if (cur === 3) {
+      items.push(1, 2, 3, 4, "ellipsis", last);
+      return items;
     }
-  };
+    if (cur >= last - 1) {
+      items.push(1, "ellipsis", last - 3, last - 2, last - 1, last);
+      return items;
+    }
+    if (cur === last - 2) {
+      items.push(1, "ellipsis", last - 3, last - 2, last - 1, last);
+      return items;
+    }
+    items.push(1, "ellipsis", cur - 1, cur, cur + 1, "ellipsis", last);
+    return items;
+  }, [currentPage, pageCount]);
 
   return (
     <DashboardLayout>
-      <div className="animate-fade-in space-y-6 max-w-[1600px] mx-auto pb-10 px-6">
-        
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-2">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Tutor Management</h1>
-            <p className="text-muted-foreground text-sm flex items-center gap-1.5 mt-0.5 font-medium">
-               <Users className="w-3.5 h-3.5 text-primary" />
-               Manage educator profiles, assignments, and performance
+      <div className="animate-fade-in space-y-5 sm:space-y-6 max-w-[1600px] mx-auto pb-6 sm:pb-10 px-0 sm:px-2 md:px-4 lg:px-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0 space-y-1">
+            <h1 className="text-xl font-bold text-foreground tracking-tight sm:text-2xl">Tutor Management</h1>
+            <p className="text-xs text-muted-foreground font-medium leading-relaxed sm:text-sm">
+              Manage educator profiles, assignments, and performance.
             </p>
           </div>
-          <Button 
+          <Button
             onClick={() => navigate("/admin/tutor/add")}
-            className="rounded-xl h-12 px-8 font-black uppercase tracking-widest text-[11px] shadow-lg shadow-primary/20 gap-2 transition-transform active:scale-95"
+            className="h-11 w-full shrink-0 rounded-xl shadow-sm hover:shadow-md transition-all gap-2 px-6 sm:h-10 sm:w-auto"
           >
-            <Plus className="w-4 h-4" /> Add New Tutor
+            <Plus className="w-4 h-4" /> Add Tutor
           </Button>
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="border-none shadow-sm rounded-2xl bg-white ring-1 ring-slate-100 hover:shadow-md transition-all group">
-            <CardContent className="p-6 flex items-center gap-5">
-               <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white shrink-0 group-hover:scale-110 transition-transform">
-                  <Users className="w-6 h-6" />
-               </div>
-               <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Tutors</p>
-                  <h3 className="text-2xl font-bold text-slate-900">{metrics.total}</h3>
-               </div>
-            </CardContent>
-          </Card>
+        <section className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          {summaryCards.map((stat, idx) => (
+            <Card
+              key={idx}
+              onClick={() => setStatusFilter(stat.filter)}
+              className={cn(
+                "border-none shadow-sm rounded-2xl cursor-pointer hover:shadow-md transition-all group overflow-hidden relative min-w-0",
+                statusFilter === stat.filter && "ring-2 ring-primary/20 bg-primary/[0.02]",
+              )}
+            >
+              <CardContent className="p-3.5 sm:p-5 flex items-center justify-between gap-2 relative z-10">
+                <div className="min-w-0 space-y-0.5 sm:space-y-1">
+                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-wider sm:text-[11px] sm:tracking-widest leading-tight line-clamp-2">
+                    {stat.label}
+                  </p>
+                  <h3 className="text-lg font-black text-foreground tabular-nums sm:text-2xl">{stat.value}</h3>
+                </div>
+                <div
+                  className={cn(
+                    "p-2 rounded-lg sm:p-2.5 sm:rounded-xl shrink-0 group-hover:scale-110 transition-transform duration-300",
+                    stat.bg,
+                    stat.color,
+                  )}
+                >
+                  <stat.icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </section>
 
-          <Card className="border-none shadow-sm rounded-2xl bg-white ring-1 ring-slate-100 hover:shadow-md transition-all group">
-            <CardContent className="p-6 flex items-center gap-5">
-               <div className="w-12 h-12 rounded-2xl bg-emerald-500 flex items-center justify-center text-white shrink-0 group-hover:scale-110 transition-transform">
-                  <UserCheck className="w-6 h-6" />
-               </div>
-               <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Active Tutors</p>
-                  <h3 className="text-2xl font-bold text-slate-900">{metrics.active}</h3>
-               </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-none shadow-sm rounded-2xl bg-white ring-1 ring-slate-100 hover:shadow-md transition-all group">
-            <CardContent className="p-6 flex items-center gap-5">
-               <div className="w-12 h-12 rounded-2xl bg-slate-400 flex items-center justify-center text-white shrink-0 group-hover:scale-110 transition-transform">
-                  <UserX className="w-6 h-6" />
-               </div>
-               <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Inactive Tutors</p>
-                  <h3 className="text-2xl font-bold text-slate-900">{metrics.inactive}</h3>
-               </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-none shadow-sm rounded-2xl bg-white ring-1 ring-slate-100 hover:shadow-md transition-all group">
-            <CardContent className="p-6 flex items-center gap-5">
-               <div className="w-12 h-12 rounded-2xl bg-amber-500 flex items-center justify-center text-white shrink-0 group-hover:scale-110 transition-transform">
-                  <Plus className="w-6 h-6" />
-               </div>
-               <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">New Tutors</p>
-                  <h3 className="text-2xl font-bold text-slate-900">{metrics.new}</h3>
-               </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Filters */}
-        <Card className="border-none shadow-sm rounded-2xl bg-white ring-1 ring-slate-100">
-          <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-              <div className="relative group">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-primary transition-colors" />
-                <Input 
-                  placeholder="Search name, email..." 
-                  className="pl-10 h-11 bg-slate-50/50 border-slate-100/50 rounded-xl font-bold text-slate-800"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </div>
-
-              <Select value={courseFilter} onValueChange={setCourseFilter}>
-                <SelectTrigger className="h-11 bg-slate-50/50 border-slate-100/50 rounded-xl font-bold text-slate-800">
-                  <SelectValue placeholder="Course" />
-                </SelectTrigger>
-                <SelectContent className="rounded-xl border-none shadow-xl">
-                  <SelectItem value="all" className="font-bold py-2.5">All Courses</SelectItem>
-                  <SelectItem value="Full Stack Development" className="font-bold py-2.5">Full Stack</SelectItem>
-                  <SelectItem value="UI/UX Design Masterclass" className="font-bold py-2.5">UI/UX Design</SelectItem>
-                  <SelectItem value="Python Zero to Hero" className="font-bold py-2.5">Python</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={batchFilter} onValueChange={setBatchFilter}>
-                <SelectTrigger className="h-11 bg-slate-50/50 border-slate-100/50 rounded-xl font-bold text-slate-800">
-                  <SelectValue placeholder="Batch" />
-                </SelectTrigger>
-                <SelectContent className="rounded-xl border-none shadow-xl">
-                  <SelectItem value="all" className="font-bold py-2.5">All Batches</SelectItem>
-                  <SelectItem value="FS-JAN-24" className="font-bold py-2.5 outline-none">FS-JAN-24</SelectItem>
-                  <SelectItem value="UI-MAR-24" className="font-bold py-2.5 outline-none">UI-MAR-24</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="h-11 bg-slate-50/50 border-slate-100/50 rounded-xl font-bold text-slate-800">
+        <section className="space-y-6">
+          <Card className="border-none shadow-sm rounded-2xl p-3 sm:p-4 flex flex-col gap-3 sm:gap-4 md:flex-row md:items-stretch">
+            <div className="relative flex-1 w-full min-w-0">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+              <Input
+                placeholder="Search name, email, phone, courses, joined date..."
+                className="pl-10 bg-muted/20 border-none rounded-xl h-11 text-sm"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div className="flex w-full shrink-0 md:w-auto md:max-w-[200px]">
+              <Select
+                value={statusFilter}
+                onValueChange={(v) => setStatusFilter(v as "all" | "active" | "inactive" | "new")}
+              >
+                <SelectTrigger className="w-full md:w-[160px] bg-muted/20 border-none rounded-xl h-11 font-bold text-xs">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-none shadow-xl">
-                  <SelectItem value="all" className="font-bold py-2.5">All Status</SelectItem>
-                  <SelectItem value="Active" className="font-bold py-2.5">Active</SelectItem>
-                  <SelectItem value="Inactive" className="font-bold py-2.5">Inactive</SelectItem>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                  <SelectItem value="new">New (2025)</SelectItem>
                 </SelectContent>
               </Select>
-
-              <Button 
-                variant="outline" 
-                onClick={resetFilters}
-                className="h-11 rounded-xl border-slate-100 text-slate-500 font-bold hover:bg-slate-50 gap-2"
-              >
-                <FilterX className="w-4 h-4" /> Reset Filters
-              </Button>
             </div>
-          </CardContent>
-        </Card>
+          </Card>
 
-        {/* Table */}
-        <Card className="border-none shadow-sm rounded-2xl bg-white overflow-hidden ring-1 ring-slate-100">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-slate-50/50 border-b border-slate-100 hover:bg-slate-50/50">
-                  <TableHead className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Educator Information</TableHead>
-                  <TableHead className="py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Contact Details</TableHead>
-                  <TableHead className="py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Assigned Units</TableHead>
-                  <TableHead className="py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Status</TableHead>
-                  <TableHead className="py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Joined Date</TableHead>
-                  <TableHead className="px-8 py-5 text-right text-[10px] font-black uppercase tracking-widest text-slate-400">Quick Controls</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredTutors.length > 0 ? (
-                  filteredTutors.map((tutor) => (
-                    <TableRow key={tutor.id} className="hover:bg-slate-50/30 transition-colors border-b-slate-50/50">
-                      <TableCell className="px-8 py-6">
-                         <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-xl bg-slate-900 overflow-hidden shrink-0 border-2 border-white shadow-sm ring-1 ring-slate-100">
-                               <img src={tutor.avatar} alt={tutor.name} className="w-full h-full object-cover" />
-                            </div>
-                            <div className="space-y-0.5">
-                               <p className="text-sm font-bold text-slate-900 tracking-tight">{tutor.name}</p>
-                               <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Educator ID: {tutor.id}</p>
-                            </div>
-                         </div>
-                      </TableCell>
-                      <TableCell className="py-6">
-                        <div className="space-y-1">
-                           <div className="flex items-center gap-2 text-xs font-bold text-slate-600 italic">
-                             <Phone className="w-3 h-3 text-slate-300" /> {tutor.phone}
-                           </div>
-                           <p className="text-[10px] font-medium text-slate-400">{tutor.email}</p>
+          <Card className="border-none shadow-sm rounded-2xl overflow-hidden hidden md:block">
+            <div className="overflow-x-auto overscroll-x-contain -mx-px">
+              <Table className="min-w-[800px]">
+                <TableHeader className="bg-muted/30">
+                  <TableRow className="hover:bg-transparent border-b border-border/50">
+                    <TableHead className="px-4 lg:px-6 py-4 text-[11px] font-black uppercase tracking-widest text-muted-foreground">
+                      Tutor
+                    </TableHead>
+                    <TableHead className="py-4 text-[11px] font-black uppercase tracking-widest text-muted-foreground">
+                      Courses
+                    </TableHead>
+                    <TableHead className="py-4 text-[11px] font-black uppercase tracking-widest text-muted-foreground hidden lg:table-cell">
+                      Batch
+                    </TableHead>
+                    <TableHead className="py-4 text-[11px] font-black uppercase tracking-widest text-muted-foreground hidden lg:table-cell">
+                      Students
+                    </TableHead>
+                    <TableHead className="py-4 text-[11px] font-black uppercase tracking-widest text-muted-foreground text-center">
+                      Status
+                    </TableHead>
+                    <TableHead className="py-4 text-[11px] font-black uppercase tracking-widest text-muted-foreground hidden xl:table-cell">
+                      Joined
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {pagedTutors.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="h-40 text-center">
+                        <div className="flex flex-col items-center justify-center gap-2">
+                          <Users className="h-8 w-8 text-muted-foreground/30" />
+                          <p className="font-medium text-muted-foreground">No tutors match your search or filters</p>
                         </div>
-                      </TableCell>
-                      <TableCell className="py-6">
-                        <div className="space-y-1.5">
-                           <div className="flex items-center gap-2">
-                             <BookOpen className="w-3 h-3 text-primary/50" />
-                             <span className="text-[10px] font-bold text-slate-600">{tutor.courses.length} Courses</span>
-                           </div>
-                           <div className="flex items-center gap-2">
-                             <Layers className="w-3 h-3 text-slate-300" />
-                             <span className="text-[10px] font-bold text-slate-400 italic">
-                                {tutor.courses.reduce((acc, curr) => acc + curr.batches.length, 0)} Batches
-                             </span>
-                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="py-6">
-                        {getStatusBadge(tutor.status)}
-                      </TableCell>
-                      <TableCell className="py-6 font-bold text-slate-500 text-xs">
-                        {tutor.joinedDate}
-                      </TableCell>
-                      <TableCell className="px-8 py-6 text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-slate-50">
-                              <MoreVertical className="w-4 h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-56 rounded-2xl border-none shadow-2xl p-2">
-                            <DropdownMenuLabel className="text-[10px] font-black uppercase text-slate-400 px-3 py-2">Profile Oversight</DropdownMenuLabel>
-                             <DropdownMenuItem 
-                              onClick={() => navigate(`/admin/tutor/${tutor.id}`)} 
-                              className="rounded-xl h-11 px-3 font-bold text-slate-600 gap-3"
-                            >
-                              <Eye className="w-4 h-4" /> View Full Profile
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={() => navigate(`/admin/tutor/edit/${tutor.id}`)} 
-                              className="rounded-xl h-11 px-3 font-bold text-slate-600 gap-3"
-                            >
-                              <Edit className="w-4 h-4" /> Modify Config
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator className="bg-slate-50 mx-1" />
-                            <DropdownMenuItem 
-                              onClick={() => handleToggleBlock(tutor.id, tutor.name, tutor.status === "Inactive")}
-                              className="rounded-xl h-11 px-3 font-bold text-slate-600 gap-3"
-                            >
-                              <Ban className="w-4 h-4" /> {tutor.status === "Inactive" ? "Unblock Account" : "Block Access"}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={() => handleDelete(tutor.id, tutor.name)}
-                              className="rounded-xl h-11 px-3 font-bold text-rose-500 hover:text-rose-600 gap-3"
-                            >
-                              <Trash2 className="w-4 h-4" /> Purge Explorer
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={6} className="h-60 text-center">
-                      <div className="flex flex-col items-center justify-center space-y-3">
-                         <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center">
-                            <Users className="w-8 h-8 text-slate-200" />
-                         </div>
-                         <p className="text-sm font-bold text-slate-500 italic">No tutors found in this view</p>
-                         <Button variant="outline" onClick={resetFilters} className="rounded-xl font-bold h-10 border-slate-200">Reset Filters</Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </Card>
+                  ) : null}
+                  {pagedTutors.map((tutor) => (
+                    <TableRow
+                      key={tutor.id}
+                      tabIndex={0}
+                      aria-label={`Open profile for ${tutor.name}`}
+                      className="cursor-pointer border-b border-border/50 transition-colors hover:bg-muted/30 focus-visible:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 last:border-0"
+                      onClick={() => navigate(`/admin/tutor/${tutor.id}`)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          navigate(`/admin/tutor/${tutor.id}`);
+                        }
+                      }}
+                    >
+                      <TableCell className="px-4 lg:px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                            {tutorInitials(tutor.name)}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-bold text-foreground">{tutor.name}</p>
+                            <p className="truncate text-[10px] font-medium text-muted-foreground">{tutor.email}</p>
+                            <p className="text-[9px] font-black uppercase tracking-tight text-muted-foreground/80">
+                              ID: {tutor.id}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="max-w-[220px] py-4">
+                        <div className="flex flex-wrap gap-1">
+                          {tutor.courses.length === 0 ? (
+                            <span className="text-xs font-medium text-muted-foreground">—</span>
+                          ) : (
+                            tutor.courses.map((c) => (
+                              <Badge
+                                key={c.id}
+                                variant="secondary"
+                                className="h-4 max-w-full truncate border-none bg-muted px-1.5 text-[9px] font-bold text-muted-foreground"
+                              >
+                                {c.name}
+                              </Badge>
+                            ))
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden py-4 text-xs font-bold text-muted-foreground lg:table-cell">
+                        {primaryBatchLabel(tutor)}
+                      </TableCell>
+                      <TableCell className="hidden py-4 text-xs font-bold text-foreground lg:table-cell">
+                        {tutor.assignedStudentIds?.length ?? 0}
+                      </TableCell>
+                      <TableCell className="py-4 text-center">
+                        <Badge
+                          className={cn(
+                            "h-5 rounded-full border-none px-2.5 text-[10px] font-black shadow-none",
+                            tutor.status === "Active"
+                              ? "bg-emerald-50 text-emerald-600"
+                              : "bg-muted text-muted-foreground",
+                          )}
+                        >
+                          {tutor.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="hidden py-4 text-[11px] font-bold text-muted-foreground whitespace-nowrap xl:table-cell">
+                        {tutor.joinedDate}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
 
-        {/* Pagination */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-6 rounded-2xl ring-1 ring-slate-100 shadow-sm">
-           <div className="flex items-center gap-3">
-              <p className="text-[10px] font-black uppercase text-slate-400">Rows per page</p>
-              <Select value={rowsPerPage} onValueChange={setRowsPerPage}>
-                <SelectTrigger className="w-20 h-9 bg-slate-50 border-none rounded-lg text-xs font-bold ring-0">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="rounded-xl border-none shadow-xl min-w-[5rem]">
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="25">25</SelectItem>
-                  <SelectItem value="50">50</SelectItem>
-                </SelectContent>
-              </Select>
-           </div>
-
-           <div className="flex items-center gap-2">
-              <Button variant="outline" className="h-9 rounded-xl font-bold text-xs px-4" disabled>Previous</Button>
-              <div className="flex items-center gap-1 mx-2">
-                 {[1].map(p => (
-                   <Button key={p} variant={currentPage === p ? "default" : "ghost"} className="w-9 h-9 rounded-xl font-bold text-xs p-0">{p}</Button>
-                 ))}
+            <div className="flex flex-col gap-4 border-t border-border/50 bg-muted/10 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+              <p className="text-center text-[10px] font-bold text-muted-foreground sm:text-left sm:text-[11px]">
+                Showing{" "}
+                <span className="text-foreground">
+                  {filteredTutors.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}-
+                  {Math.min(currentPage * pageSize, filteredTutors.length)}
+                </span>{" "}
+                of <span className="text-foreground">{filteredTutors.length}</span> tutors
+              </p>
+              <div className="flex min-w-0 justify-center sm:justify-end">
+                <div className="inline-flex max-w-full items-center overflow-x-auto rounded-2xl border border-border/60 bg-background px-1 py-1 shadow-sm">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 shrink-0 rounded-xl"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    aria-label="Previous page"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <div className="flex items-center gap-0.5 px-0.5 sm:gap-1 sm:px-1">
+                    {pageItems.map((item, idx) =>
+                      item === "ellipsis" ? (
+                        <div key={`e-${idx}`} className="px-1.5 text-sm font-bold text-muted-foreground sm:px-2">
+                          …
+                        </div>
+                      ) : (
+                        <Button
+                          key={item}
+                          type="button"
+                          variant={item === currentPage ? "default" : "ghost"}
+                          className={cn(
+                            "h-9 min-w-8 shrink-0 rounded-xl px-2 text-xs font-bold sm:min-w-9 sm:px-3 sm:text-sm",
+                            item === currentPage && "bg-primary text-primary-foreground shadow-sm",
+                          )}
+                          onClick={() => setPage(item)}
+                          aria-current={item === currentPage ? "page" : undefined}
+                        >
+                          {item}
+                        </Button>
+                      ),
+                    )}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 shrink-0 rounded-xl"
+                    onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+                    disabled={currentPage === pageCount}
+                    aria-label="Next page"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-              <Button variant="outline" className="h-9 rounded-xl font-bold text-xs px-4" disabled>Next</Button>
-           </div>
-        </div>
+            </div>
+          </Card>
 
+          <div className="space-y-3 md:hidden">
+            {filteredTutors.length === 0 ? (
+              <Card className="border-none shadow-sm rounded-2xl">
+                <CardContent className="flex flex-col items-center justify-center gap-2 py-12">
+                  <Users className="h-8 w-8 text-muted-foreground/30" />
+                  <p className="text-sm font-medium text-muted-foreground">No tutors match your search or filters</p>
+                </CardContent>
+              </Card>
+            ) : null}
+            {pagedTutors.map((tutor) => (
+              <Card
+                key={tutor.id}
+                className="border-none shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-shadow"
+              >
+                <CardContent className="p-4">
+                  <button
+                    type="button"
+                    className="flex w-full gap-3 rounded-xl text-left outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-primary/30"
+                    onClick={() => navigate(`/admin/tutor/${tutor.id}`)}
+                  >
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                      {tutorInitials(tutor.name)}
+                    </div>
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <p className="truncate text-sm font-bold text-foreground">{tutor.name}</p>
+                      <p className="truncate text-[11px] font-medium text-muted-foreground">{tutor.email}</p>
+                      <div className="flex flex-wrap gap-1 pt-1">
+                        {tutor.courses.length === 0 ? (
+                          <span className="text-[10px] text-muted-foreground">No courses</span>
+                        ) : (
+                          tutor.courses.map((c) => (
+                            <Badge
+                              key={c.id}
+                              variant="secondary"
+                              className="max-w-full truncate border-none bg-muted px-2 py-0 text-[9px] font-bold text-muted-foreground"
+                            >
+                              {c.name}
+                            </Badge>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  </button>
+                  <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-border/40 pt-3 text-[11px]">
+                    <span className="font-bold text-muted-foreground">
+                      Students:{" "}
+                      <span className="text-foreground">{tutor.assignedStudentIds?.length ?? 0}</span>
+                    </span>
+                    <span className="hidden min-[400px]:inline text-muted-foreground">·</span>
+                    <span className="font-bold text-muted-foreground">
+                      Batch: <span className="text-foreground">{primaryBatchLabel(tutor)}</span>
+                    </span>
+                    <span className="hidden min-[400px]:inline text-muted-foreground">·</span>
+                    <span className="font-bold text-muted-foreground">
+                      Joined: <span className="text-foreground">{tutor.joinedDate}</span>
+                    </span>
+                    <Badge
+                      className={cn(
+                        "ml-auto text-[10px] font-black",
+                        tutor.status === "Active"
+                          ? "border-none bg-emerald-50 text-emerald-600 shadow-none"
+                          : "border-none bg-muted text-muted-foreground shadow-none",
+                      )}
+                    >
+                      {tutor.status}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <Card className="border-none shadow-sm rounded-2xl overflow-hidden md:hidden">
+            <div className="flex flex-col gap-4 bg-muted/10 px-4 py-4">
+              <p className="text-center text-[10px] font-bold text-muted-foreground">
+                Showing{" "}
+                <span className="text-foreground">
+                  {filteredTutors.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}-
+                  {Math.min(currentPage * pageSize, filteredTutors.length)}
+                </span>{" "}
+                of <span className="text-foreground">{filteredTutors.length}</span> tutors
+              </p>
+              <div className="flex justify-center overflow-x-auto pb-1">
+                <div className="inline-flex max-w-full items-center rounded-2xl border border-border/60 bg-background px-1 py-1 shadow-sm">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 shrink-0 rounded-xl"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    aria-label="Previous page"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <div className="flex max-w-[min(100vw-8rem,20rem)] items-center gap-0.5 overflow-x-auto px-1">
+                    {pageItems.map((item, idx) =>
+                      item === "ellipsis" ? (
+                        <div key={`m-e-${idx}`} className="shrink-0 px-1.5 text-sm font-bold text-muted-foreground">
+                          …
+                        </div>
+                      ) : (
+                        <Button
+                          key={`m-${item}`}
+                          type="button"
+                          variant={item === currentPage ? "default" : "ghost"}
+                          className={cn(
+                            "h-9 min-w-8 shrink-0 rounded-xl px-2 text-xs font-bold",
+                            item === currentPage && "bg-primary text-primary-foreground shadow-sm",
+                          )}
+                          onClick={() => setPage(item)}
+                          aria-current={item === currentPage ? "page" : undefined}
+                        >
+                          {item}
+                        </Button>
+                      ),
+                    )}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 shrink-0 rounded-xl"
+                    onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+                    disabled={currentPage === pageCount}
+                    aria-label="Next page"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </section>
       </div>
     </DashboardLayout>
   );

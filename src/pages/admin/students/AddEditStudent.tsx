@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, type FormEvent } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,25 +29,108 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { defaultMentorNameForStudentId } from "./studentDefaults";
 
-// --- Mock Data ---
+// --- LocalStorage Student Store (frontend-only persistence) ---
+
+const STUDENTS_STORAGE_KEY = "students";
+
+type StudentStatus = "Active" | "Blocked" | "Completed";
+
+type StudentCourse = { id: string; name: string };
+
+type StoredStudent = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  status: StudentStatus;
+  joined: string; // YYYY-MM-DD
+  courses: StudentCourse[]; // must always exist
+  batchId: string;
+  batchName: string;
+  mentorName: string;
+};
+
+function readStoredStudents(): StoredStudent[] {
+  try {
+    const raw = localStorage.getItem(STUDENTS_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return (parsed as any[])
+      .map((s) => {
+        if (!s || typeof s !== "object" || typeof s.id !== "string") return null;
+        const rawCourses = Array.isArray(s.courses) ? s.courses : [];
+        const courses: StudentCourse[] = rawCourses
+          .map((c: any) => {
+            if (typeof c === "string") return { id: c, name: c };
+            if (!c || typeof c !== "object") return null;
+            if (typeof c.id !== "string" || typeof c.name !== "string") return null;
+            return { id: c.id, name: c.name };
+          })
+          .filter(Boolean) as StudentCourse[];
+        const batchId = typeof (s as any).batchId === "string" ? (s as any).batchId : "";
+        const batchName = typeof (s as any).batchName === "string" ? (s as any).batchName : "";
+        const rawMentor =
+          typeof (s as any).mentorName === "string" ? (s as any).mentorName.trim() : "";
+        const sid = typeof (s as any).id === "string" ? (s as any).id : "";
+        const mentorName = rawMentor || (sid ? defaultMentorNameForStudentId(sid) : "");
+        const normalizedCourses = courses.map(normalizeStoredCourse);
+        return { ...s, courses: normalizedCourses, batchId, batchName, mentorName } as StoredStudent;
+      })
+      .filter(Boolean) as StoredStudent[];
+  } catch {
+    return [];
+  }
+}
+
+function writeStoredStudents(students: StoredStudent[]) {
+  localStorage.setItem(STUDENTS_STORAGE_KEY, JSON.stringify(students));
+}
 
 const AVAILABLE_COURSES = [
-  "Full Stack Development",
-  "Python Data Science",
-  "UI/UX Design",
-  "Digital Marketing",
-  "Cyber Security",
-  "Mobile App Development"
+  { id: "c1", name: "Full Stack Development" },
+  { id: "c2", name: "Python Data Science" },
+  { id: "c3", name: "UI/UX Design" },
+  { id: "c4", name: "Digital Marketing" },
+  { id: "c5", name: "Cyber Security" },
+  { id: "c6", name: "Mobile App Development" },
 ];
 
 const AVAILABLE_BATCHES = [
   "FS-JAN-24", "FS-FEB-24", "PY-JAN-24", "UI-FEB-24", "DM-MAR-24", "CS-JAN-24"
 ];
 
-interface EnrolledCourse {
-  courseName: string;
-  batch: string;
+const BATCHES = [
+  { id: "b1", name: "Morning Batch" },
+  { id: "b2", name: "Evening Batch" },
+  { id: "b3", name: "Weekend Batch" },
+];
+
+const getCourseById = (id: string) => AVAILABLE_COURSES.find((c) => c.id === id) ?? null;
+const getBatchById = (id: string) => BATCHES.find((b) => b.id === id) ?? null;
+
+/** Align stored { id, name } with the catalog so Select values always match a SelectItem (fixes legacy id/name skew like c2 + "UI/UX Design"). */
+function normalizeStoredCourse(c: StudentCourse): StudentCourse {
+  const byId = AVAILABLE_COURSES.find((x) => x.id === c.id);
+  if (byId && byId.name === c.name) return byId;
+  const byName = AVAILABLE_COURSES.find(
+    (x) => x.name.trim().toLowerCase() === c.name.trim().toLowerCase(),
+  );
+  if (byName) return byName;
+  const byIdCi = AVAILABLE_COURSES.find((x) => x.id.toLowerCase() === c.id.toLowerCase());
+  if (byIdCi) return byIdCi;
+  return c;
+}
+
+function resolveBatchIdForForm(batchId: string, batchName: string): string {
+  if (batchId && BATCHES.some((b) => b.id === batchId)) return batchId;
+  const ci = BATCHES.find((b) => b.id.toLowerCase() === batchId.trim().toLowerCase());
+  if (ci) return ci.id;
+  const byName = BATCHES.find((b) => b.name.toLowerCase() === batchName.trim().toLowerCase());
+  if (byName) return byName.id;
+  return batchId;
 }
 
 const AddEditStudent = ({ mode = "add" }: { mode?: "add" | "edit" }) => {
@@ -63,38 +146,38 @@ const AddEditStudent = ({ mode = "add" }: { mode?: "add" | "edit" }) => {
     status: "Active",
   });
 
-  const [enrolledCourses, setEnrolledCourses] = useState<EnrolledCourse[]>([]);
+  const [selectedCourses, setSelectedCourses] = useState<StudentCourse[]>([]);
+  const [selectedBatch, setSelectedBatch] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const courseSelectOptions = useMemo(() => {
+    const catalogIds = new Set(AVAILABLE_COURSES.map((c) => c.id));
+    const extras = selectedCourses.filter((c) => !catalogIds.has(c.id));
+    return [...AVAILABLE_COURSES, ...extras];
+  }, [selectedCourses]);
 
   useEffect(() => {
     if (mode === "edit" && id) {
-      // Mock fetching student data
+      const meta = readStoredStudents().find((s) => s.id === id) ?? null;
       setFormData({
-        name: "Sarah Connor",
-        email: "sarah.c@example.com",
-        phone: "+1 234 567 890",
+        name: meta?.name ?? "Sarah Connor",
+        email: meta?.email ?? "sarah.c@example.com",
+        phone: meta?.phone ?? "+1 234 567 890",
         password: "", // Don't show password in edit
-        status: "Active",
+        status: meta?.status ?? "Active",
       });
-      setEnrolledCourses([
-        { courseName: "Full Stack Development", batch: "FS-JAN-24" },
-        { courseName: "UI/UX Design", batch: "UI-FEB-24" }
-      ]);
+      const loaded = (meta?.courses ?? []).map(normalizeStoredCourse);
+      setSelectedCourses(loaded);
+      setSelectedBatch(resolveBatchIdForForm(meta?.batchId ?? "", meta?.batchName ?? ""));
     }
   }, [mode, id]);
 
-  const handleAddCourse = () => {
-    setEnrolledCourses([...enrolledCourses, { courseName: "", batch: "" }]);
+  const handleAddCourse = (course: StudentCourse) => {
+    setSelectedCourses((prev) => (prev.some((c) => c.id === course.id) ? prev : [...prev, course]));
   };
 
-  const handleRemoveCourse = (index: number) => {
-    setEnrolledCourses(enrolledCourses.filter((_, i) => i !== index));
-  };
-
-  const handleCourseChange = (index: number, field: keyof EnrolledCourse, value: string) => {
-    const updated = [...enrolledCourses];
-    updated[index][field] = value;
-    setEnrolledCourses(updated);
+  const handleRemoveCourse = (courseId: string) => {
+    setSelectedCourses((prev) => prev.filter((c) => c.id !== courseId));
   };
 
   const validate = () => {
@@ -102,13 +185,13 @@ const AddEditStudent = ({ mode = "add" }: { mode?: "add" | "edit" }) => {
     if (!formData.name) newErrors.name = "Full Name is required";
     if (!formData.email) newErrors.email = "Email is required";
     if (mode === "add" && !formData.password) newErrors.password = "Password is required";
-    if (enrolledCourses.length === 0) newErrors.courses = "At least one course must be assigned";
+    if (selectedCourses.length === 0) newErrors.courses = "At least one course must be assigned";
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!validate()) {
       toast({
@@ -119,7 +202,46 @@ const AddEditStudent = ({ mode = "add" }: { mode?: "add" | "edit" }) => {
       return;
     }
 
-    // Logic for saving data...
+    const students = readStoredStudents();
+    const batch = getBatchById(selectedBatch);
+    const batchId = selectedBatch || "";
+    const batchName = batch?.name || "";
+
+    if (mode === "edit" && id) {
+      const updated = students.map((s) =>
+        s.id === id
+          ? {
+              ...s,
+              name: formData.name,
+              email: formData.email,
+              phone: formData.phone,
+              status: formData.status as StudentStatus,
+              courses: selectedCourses,
+              batchId,
+              batchName,
+            }
+          : s,
+      );
+      writeStoredStudents(updated);
+    } else {
+      const today = new Date().toISOString().slice(0, 10);
+      const newId = Date.now().toString();
+      const newStudent: StoredStudent = {
+        id: newId,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        status: formData.status as StudentStatus,
+        joined: today,
+        courses: selectedCourses ?? [],
+        batchId,
+        batchName,
+        mentorName: defaultMentorNameForStudentId(newId),
+      };
+      const updated = [...students, newStudent];
+      writeStoredStudents(updated);
+    }
+
     toast({
       title: mode === "add" ? "Student Enrolled" : "Profile Updated",
       description: `${formData.name} has been successfully ${mode === "add" ? "added to the system" : "updated"}.`,
@@ -248,7 +370,7 @@ const AddEditStudent = ({ mode = "add" }: { mode?: "add" | "edit" }) => {
                 </CardTitle>
                 <Button 
                   type="button" 
-                  onClick={handleAddCourse}
+                  onClick={() => handleAddCourse(AVAILABLE_COURSES[0])}
                   variant="outline" 
                   size="sm" 
                   className="rounded-lg h-8 px-3 text-[10px] font-black uppercase tracking-widest border-primary/20 text-primary hover:bg-primary/5"
@@ -257,7 +379,7 @@ const AddEditStudent = ({ mode = "add" }: { mode?: "add" | "edit" }) => {
                 </Button>
               </CardHeader>
               <CardContent className="p-8 space-y-4">
-                {enrolledCourses.length === 0 ? (
+                {selectedCourses.length === 0 ? (
                   <div className="py-12 text-center space-y-4 bg-muted/5 rounded-3xl border border-dashed border-border/50">
                     <div className="w-12 h-12 bg-muted/50 rounded-full flex items-center justify-center mx-auto">
                       <BookOpen className="w-6 h-6 text-muted-foreground/50" />
@@ -265,33 +387,56 @@ const AddEditStudent = ({ mode = "add" }: { mode?: "add" | "edit" }) => {
                     <p className="text-xs font-bold text-muted-foreground">No courses assigned yet.</p>
                   </div>
                 ) : (
-                  enrolledCourses.map((ec, idx) => (
-                    <div key={idx} className="flex flex-col md:flex-row items-center gap-4 p-5 bg-muted/10 rounded-2xl border border-border/30 group animate-in slide-in-from-left-4 duration-300">
+                  selectedCourses.map((course, rowIndex) => (
+                    <div
+                      key={`${course.id}-${rowIndex}`}
+                      className="flex flex-col md:flex-row items-center gap-4 p-5 bg-muted/10 rounded-2xl border border-border/30 group animate-in slide-in-from-left-4 duration-300"
+                    >
                       <div className="flex-1 w-full space-y-1">
                         <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground pl-1">Course</Label>
-                        <Select value={ec.courseName} onValueChange={(val) => handleCourseChange(idx, "courseName", val)}>
+                        <Select
+                          value={course.id}
+                          onValueChange={(val) => {
+                            const picked =
+                              courseSelectOptions.find((c) => c.id === val) ?? getCourseById(val);
+                            if (!picked) return;
+                            setSelectedCourses((prev) =>
+                              prev.map((c, i) =>
+                                i === rowIndex ? { id: picked.id, name: picked.name } : c,
+                              ),
+                            );
+                          }}
+                        >
                           <SelectTrigger className="h-10 bg-background border-none rounded-xl font-bold text-xs ring-1 ring-border/50">
                             <SelectValue placeholder="Select Course" />
                           </SelectTrigger>
                           <SelectContent className="rounded-xl border-none shadow-xl">
-                            {AVAILABLE_COURSES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                            {courseSelectOptions.map((c) => (
+                              <SelectItem key={c.id} value={c.id}>
+                                {c.name}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </div>
                       <div className="flex-1 w-full space-y-1">
                         <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground pl-1">Batch</Label>
-                        <Select value={ec.batch} onValueChange={(val) => handleCourseChange(idx, "batch", val)}>
+                        <Select value={selectedBatch} onValueChange={setSelectedBatch}>
                           <SelectTrigger className="h-10 bg-background border-none rounded-xl font-bold text-xs ring-1 ring-border/50">
                             <SelectValue placeholder="Select Batch" />
                           </SelectTrigger>
                           <SelectContent className="rounded-xl border-none shadow-xl">
-                            {AVAILABLE_BATCHES.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}
+                            {BATCHES.map((b) => (
+                              <SelectItem key={b.id} value={b.id}>
+                                {b.name}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </div>
                       <Button 
                         type="button" 
-                        onClick={() => handleRemoveCourse(idx)}
+                        onClick={() => handleRemoveCourse(course.id)}
                         variant="ghost" 
                         size="icon" 
                         className="h-10 w-10 rounded-xl text-red-500 hover:bg-red-50 shrink-0 md:mt-5"

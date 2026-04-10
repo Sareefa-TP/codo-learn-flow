@@ -354,6 +354,8 @@ const App = () => (
           <Route path="/admin/tutor/edit/:id" element={<AddEditTutor mode="edit" />} />
           <Route path="/admin/mentors" element={<AdminMentors />} />
           <Route path="/admin/mentors/add" element={<AddEditMentor mode="add" />} />
+          <Route path="/admin/mentors/edit/:id" element={<AddEditMentor mode="edit" />} />
+          <Route path="/admin/mentors/:id" element={<AdminMentorDetails />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/courses" element={<TutorBatches role="admin" batches={courses} />} />
