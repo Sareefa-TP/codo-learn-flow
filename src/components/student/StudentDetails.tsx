@@ -28,6 +28,7 @@ import {
   LayoutGrid
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useRole } from "@/hooks/useRole";
 
 // --- Mock Data ---
 
@@ -398,6 +399,8 @@ const KpiMiniCard = ({
 const StudentDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { role } = useRole();
+  const basePath = role === "superadmin" ? "/superadmin" : "/admin";
   const studentMeta = useMemo(() => {
     if (!id) return null;
     return readStoredStudents().find((s) => s.id === id) ?? null;
@@ -484,7 +487,7 @@ const StudentDetails = () => {
                   variant="outline"
                   size="icon"
                   className="h-10 w-10 shrink-0 rounded-full border-border/60 bg-background shadow-sm hover:bg-muted/40"
-                  onClick={() => navigate("/admin/students")}
+                  onClick={() => navigate(`${basePath}/students`)}
                   aria-label="Back to students"
                 >
                   <ChevronLeft className="h-4 w-4 text-foreground" />
@@ -518,7 +521,7 @@ const StudentDetails = () => {
               </div>
               <Button
                 type="button"
-                onClick={() => navigate(`/admin/students/edit/${id}`)}
+                onClick={() => navigate(`${basePath}/students/edit/${id}`)}
                 variant="outline"
                 className="h-10 w-full shrink-0 gap-2 rounded-xl border-border/60 bg-background shadow-sm sm:w-auto"
               >

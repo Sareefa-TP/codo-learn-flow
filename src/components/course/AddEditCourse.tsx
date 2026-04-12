@@ -39,6 +39,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { useRole } from "@/hooks/useRole";
 
 /**
  * ADMIN PERMISSION COMPLIANCE:
@@ -53,6 +54,8 @@ interface AddEditCourseProps {
 const AddEditCourse = ({ mode }: AddEditCourseProps) => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const { role } = useRole();
+  const basePath = role === "superadmin" ? "/superadmin" : "/admin";
   const { toast } = useToast();
 
   const [formData, setFormData] = useState<Partial<Course>>({
@@ -120,7 +123,7 @@ const AddEditCourse = ({ mode }: AddEditCourseProps) => {
       toast({ title: "Course Updated", description: "Changes saved successfully." });
     }
 
-    navigate("/admin/courses");
+    navigate(`${basePath}/courses`);
   };
 
   return (
@@ -130,7 +133,7 @@ const AddEditCourse = ({ mode }: AddEditCourseProps) => {
         <div className="flex flex-col gap-2">
           <Button 
             variant="ghost" 
-            onClick={() => navigate("/admin/courses")}
+            onClick={() => navigate(`${basePath}/courses`)}
             className="w-fit -ml-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -446,7 +449,7 @@ const AddEditCourse = ({ mode }: AddEditCourseProps) => {
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate("/admin/courses")}
+              onClick={() => navigate(`${basePath}/courses`)}
               className="h-12 px-8 rounded-xl border-slate-200 text-slate-600 font-bold"
             >
               Cancel

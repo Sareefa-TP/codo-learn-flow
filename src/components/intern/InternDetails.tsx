@@ -49,10 +49,13 @@ import {
   AttendanceRecord
 } from "@/data/internData";
 import { toast } from "sonner";
+import { useRole } from "@/hooks/useRole";
 
 const AdminInternDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { role } = useRole();
+  const basePath = role === "superadmin" ? "/superadmin" : "/admin";
   const [activeTab, setActiveTab] = useState("overview");
 
   // Find intern data
@@ -75,7 +78,7 @@ const AdminInternDetails = () => {
             <h2 className="text-xl font-bold">Intern Not Found</h2>
             <p className="text-muted-foreground">The intern you are looking for does not exist or has been removed.</p>
           </div>
-          <Button onClick={() => navigate("/admin/interns")} variant="outline" className="rounded-xl gap-2">
+          <Button onClick={() => navigate(`${basePath}/interns`)} variant="outline" className="rounded-xl gap-2">
             <ArrowLeft className="w-4 h-4" />
             Back to Interns
           </Button>
@@ -95,7 +98,7 @@ const AdminInternDetails = () => {
               variant="outline" 
               size="icon" 
               className="rounded-full h-10 w-10 shrink-0 border-border/50"
-              onClick={() => navigate("/admin/interns")}
+              onClick={() => navigate(`${basePath}/interns`)}
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>

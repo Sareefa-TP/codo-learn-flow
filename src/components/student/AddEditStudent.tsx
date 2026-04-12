@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useRole } from "@/hooks/useRole";
 import { defaultMentorNameForStudentId } from "./studentDefaults";
 
 // --- LocalStorage Student Store (frontend-only persistence) ---
@@ -136,6 +137,8 @@ function resolveBatchIdForForm(batchId: string, batchName: string): string {
 const AddEditStudent = ({ mode = "add" }: { mode?: "add" | "edit" }) => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { role } = useRole();
+  const basePath = role === "superadmin" ? "/superadmin" : "/admin";
   const { toast } = useToast();
   
   const [formData, setFormData] = useState({
@@ -246,7 +249,7 @@ const AddEditStudent = ({ mode = "add" }: { mode?: "add" | "edit" }) => {
       title: mode === "add" ? "Student Enrolled" : "Profile Updated",
       description: `${formData.name} has been successfully ${mode === "add" ? "added to the system" : "updated"}.`,
     });
-    navigate("/admin/students");
+    navigate(`${basePath}/students`);
   };
 
   return (
@@ -257,7 +260,7 @@ const AddEditStudent = ({ mode = "add" }: { mode?: "add" | "edit" }) => {
         <div className="flex items-center justify-between">
           <Button 
             variant="ghost" 
-            onClick={() => navigate("/admin/students")}
+            onClick={() => navigate(`${basePath}/students`)}
             className="rounded-xl gap-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 -ml-4"
           >
             <ChevronLeft className="w-4 h-4" /> Cancel

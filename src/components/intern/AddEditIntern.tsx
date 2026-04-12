@@ -24,9 +24,12 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { INTERNS, addIntern, Intern } from "@/data/internData";
+import { useRole } from "@/hooks/useRole";
 
 const AddEditIntern = () => {
   const navigate = useNavigate();
+  const { role } = useRole();
+  const basePath = role === "superadmin" ? "/superadmin" : "/admin";
   
   const [formData, setFormData] = useState({
     name: "",
@@ -97,7 +100,7 @@ const AddEditIntern = () => {
       addIntern(newIntern);
       toast.success("Intern onboarded successfully!");
       setIsSubmitting(false);
-      navigate("/admin/interns");
+      navigate(`${basePath}/interns`);
     }, 800);
   };
 
@@ -111,7 +114,7 @@ const AddEditIntern = () => {
              <Button 
                 variant="ghost" 
                 size="icon" 
-                onClick={() => navigate("/admin/interns")}
+                onClick={() => navigate(`${basePath}/interns`)}
                 className="rounded-xl hover:bg-muted h-10 w-10 shrink-0"
               >
                 <ChevronLeft className="w-5 h-5" />
@@ -129,7 +132,7 @@ const AddEditIntern = () => {
           <div className="flex items-center gap-3">
              <Button 
               variant="ghost" 
-              onClick={() => navigate("/admin/interns")}
+              onClick={() => navigate(`${basePath}/interns`)}
               className="rounded-xl h-11 px-6 font-bold text-muted-foreground hover:text-foreground"
             >
               Cancel
@@ -256,7 +259,7 @@ const AddEditIntern = () => {
              <Button 
                 type="button"
                 variant="outline" 
-                onClick={() => navigate("/admin/interns")}
+                onClick={() => navigate(`${basePath}/interns`)}
                 className="rounded-xl h-12 px-8 font-bold border-border/50 hover:bg-background"
               >
                 Abort

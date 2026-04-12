@@ -163,10 +163,10 @@ export const adminNavigation: RoleNavigation = {
     { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
     { title: "Students", url: "/admin/students", icon: GraduationCap },
     { title: "Interns", url: "/admin/interns", icon: Briefcase },
-    { title: "Tutors", url: "/admin/tutor", icon: BookOpen },
+    { title: "Tutors", url: "/admin/tutors", icon: BookOpen },
     { title: "Mentors", url: "/admin/mentors", icon: Users },
     { title: "Courses", url: "/admin/courses", icon: Package },
-    { title: "Batch", url: "/admin/batch", icon: Layers },
+    { title: "Batches", url: "/admin/batches", icon: Layers },
     { title: "Meet", url: "/admin/meet", icon: Video },
     { title: "Assignments", url: "/admin/assignments", icon: ClipboardList },
     { title: "Attendance", url: "/admin/attendance", icon: UserCheck },
@@ -266,7 +266,8 @@ export const superadminNavigation: RoleNavigation = {
     { title: "Interns", url: "/superadmin/interns", icon: Briefcase },
     { title: "Tutors", url: "/superadmin/tutors", icon: BookOpen },
     { title: "Mentors", url: "/superadmin/mentors", icon: Users },
-    { title: "Program Structure", url: "/superadmin/program", icon: Package },
+    { title: "Courses", url: "/superadmin/courses", icon: Package },
+
     { title: "Batches", url: "/superadmin/batches", icon: Users },
     { title: "Finance & Payroll", url: "/superadmin/finance", icon: CreditCard },
     { title: "Reports & Analytics", url: "/superadmin/reports", icon: PieChart },
@@ -274,9 +275,7 @@ export const superadminNavigation: RoleNavigation = {
     { title: "Integrations", url: "/superadmin/integrations", icon: Link2 },
     { title: "System Settings", url: "/superadmin/settings", icon: Settings },
   ],
-  secondaryNav: [
-    { title: "Notifications", url: "/superadmin/notifications", icon: Bell },
-  ],
+  secondaryNav: [],
 };
 
 // Get navigation config by role

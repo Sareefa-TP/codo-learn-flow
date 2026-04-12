@@ -16,6 +16,7 @@ import { ArrowLeft, Save, Plus, X, BookOpen, User, Phone, Mail } from "lucide-re
 import { useToast } from "@/hooks/use-toast";
 import { mockMentors, updateMentor, addMentor } from "@/data/mockMentors";
 import { Badge } from "@/components/ui/badge";
+import { useRole } from "@/hooks/useRole";
 
 interface AddEditMentorProps {
   mode: "add" | "edit";
@@ -24,6 +25,8 @@ interface AddEditMentorProps {
 const AddEditMentor = ({ mode }: AddEditMentorProps) => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { role } = useRole();
+  const basePath = role === "superadmin" ? "/superadmin" : "/admin";
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -106,7 +109,7 @@ const AddEditMentor = ({ mode }: AddEditMentorProps) => {
       });
     }
 
-    navigate("/admin/mentors");
+    navigate(`${basePath}/mentors`);
   };
 
   return (
@@ -116,7 +119,7 @@ const AddEditMentor = ({ mode }: AddEditMentorProps) => {
         <div className="flex flex-col gap-2">
           <Button
             variant="ghost"
-            onClick={() => navigate("/admin/mentors")}
+            onClick={() => navigate(`${basePath}/mentors`)}
             className="w-fit -ml-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -290,7 +293,7 @@ const AddEditMentor = ({ mode }: AddEditMentorProps) => {
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate("/admin/mentors")}
+              onClick={() => navigate(`${basePath}/mentors`)}
               className="h-11 px-8 rounded-xl border-slate-200"
             >
               Cancel

@@ -1,11 +1,11 @@
 import StudentList from "@/components/student/StudentList";
 
 /**
- * Super Admin Student Management
+ * Admin Student Management
  * This page uses the shared StudentList component.
  */
-const Students = () => {
+const StudentListPage = () => {
   return <StudentList />;
 };
 
-export default Students;
+export default StudentListPage;

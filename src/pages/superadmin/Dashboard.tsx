@@ -1,15 +1,13 @@
-import { useMemo } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import SuperAdminStatCard from "@/components/superadmin/SuperAdminStatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Users, GraduationCap, IndianRupee, TrendingDown } from "lucide-react";
+import { IndianRupee, TrendingDown, Wallet, UserCog } from "lucide-react";
 import {
-  studentRecords,
   transactions,
   activityLogs,
   financialChartData,
   getWalletBalance,
+  staffMembers,
 } from "@/data/superAdminData";
 import {
   BarChart,
@@ -30,21 +28,8 @@ const activityTypeIcon: Record<string, string> = {
 };
 
 const SuperAdminDashboard = () => {
-  const totalStudents = studentRecords.filter((s) => s.type === "student").length;
-  const activeInterns = studentRecords.filter((s) => s.type === "intern" && s.status === "active").length;
+  const totalAdmins = staffMembers.filter((s) => s.role === "admin").length;
   const { credits, debits, balance } = getWalletBalance();
-
-  const monthlyRevenue = useMemo(() => {
-    return transactions
-      .filter((t) => t.direction === "credit" && t.date.startsWith("2025-01"))
-      .reduce((a, t) => a + t.amount, 0);
-  }, []);
-
-  const totalPayouts = useMemo(() => {
-    return transactions
-      .filter((t) => t.direction === "debit" && t.date.startsWith("2025-01"))
-      .reduce((a, t) => a + t.amount, 0);
-  }, []);
 
   return (
     <DashboardLayout>
@@ -60,33 +45,33 @@ const SuperAdminDashboard = () => {
 
         {/* Stat cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+
           <SuperAdminStatCard
-            title="Total Students"
-            value={totalStudents}
-            subtitle={`${studentRecords.filter((s) => s.status === "active" && s.type === "student").length} active`}
-            icon={GraduationCap}
-            trend={{ value: "+3 this month", positive: true }}
-          />
-          <SuperAdminStatCard
-            title="Active Interns"
-            value={activeInterns}
-            subtitle={`${studentRecords.filter((s) => s.type === "intern").length} total`}
-            icon={Users}
-            trend={{ value: "+1 this month", positive: true }}
-          />
-          <SuperAdminStatCard
-            title="Monthly Revenue"
-            value={`₹${(monthlyRevenue / 1000).toFixed(0)}K`}
-            subtitle="Jan 2025 student fees"
+            title="Total Credits"
+            value={`₹${(credits / 1000).toFixed(0)}K`}
+            subtitle="All time income"
             icon={IndianRupee}
-            trend={{ value: "+18% vs Dec", positive: true }}
+            trend={{ value: "Updated now", positive: true }}
           />
           <SuperAdminStatCard
-            title="Total Payouts"
-            value={`₹${(totalPayouts / 1000).toFixed(0)}K`}
-            subtitle="Salaries + Stipends"
+            title="Total Debits"
+            value={`₹${(debits / 1000).toFixed(0)}K`}
+            subtitle="All time expenses"
             icon={TrendingDown}
-            trend={{ value: "On track", positive: true }}
+            trend={{ value: "Updated now", positive: false }}
+          />
+          <SuperAdminStatCard
+            title="Net Balance"
+            value={`₹${(balance / 1000).toFixed(1)}K`}
+            subtitle="Current surplus"
+            icon={Wallet}
+            trend={{ value: balance >= 0 ? "Positive" : "Negative", positive: balance >= 0 }}
+          />
+          <SuperAdminStatCard
+            title="Total Admin"
+            value={totalAdmins}
+            subtitle="Platform managers"
+            icon={UserCog}
           />
         </div>
 
@@ -146,23 +131,6 @@ const SuperAdminDashboard = () => {
           </Card>
         </div>
 
-        {/* Quick Wallet Summary */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Card className="border border-border/60 shadow-card p-5">
-            <p className="text-sm text-muted-foreground">Total Credits</p>
-            <p className="text-xl font-bold text-primary">₹{credits.toLocaleString("en-IN")}</p>
-          </Card>
-          <Card className="border border-border/60 shadow-card p-5">
-            <p className="text-sm text-muted-foreground">Total Debits</p>
-            <p className="text-xl font-bold text-destructive">₹{debits.toLocaleString("en-IN")}</p>
-          </Card>
-          <Card className="border border-border/60 shadow-card p-5">
-            <p className="text-sm text-muted-foreground">Net Balance</p>
-            <p className={`text-xl font-bold ${balance >= 0 ? "text-primary" : "text-destructive"}`}>
-              ₹{balance.toLocaleString("en-IN")}
-            </p>
-          </Card>
-        </div>
       </div>
     </DashboardLayout>
   );

@@ -31,6 +31,7 @@ import {
   ChevronRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useRole } from "@/hooks/useRole";
 import { defaultMentorNameForStudentId } from "./studentDefaults";
 
 // --- LocalStorage Student Store (frontend-only persistence) ---
@@ -125,6 +126,8 @@ const seededStudents: StudentRow[] = Array.from({ length: 1000 }).map((_, i) => 
 
 const StudentList = () => {
   const navigate = useNavigate();
+  const { role } = useRole();
+  const basePath = role === "superadmin" ? "/superadmin" : "/admin";
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [page, setPage] = useState(1);
@@ -234,7 +237,7 @@ const StudentList = () => {
             </p>
           </div>
           <Button 
-            onClick={() => navigate("/admin/students/add")}
+            onClick={() => navigate(`${basePath}/students/add`)}
             className="h-11 w-full shrink-0 rounded-xl shadow-sm hover:shadow-md transition-all gap-2 px-6 sm:h-10 sm:w-auto"
           >
             <Plus className="w-4 h-4" /> Add Student
@@ -317,11 +320,11 @@ const StudentList = () => {
                         key={student.id}
                         className="group cursor-pointer hover:bg-muted/10 transition-colors border-b border-border/50 last:border-0 focus-within:bg-muted/10"
                         tabIndex={0}
-                        onClick={() => navigate(`/admin/students/${student.id}`)}
+                        onClick={() => navigate(`${basePath}/students/${student.id}`)}
                         onKeyDown={(e) => {
                           if (e.key === "Enter" || e.key === " ") {
                             e.preventDefault();
-                            navigate(`/admin/students/${student.id}`);
+                            navigate(`${basePath}/students/${student.id}`);
                           }
                         }}
                       >
@@ -447,7 +450,7 @@ const StudentList = () => {
                     <button
                       type="button"
                       className="flex w-full gap-3 rounded-xl text-left outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-primary/30"
-                      onClick={() => navigate(`/admin/students/${student.id}`)}
+                      onClick={() => navigate(`${basePath}/students/${student.id}`)}
                     >
                       <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
                         {student.name.split(" ").map((n) => n[0]).join("")}

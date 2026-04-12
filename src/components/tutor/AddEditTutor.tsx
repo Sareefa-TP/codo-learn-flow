@@ -27,6 +27,7 @@ import {
 import { toast } from "sonner";
 import { mockTutors } from "@/data/mockTutors";
 import { cn } from "@/lib/utils";
+import { useRole } from "@/hooks/useRole";
 
 interface AddEditTutorProps {
   mode: "add" | "edit";
@@ -42,6 +43,8 @@ const availableCourses = [
 const AddEditTutor = ({ mode }: AddEditTutorProps) => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { role } = useRole();
+  const basePath = role === "superadmin" ? "/superadmin" : "/admin";
   
   const [formData, setFormData] = useState({
     name: "",
@@ -109,7 +112,7 @@ const AddEditTutor = ({ mode }: AddEditTutorProps) => {
     }
 
     toast.success(`Tutor ${mode === "add" ? "added" : "updated"} successfully!`);
-    navigate("/admin/tutor");
+    navigate(`${basePath}/tutors`);
   };
 
   return (
@@ -122,7 +125,7 @@ const AddEditTutor = ({ mode }: AddEditTutorProps) => {
              <Button 
                 variant="ghost" 
                 size="icon" 
-                onClick={() => navigate("/admin/tutor")}
+                onClick={() => navigate(`${basePath}/tutors`)}
                 className="rounded-xl hover:bg-slate-100 h-10 w-10 shrink-0"
               >
                 <ChevronLeft className="w-5 h-5" />
@@ -140,7 +143,7 @@ const AddEditTutor = ({ mode }: AddEditTutorProps) => {
           <div className="flex items-center gap-3">
              <Button 
               variant="ghost" 
-              onClick={() => navigate("/admin/tutor")}
+              onClick={() => navigate(`${basePath}/tutors`)}
               className="rounded-xl h-11 px-6 font-bold text-slate-500 hover:text-slate-900"
             >
               Cancel Operation
@@ -348,7 +351,7 @@ const AddEditTutor = ({ mode }: AddEditTutorProps) => {
              <Button 
                 type="button"
                 variant="ghost" 
-                onClick={() => navigate("/admin/tutor")}
+                onClick={() => navigate(`${basePath}/tutors`)}
                 className="rounded-xl h-12 px-8 font-bold text-slate-300 hover:text-white hover:bg-white/5"
               >
                 Abort Changes

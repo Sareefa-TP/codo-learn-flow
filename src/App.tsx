@@ -104,24 +104,25 @@ import MentorChat from "./pages/mentor/Chat";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/Dashboard";
-import StudentList from "./pages/admin/students/StudentList";
-import StudentDetails from "./pages/admin/students/StudentDetails";
-import AddEditStudent from "./pages/admin/students/AddEditStudent";
+import StudentList from "./components/student/StudentList";
+import StudentDetails from "./components/student/StudentDetails";
+import AddEditStudent from "./components/student/AddEditStudent";
+import AdminStudents from "./pages/admin/Students";
 import AdminInterns from "./pages/admin/Interns";
-import AdminInternDetails from "./pages/admin/InternDetails";
-import AddEditIntern from "./pages/admin/AddEditIntern";
-import AdminTutorDetails from "./pages/admin/TutorDetails";
-import AddEditTutor from "./pages/admin/AddEditTutor.tsx";
+import AdminInternDetails from "./components/intern/InternDetails";
+import AddEditIntern from "./components/intern/AddEditIntern";
+import AdminTutorDetails from "./components/tutor/TutorDetails";
+import AddEditTutor from "./components/tutor/AddEditTutor.tsx";
 import AdminTutors from "./pages/admin/Tutors";
 import AdminMentors from "./pages/admin/Mentors";
-import AddEditMentor from "./pages/admin/AddEditMentor.tsx";
-import AdminMentorDetails from "./pages/admin/MentorDetails";
-import CoursesList from "./pages/admin/courses/CourseList.tsx";
-import CreateCourse from "./pages/admin/courses/AddEditCourse.tsx";
+import AddEditMentor from "./components/mentor/AddEditMentor.tsx";
+import AdminMentorDetails from "./components/mentor/MentorDetails";
+import CoursesList from "./pages/admin/courses/CourseList";
+import CreateCourse from "./components/course/AddEditCourse.tsx";
 import { courses } from "./data/courseData.ts";
-import BatchList from "./pages/admin/batch/BatchList";
-import BatchForm from "./pages/admin/batch/BatchForm";
-import BatchDetails from "./pages/admin/batch/BatchDetails";
+import AdminBatches from "./pages/admin/batch/BatchList";
+import AdminBatchForm from "./pages/admin/batch/BatchForm";
+import AdminBatchDetails from "./pages/admin/batch/BatchDetails";
 import AdminAttendance from "./pages/admin/Attendance";
 import AdminAssessments from "./pages/admin/Assessments";
 import AdminFinance from "./pages/admin/FinanceOverview";
@@ -166,7 +167,8 @@ import SuperAdminStudents from "./pages/superadmin/Students";
 import SuperAdminInterns from "./pages/superadmin/Interns";
 import SuperAdminTutors from "./pages/superadmin/Tutors";
 import SuperAdminMentors from "./pages/superadmin/Mentors";
-import SuperAdminProgram from "./pages/superadmin/Program";
+import SuperAdminCourses from "./pages/superadmin/Courses";
+
 import SuperAdminBatches from "./pages/superadmin/Batches";
 import SuperAdminFinance from "./pages/superadmin/Finance";
 import SuperAdminReports from "./pages/superadmin/Reports";
@@ -341,17 +343,17 @@ const App = () => (
           <Route path="/admin/meet/:id" element={<AdminMeetDetails />} />
           <Route path="/admin/support-tickets" element={<AdminSupportTickets />} />
           <Route path="/admin/support-tickets/:id" element={<AdminSupportTicketDetails />} />
-          <Route path="/admin/students" element={<StudentList />} />
+          <Route path="/admin/students" element={<AdminStudents />} />
           <Route path="/admin/students/:id" element={<StudentDetails />} />
           <Route path="/admin/students/add" element={<AddEditStudent mode="add" />} />
           <Route path="/admin/students/edit/:id" element={<AddEditStudent mode="edit" />} />
           <Route path="/admin/interns" element={<AdminInterns />} />
           <Route path="/admin/interns/create" element={<AddEditIntern />} />
           <Route path="/admin/interns/:id" element={<AdminInternDetails />} />
-          <Route path="/admin/tutor" element={<AdminTutors />} />
-          <Route path="/admin/tutor/:id" element={<AdminTutorDetails />} />
-          <Route path="/admin/tutor/add" element={<AddEditTutor mode="add" />} />
-          <Route path="/admin/tutor/edit/:id" element={<AddEditTutor mode="edit" />} />
+          <Route path="/admin/tutors" element={<AdminTutors />} />
+          <Route path="/admin/tutors/:id" element={<AdminTutorDetails />} />
+          <Route path="/admin/tutors/add" element={<AddEditTutor mode="add" />} />
+          <Route path="/admin/tutors/edit/:id" element={<AddEditTutor mode="edit" />} />
           <Route path="/admin/mentors" element={<AdminMentors />} />
           <Route path="/admin/mentors/add" element={<AddEditMentor mode="add" />} />
           <Route path="/admin/mentors/edit/:id" element={<AddEditMentor mode="edit" />} />
@@ -365,10 +367,10 @@ const App = () => (
           <Route path="/admin/courses/:batchId/teaching/:moduleSlug/:sessionSlug" element={<TutorTeachingFlow role="admin" />} />
           <Route path="/admin/courses/edit/:id" element={<CreateCourse mode="edit" />} />
           {/* Admin Batch Routes */}
-          <Route path="/admin/batch" element={<BatchList />} />
-          <Route path="/admin/batch/create" element={<BatchForm mode="create" />} />
-          <Route path="/admin/batch/:id" element={<BatchDetails />} />
-          <Route path="/admin/batch/:id/edit" element={<BatchForm mode="edit" />} />
+          <Route path="/admin/batches" element={<AdminBatches />} />
+          <Route path="/admin/batches/create" element={<AdminBatchForm mode="create" />} />
+          <Route path="/admin/batches/:id" element={<AdminBatchDetails />} />
+          <Route path="/admin/batches/:id/edit" element={<AdminBatchForm mode="edit" />} />
           <Route path="/admin/assignments" element={<AssignmentList />} />
           <Route path="/admin/assignments/create" element={<AssignmentForm mode="create" />} />
           <Route path="/admin/assignments/:id" element={<AssignmentDetails />} />
@@ -406,13 +408,32 @@ const App = () => (
 
           {/* Super Admin Routes */}
           <Route path="/superadmin" element={<SuperAdminDashboard />} />
+          <Route path="/superadmin/dashboard" element={<SuperAdminDashboard />} />
           <Route path="/superadmin/users" element={<SuperAdminUsers />} />
           <Route path="/superadmin/students" element={<SuperAdminStudents />} />
+          <Route path="/superadmin/students/:id" element={<StudentDetails />} />
+          <Route path="/superadmin/students/add" element={<AddEditStudent mode="add" />} />
+          <Route path="/superadmin/students/edit/:id" element={<AddEditStudent mode="edit" />} />
           <Route path="/superadmin/interns" element={<SuperAdminInterns />} />
+          <Route path="/superadmin/interns/:id" element={<AdminInternDetails />} />
+          <Route path="/superadmin/interns/create" element={<AddEditIntern />} />
+          <Route path="/superadmin/interns/edit/:id" element={<AddEditIntern />} />
           <Route path="/superadmin/tutors" element={<SuperAdminTutors />} />
+          <Route path="/superadmin/tutors/:id" element={<AdminTutorDetails />} />
+          <Route path="/superadmin/tutors/add" element={<AddEditTutor mode="add" />} />
+          <Route path="/superadmin/tutors/edit/:id" element={<AddEditTutor mode="edit" />} />
           <Route path="/superadmin/mentors" element={<SuperAdminMentors />} />
-          <Route path="/superadmin/program" element={<SuperAdminProgram />} />
+          <Route path="/superadmin/mentors/add" element={<AddEditMentor mode="add" />} />
+          <Route path="/superadmin/mentors/edit/:id" element={<AddEditMentor mode="edit" />} />
+          <Route path="/superadmin/mentors/:id" element={<AdminMentorDetails />} />
+          <Route path="/superadmin/courses" element={<SuperAdminCourses />} />
+          <Route path="/superadmin/courses/create" element={<CreateCourse mode="create" />} />
+          <Route path="/superadmin/courses/edit/:id" element={<CreateCourse mode="edit" />} />
+
           <Route path="/superadmin/batches" element={<SuperAdminBatches />} />
+          <Route path="/superadmin/batches/create" element={<AdminBatchForm mode="create" />} />
+          <Route path="/superadmin/batches/:id" element={<AdminBatchDetails />} />
+          <Route path="/superadmin/batches/:id/edit" element={<AdminBatchForm mode="edit" />} />
           <Route path="/superadmin/finance" element={<SuperAdminFinance />} />
           <Route path="/superadmin/reports" element={<SuperAdminReports />} />
           <Route path="/superadmin/certificates" element={<SuperAdminCertificates />} />

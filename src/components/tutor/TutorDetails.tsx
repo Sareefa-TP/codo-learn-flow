@@ -31,10 +31,13 @@ import {
 import { mockTutors as initialTutors } from "@/data/mockTutors";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useRole } from "@/hooks/useRole";
 
 const AdminTutorDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { role } = useRole();
+    const basePath = role === "superadmin" ? "/superadmin" : "/admin";
 
     // Finding tutor from mock data
     const tutor = initialTutors.find((t) => t.id === id);
@@ -46,7 +49,7 @@ const AdminTutorDetails = () => {
                     <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Tutor Profile Not Found</h2>
                     <p className="text-slate-400 font-medium">The educator you're looking for doesn't exist or has been removed.</p>
                     <Button 
-                        onClick={() => navigate("/admin/tutor")}
+                        onClick={() => navigate(`${basePath}/tutors`)}
                         className="rounded-xl h-11 px-6 font-bold gap-2"
                     >
                         <ChevronLeft className="w-5 h-5" /> Back to Dashboard
@@ -77,7 +80,7 @@ const AdminTutorDetails = () => {
                         <Button 
                             variant="outline" 
                             size="icon" 
-                            onClick={() => navigate("/admin/tutor")} 
+                            onClick={() => navigate(`${basePath}/tutors`)} 
                             className="h-11 w-11 rounded-xl border-slate-100 shadow-sm"
                         >
                             <ChevronLeft className="w-5 h-5 text-slate-400" />
@@ -97,7 +100,7 @@ const AdminTutorDetails = () => {
                         </div>
                     </div>
                     <Button 
-                        onClick={() => navigate(`/admin/tutor/edit/${tutor.id}`)}
+                        onClick={() => navigate(`${basePath}/tutors/edit/${tutor.id}`)}
                         className="rounded-xl h-11 px-8 font-black uppercase text-xs shadow-lg shadow-primary/20 gap-2 transition-transform active:scale-95"
                     >
                         <Edit className="w-4 h-4" /> Modify Profile

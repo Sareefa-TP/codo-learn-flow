@@ -24,10 +24,13 @@ import {
   Briefcase
 } from "lucide-react";
 import { mockMentors } from "@/data/mockMentors";
+import { useRole } from "@/hooks/useRole";
 
 const AdminMentorDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { role } = useRole();
+  const basePath = role === "superadmin" ? "/superadmin" : "/admin";
   const mentor = mockMentors.find((m) => m.id === id);
 
   if (!mentor) {
@@ -41,7 +44,7 @@ const AdminMentorDetails = () => {
             <h2 className="text-xl font-bold">Mentor Not Found</h2>
             <p className="text-muted-foreground">The mentor you are looking for does not exist or has been removed.</p>
           </div>
-          <Button onClick={() => navigate("/admin/mentors")} variant="outline" className="rounded-xl gap-2">
+          <Button onClick={() => navigate(`${basePath}/mentors`)} variant="outline" className="rounded-xl gap-2">
             <ArrowLeft className="w-4 h-4" />
             Back to Mentors
           </Button>
@@ -67,7 +70,7 @@ const AdminMentorDetails = () => {
               variant="outline" 
               size="icon" 
               className="rounded-full h-10 w-10 shrink-0 border-border/50 bg-white"
-              onClick={() => navigate("/admin/mentors")}
+              onClick={() => navigate(`${basePath}/mentors`)}
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
