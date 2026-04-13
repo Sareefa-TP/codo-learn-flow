@@ -146,6 +146,7 @@ const AdminInterns = () => {
               <SelectItem value="All">All Status</SelectItem>
               <SelectItem value="Active">Active</SelectItem>
               <SelectItem value="Completed">Completed</SelectItem>
+              <SelectItem value="Inactive">Inactive</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -197,7 +198,9 @@ const AdminInterns = () => {
                       <Badge className={
                         intern.status === "Active" 
                           ? "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border-emerald-500/20" 
-                          : "bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 border-blue-500/20"
+                          : intern.status === "Completed"
+                          ? "bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 border-blue-500/20"
+                          : "bg-rose-500/10 text-rose-600 hover:bg-rose-500/20 border-rose-500/20"
                       }>
                         {intern.status}
                       </Badge>

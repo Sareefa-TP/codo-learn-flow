@@ -42,7 +42,7 @@ export interface Intern {
   course: string;
   role: string;
   batch: string;
-  status: "Active" | "Completed";
+  status: "Active" | "Completed" | "Inactive";
   joinedDate: string;
   avatar?: string;
   performance: {

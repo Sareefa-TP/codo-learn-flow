@@ -27,7 +27,8 @@ import {
   Trophy,
   AlertCircle,
   GraduationCap,
-  TrendingUp
+  TrendingUp,
+  Trash2
 } from "lucide-react";
 import { SHARED_BATCHES, Batch } from "@/data/batchData";
 import { courses } from "@/data/courseData";
