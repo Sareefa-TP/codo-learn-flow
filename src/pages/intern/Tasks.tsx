@@ -4,11 +4,11 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { InternSearchBar } from "@/components/inputs/InternSearchBar";
 import {
   ClipboardList, Clock, CheckCircle2, AlertCircle, Loader2,
   Calendar, Eye, Upload,
 } from "lucide-react";
+import PageSearch from "@/components/shared/PageSearch";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -296,10 +296,9 @@ const InternTasks = () => {
           </p>
         </div>
 
-        <InternSearchBar
+        <PageSearch
           placeholder="Search tasks..."
-          value={searchQuery}
-          onChange={setSearchQuery}
+          onSearch={setSearchQuery}
         />
 
         {/* ── Summary Cards ── */}

@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/table";
 import {
     Users,
-    Search,
     CheckCircle2,
     XCircle,
     Mail,
@@ -23,6 +22,7 @@ import {
     MessageSquare,
     Eye
 } from "lucide-react";
+import PageSearch from "@/components/shared/PageSearch";
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -169,15 +169,12 @@ const TutorManagement = () => {
                 {/* Filters */}
                 <Card className="p-4 bg-white rounded-[16px] shadow-sm border-none">
                     <div className="flex flex-wrap gap-4 items-center">
-                        <div className="relative flex-1 min-w-[240px] max-w-md">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                            <Input
-                                placeholder="Search by name or email..."
-                                className="pl-10 h-11 bg-slate-50 border-none rounded-xl focus-visible:ring-indigo-500"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                        </div>
+                        <PageSearch
+                            placeholder="Search by name or email..."
+                            onSearch={setSearchQuery}
+                            className="flex-1 min-w-[240px] max-w-md mx-0 mb-0"
+                            animate={false}
+                        />
                         <div className="flex flex-wrap gap-3">
                             <Select value={courseFilter} onValueChange={setCourseFilter}>
                                 <SelectTrigger className="w-[180px] h-11 bg-slate-50 border-none rounded-xl">

@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { InternSearchBar } from "@/components/inputs/InternSearchBar";
+import PageSearch from "@/components/shared/PageSearch";
 import { 
   Select, 
   SelectContent, 
@@ -505,10 +505,9 @@ const SupportTicket = () => {
           />
         )}
 
-        <InternSearchBar
+        <PageSearch
           placeholder="Search support tickets..."
-          value={searchQuery}
-          onChange={setSearchQuery}
+          onSearch={setSearchQuery}
         />
 
         {/* Filters Section */}

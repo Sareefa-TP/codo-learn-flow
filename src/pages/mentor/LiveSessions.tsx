@@ -40,7 +40,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
-  Search,
   MoreVertical,
   Eye,
   Video,
@@ -58,6 +57,7 @@ import {
   XCircle,
   CircleDot,
 } from "lucide-react";
+import PageSearch from "@/components/shared/PageSearch";
 import { toast } from "sonner";
 import { 
   MOCK_SESSIONS, 
@@ -183,14 +183,13 @@ const MentorLiveSessions = () => {
           <CardContent className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
               <div className="lg:col-span-2">
-                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2 block">Search Session</label>
-                <div className="relative">
-                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-muted-foreground" />
-                  <Input
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Search Session</label>
+                  <PageSearch
                     placeholder="Search by title, tutor or topic..."
-                    className="pl-11 h-11 rounded-xl bg-background border-border/50 shadow-sm focus:ring-primary/20 text-sm"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onSearch={setSearchTerm}
+                    className="mx-0 h-11"
+                    animate={false}
                   />
                 </div>
               </div>

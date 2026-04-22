@@ -19,9 +19,9 @@ import {
     Clock,
     FileText,
     ArrowLeft,
-    Search,
     Play
 } from "lucide-react";
+import PageSearch from "@/components/shared/PageSearch";
 import { cn } from "@/lib/utils";
 
 // Types
@@ -318,17 +318,12 @@ const StudentAssignments = () => {
                             </div>
                         </div>
 
-                        {/* Search Bar */}
-                        <div className="relative max-w-md">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <input
-                                type="text"
-                                placeholder="Search assignments, courses or modules..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
-                            />
-                        </div>
+                        {/* Standardized Search Bar */}
+                        <PageSearch
+                            placeholder="Search assignments, courses or modules..."
+                            onSearch={setSearchQuery}
+                            className="max-w-md mx-0"
+                        />
 
                         {filteredCourses.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -413,17 +408,12 @@ const StudentAssignments = () => {
                                 Back to courses
                             </Button>
 
-                            {/* Search Bar in Step 2 */}
-                            <div className="relative w-full sm:max-w-xs">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                                <input
-                                    type="text"
-                                    placeholder="Search in this course..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
-                                />
-                            </div>
+                            {/* Standardized Search Bar in Step 2 */}
+                            <PageSearch
+                                placeholder="Search in this course..."
+                                onSearch={setSearchQuery}
+                                className="w-full sm:max-w-xs mx-0"
+                            />
                         </div>
 
                         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">

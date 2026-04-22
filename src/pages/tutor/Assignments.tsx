@@ -32,7 +32,6 @@ import {
 } from "@/components/ui/select";
 import {
   ClipboardList,
-  Search,
   Calendar as CalendarIcon,
   ArrowLeft,
   CheckCircle2,
@@ -47,6 +46,7 @@ import {
   Clock,
   PlayCircle
 } from "lucide-react";
+import PageSearch from "@/components/shared/PageSearch";
 import { useToast } from "@/hooks/use-toast";
 import {
   Tooltip,
@@ -229,15 +229,12 @@ const TutorAssignments = () => {
               </div>
             </div>
 
-            <div className="relative max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Search assignments or courses..."
-                className="pl-10 h-11 bg-card"
-                value={courseSearch}
-                onChange={(e) => setCourseSearch(e.target.value)}
-              />
-            </div>
+            <PageSearch
+              placeholder="Search assignments or courses..."
+              onSearch={setCourseSearch}
+              className="max-w-md mx-0"
+              animate={false}
+            />
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {allAssignments.map((asg) => {

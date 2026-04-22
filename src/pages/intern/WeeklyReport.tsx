@@ -16,7 +16,7 @@ import {
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { StandardModal } from "@/components/modals/StandardModal";
-import { InternSearchBar } from "@/components/inputs/InternSearchBar";
+import PageSearch from "@/components/shared/PageSearch";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -748,10 +748,9 @@ const WeeklyReport = () => {
                         </Button>
                     </div>
 
-                    <InternSearchBar
+                    <PageSearch
                         placeholder="Search reports..."
-                        value={searchQuery}
-                        onChange={setSearchQuery}
+                        onSearch={setSearchQuery}
                     />
 
                     {/* ── Summary Strip ── */}

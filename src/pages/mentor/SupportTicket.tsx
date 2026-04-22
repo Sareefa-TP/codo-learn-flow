@@ -7,7 +7,6 @@ import {
     CheckCircle2,
     AlertCircle,
     ChevronRight,
-    Search,
     Paperclip,
     Send,
     ArrowLeft,
@@ -16,6 +15,7 @@ import {
     Download,
     X
 } from "lucide-react";
+import PageSearch from "@/components/shared/PageSearch";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -263,16 +263,11 @@ const MentorSupportTicket = () => {
                 {/* 1️⃣ Ticket List View */}
                 {view === "list" && (
                     <div className="space-y-6">
-                        <div className="relative mb-10 group animate-in fade-in slide-in-from-top-4 duration-700 delay-100">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-all duration-300" />
-                            <input
-                                type="text"
-                                placeholder="Search tickets by ID or subject..."
-                                className="w-full bg-card border border-border/60 rounded-[1.25rem] py-4 pl-12 pr-6 text-sm font-medium focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-sm placeholder:text-muted-foreground/50"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                        </div>
+                        <PageSearch
+                            placeholder="Search tickets by ID or subject..."
+                            onSearch={setSearchQuery}
+                            className="mb-10 max-w-none"
+                        />
 
                         <div className="grid gap-4">
                             {filteredTickets.length > 0 ? (

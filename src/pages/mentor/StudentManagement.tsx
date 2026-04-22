@@ -38,7 +38,6 @@ import {
 } from "@/components/ui/select";
 import {
     Users,
-    Search,
     MoreVertical,
     Eye,
     TrendingUp,
@@ -55,6 +54,7 @@ import {
     Clock,
     Activity as ActivityIcon,
 } from "lucide-react";
+import PageSearch from "@/components/shared/PageSearch";
 import { toast } from "sonner";
 
 // Mock data for assigned students
@@ -304,15 +304,12 @@ const StudentManagement = () => {
                             </CardTitle>
 
                             <div className="flex flex-col sm:flex-row items-center gap-3">
-                                <div className="relative w-full sm:w-64">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                                    <Input
-                                        placeholder="Search students..."
-                                        className="pl-9 h-9 rounded-lg"
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                    />
-                                </div>
+                                <PageSearch
+                                    placeholder="Search students..."
+                                    onSearch={setSearchTerm}
+                                    className="sm:w-64 mx-0 mb-0"
+                                    animate={false}
+                                />
                                 <div className="flex items-center gap-2 w-full sm:w-auto">
                                     <Button variant="outline" size="sm" className="h-9 gap-2 rounded-lg">
                                         <Filter className="w-4 h-4" />

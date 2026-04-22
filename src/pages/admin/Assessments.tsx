@@ -25,7 +25,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { ClipboardList, CheckCircle, Clock, AlertCircle, Eye, Calendar, Search, FileX, Presentation, UserCheck, Timer, XCircle, Pencil } from "lucide-react";
+import { ClipboardList, CheckCircle, Clock, AlertCircle, Eye, Calendar, FileX, Presentation, UserCheck, Timer, XCircle, Pencil } from "lucide-react";
+import PageSearch from "@/components/shared/PageSearch";
 
 // Types
 type AssignmentStatus = "Active" | "Overdue" | "Closed";
@@ -284,18 +285,11 @@ const AdminAssessments = () => {
           </Card>
         </div>
 
-        {/* Action Bar (Search) */}
-        <div className="flex justify-between items-center bg-card p-4 rounded-xl border border-border/50 shadow-sm">
-          <div className="relative w-full md:w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Search by title, batch, or tutor..."
-              className="pl-9 w-full bg-background"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-        </div>
+        {/* Standardized Search Bar */}
+        <PageSearch
+          placeholder="Search by title, batch, or tutor..."
+          onSearch={setSearchTerm}
+        />
 
         {/* Assignments Table */}
         <Card className="border-border/50 overflow-hidden shadow-sm">

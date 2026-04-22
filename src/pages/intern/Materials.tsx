@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
-import { InternSearchBar } from "@/components/inputs/InternSearchBar";
+import PageSearch from "@/components/shared/PageSearch";
 
 // --- Types ---
 
@@ -339,11 +339,10 @@ const Materials = () => {
           </div>
         </div>
 
-        {/* Search Bar - Positioned below Header */}
-        <InternSearchBar
+        {/* Standardized Search Bar */}
+        <PageSearch
           placeholder="Search materials by title, mentor, or date..."
-          value={searchQuery}
-          onChange={setSearchQuery}
+          onSearch={setSearchQuery}
         />
 
         {/* Filter Tabs */}

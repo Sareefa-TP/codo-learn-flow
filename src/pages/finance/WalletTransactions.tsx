@@ -1,7 +1,6 @@
-import { useMemo, useState } from "react";
+import { useState, useMemo } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import {
     Select,
     SelectContent,
@@ -10,7 +9,8 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, ArrowUpRight, ArrowDownLeft, TrendingUp } from "lucide-react";
+import { ArrowUpRight, ArrowDownLeft, TrendingUp } from "lucide-react";
+import PageSearch from "@/components/shared/PageSearch";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -167,15 +167,12 @@ const WalletTransactions = () => {
 
                             {/* Filter Bar */}
                             <div className="flex flex-col sm:flex-row gap-3">
-                                <div className="relative flex-1 max-w-xs">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                                    <Input
-                                        placeholder="Search by student name..."
-                                        value={search}
-                                        onChange={e => setSearch(e.target.value)}
-                                        className="pl-9 bg-background"
-                                    />
-                                </div>
+                                <PageSearch
+                                    placeholder="Search by student name..."
+                                    onSearch={setSearch}
+                                    className="max-w-xs mx-0 mb-0"
+                                    animate={false}
+                                />
                                 <Select value={typeFilter} onValueChange={v => setTypeFilter(v as TypeFilter)}>
                                     <SelectTrigger className="w-full sm:w-[160px] bg-background">
                                         <SelectValue placeholder="All Types" />

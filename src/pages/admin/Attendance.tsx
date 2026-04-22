@@ -18,6 +18,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Users, UserCheck, CalendarDays, AlertTriangle, Eye, Presentation, Hash } from "lucide-react";
+import PageSearch from "@/components/shared/PageSearch";
 
 // --- Types ---
 interface Student {
@@ -223,6 +224,7 @@ const AdminAttendance = () => {
   const [selectedBatch, setSelectedBatch] = useState<Batch | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState<"all" | "lowAttendance">("all");
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Compute Globals
   let globalTotalPercentageSum = 0;
@@ -244,10 +246,15 @@ const AdminAttendance = () => {
   });
 
   const filteredBatches = computedBatches.filter(batch => {
+    const searchLower = searchTerm.toLowerCase();
+    const matchesSearch = 
+      batch.name.toLowerCase().includes(searchLower) ||
+      batch.tutorName.toLowerCase().includes(searchLower);
+
     if (activeFilter === "lowAttendance") {
-      return batch.lowCount > 0;
+      return matchesSearch && batch.lowCount > 0;
     }
-    return true;
+    return matchesSearch;
   });
 
   const overallAttendance = globalTotalStudents > 0 ? Math.round(globalTotalPercentageSum / globalTotalStudents) : 0;
@@ -343,6 +350,12 @@ const AdminAttendance = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Standardized Search Bar */}
+        <PageSearch
+          placeholder="Search by batch name or tutor..."
+          onSearch={setSearchTerm}
+        />
 
         {/* Batch Summary Table */}
         <Card className="border-border/50 overflow-hidden shadow-sm">

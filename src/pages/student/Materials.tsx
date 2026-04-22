@@ -16,6 +16,7 @@ import {
   ArrowLeft,
   PlayCircle
 } from "lucide-react";
+import PageSearch from "@/components/shared/PageSearch";
 import { useState, useMemo } from "react";
 
 // Helper to generate the standard 5 material items for any given module
@@ -140,16 +141,13 @@ const StudentMaterials = () => {
             </p>
           </div>
 
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Search materials, modules or courses..."
-              className="pl-9 bg-card w-full shadow-sm rounded-xl focus:ring-2 focus:ring-primary/20 transition-all border-border/50 focus:border-primary"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+          {/* Standardized Search Bar */}
+          <PageSearch
+            placeholder="Search materials, modules or courses..."
+            onSearch={setSearchQuery}
+            className="max-w-md mx-0 mb-0"
+            animate={false}
+          />
         </div>
 
         {/* Step 1: Course List View */}

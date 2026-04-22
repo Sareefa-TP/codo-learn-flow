@@ -9,14 +9,13 @@ import {
   Star, 
   Plus, 
   History,
-  Search,
-  Filter,
   MoreVertical,
   X,
   Eye,
   ChevronDown,
   GraduationCap
 } from "lucide-react";
+import PageSearch from "@/components/shared/PageSearch";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -158,21 +157,11 @@ const TutorFeedback = () => {
         </div>
 
         {/* Standardized Search Bar Section */}
-        <div className="flex items-center gap-3 mb-10 group animate-in fade-in slide-in-from-top-4 duration-700 delay-100">
-          <div className="relative flex-1 group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-all duration-300" />
-            <input 
-              type="text" 
-              placeholder="Search feedback by name, course or message..."
-              className="w-full bg-card border border-border/60 rounded-[1.25rem] py-4 pl-12 pr-6 text-sm font-medium focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-sm placeholder:text-muted-foreground/50"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <Button variant="outline" size="icon" className="rounded-2xl border-border/60 shrink-0 h-[52px] w-[52px] hover:border-primary/40 hover:bg-primary/5 transition-all">
-            <Filter className="w-5 h-5" />
-          </Button>
-        </div>
+        <PageSearch
+          placeholder="Search feedback by name, course or message..."
+          onSearch={setSearchQuery}
+          className="mb-10 max-w-none"
+        />
 
         {/* Tab-based Navigation (Expanded to 4 tabs) */}
         <div className="bg-slate-50/50 p-1.5 rounded-[1.5rem] border border-border/40 mb-10 w-full">

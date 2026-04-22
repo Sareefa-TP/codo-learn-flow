@@ -17,10 +17,11 @@ import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-    Search, SlidersHorizontal, Eye, CheckCircle2, RotateCcw, Clock,
+    SlidersHorizontal, Eye, CheckCircle2, RotateCcw, Clock,
     AlertCircle, User, Calendar, FileText, Download, BookOpen,
     Lightbulb, Layers, Paperclip,
 } from "lucide-react";
+import PageSearch from "@/components/shared/PageSearch";
 import { toast } from "sonner";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -212,11 +213,12 @@ const MentorWeeklyReports = () => {
                                 <span className="text-sm font-medium">Filters</span>
                             </div>
                             <Separator orientation="vertical" className="hidden sm:block h-5" />
-                            <div className="relative flex-1 min-w-[200px]">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                                <Input placeholder="Search by intern name or report title..." className="pl-9 bg-background"
-                                    value={search} onChange={e => setSearch(e.target.value)} />
-                            </div>
+                            <PageSearch
+                                placeholder="Search by intern name or report title..."
+                                onSearch={setSearch}
+                                className="flex-1 mx-0"
+                                animate={false}
+                            />
                             <Select value={filterWeek} onValueChange={setFilterWeek}>
                                 <SelectTrigger className="w-full sm:w-36"><SelectValue placeholder="All Weeks" /></SelectTrigger>
                                 <SelectContent>

@@ -32,6 +32,8 @@ import {
 import { cn } from "@/lib/utils";
 import CourseCard from "@/components/student/CourseCard";
 import { Wallet as WalletIcon } from "lucide-react";
+import PageSearch from "@/components/shared/PageSearch";
+import { toast } from "sonner";
 
 // Types
 interface Message {
@@ -67,6 +69,7 @@ interface CourseFinance {
   totalFee: number;
   totalPaid: number;
   balance: number;
+  walletBalance: number;
   completion: number;
   installments: Installment[];
   nextPayment: {
@@ -87,6 +90,7 @@ const COURSES_FINANCE: Record<string, CourseFinance> = {
     totalFee: 60000,
     totalPaid: 45000,
     balance: 15000,
+    walletBalance: 25400,
     completion: 75,
     installments: [
       { id: 1, name: "Enrollment Payment", amount: 20000, status: "Paid", date: "15 Jan 2026" },
@@ -109,6 +113,7 @@ const COURSES_FINANCE: Record<string, CourseFinance> = {
     totalFee: 85000,
     totalPaid: 35000,
     balance: 50000,
+    walletBalance: 12800,
     completion: 41.1,
     installments: [
       { id: 1, name: "Enrollment Payment", amount: 35000, status: "Paid", date: "01 Feb 2026" },
@@ -246,16 +251,11 @@ const StudentWallet = () => {
       </div>
 
       {/* Search Bar - Exactly matching My Courses page */}
-      <div className="relative group animate-in fade-in slide-in-from-top-4 duration-700 delay-100">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-all duration-300" />
-        <input
-          type="text"
-          placeholder="Search courses by name or category..."
-          className="w-full bg-card border border-border/60 rounded-[1.25rem] py-4 pl-12 pr-6 text-sm font-medium focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-sm placeholder:text-muted-foreground/50"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </div>
+      <PageSearch
+        placeholder="Search courses by name or category..."
+        onSearch={setSearchQuery}
+        className="mb-10"
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredCourses.map((course) => (
@@ -263,12 +263,19 @@ const StudentWallet = () => {
             key={course.id}
             title={course.courseName}
             category={course.category}
-            duration={course.duration}
+            duration={`${course.duration} Program`}
             progress={course.completion}
+            progressLabel="Payment Completion"
             actionText="View Payments"
             actionIcon={ChevronRight}
-            onActionClick={() => navigate(`/student/payments/${course.id}`)}
-            onDetailsClick={() => navigate(`/student/payments/${course.id}`)}
+            onActionClick={() => {
+              toast.info(`Viewing payment details for ${course.courseName}`);
+              navigate(`/student/payments/${course.id}`);
+            }}
+            onDetailsClick={() => {
+              toast.info(`Loading statement for ${course.courseName}`);
+              navigate(`/student/payments/${course.id}`);
+            }}
           />
         ))}
       </div>
@@ -303,10 +310,11 @@ const StudentWallet = () => {
         </div>
 
         {/* 1️⃣ Metric Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
           <MetricCard title="Total Course Fee" amount={courseData.totalFee} icon={WalletIcon} />
           <MetricCard title="Total Paid" amount={courseData.totalPaid} icon={CheckCircle2} />
           <MetricCard title="Remaining Balance" amount={courseData.balance} icon={Clock} />
+          <MetricCard title="Wallet Balance" amount={courseData.walletBalance} icon={IndianRupee} />
           <MetricCard title="Payment Completion" amount={courseData.completion} icon={CreditCard} isPercentage />
         </div>
 

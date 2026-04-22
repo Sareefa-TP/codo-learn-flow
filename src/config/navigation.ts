@@ -110,7 +110,6 @@ export const tutorNavigation: RoleNavigation = {
     { title: "Learning Materials", url: "/tutor/materials", icon: FileText },
     { title: "Support Ticket", url: "/tutor/support-ticket", icon: LifeBuoy },
     { title: "Wallet", url: "/tutor/wallet", icon: Wallet },
-    { title: "Students", url: "/tutor/students", icon: Users },
   ],
   secondaryNav: [],
 };

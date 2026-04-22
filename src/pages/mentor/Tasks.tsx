@@ -18,9 +18,10 @@ import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-    Plus, Search, Eye, Edit, Trash2, CalendarIcon, UploadCloud, Users,
+    Plus, Eye, Edit, Trash2, CalendarIcon, UploadCloud, Users,
     AlertCircle, CheckCircle2, Clock, FileText,
 } from "lucide-react";
+import PageSearch from "@/components/shared/PageSearch";
 import { toast } from "sonner";
 import { TaskDatePicker } from "@/components/mentor/TaskDatePicker";
 
@@ -391,13 +392,14 @@ const MentorTasks = () => {
                         <h1 className="text-2xl lg:text-3xl font-bold tracking-tight">Tasks</h1>
                         <p className="text-muted-foreground mt-1 text-sm">Manage and assign tasks for your interns.</p>
                     </div>
-                    <div className="flex gap-3">
-                        <div className="relative w-full sm:w-64">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input placeholder="Search tasks or interns..." className="pl-9 bg-background shadow-sm"
-                                value={search} onChange={e => setSearch(e.target.value)} />
-                        </div>
-                        <Button className="gap-2 shadow-sm whitespace-nowrap" onClick={handleOpenCreate}>
+                    <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                        <PageSearch
+                            placeholder="Search tasks or interns..."
+                            onSearch={setSearch}
+                            className="w-full sm:w-64 mx-0"
+                            animate={false}
+                        />
+                        <Button className="gap-2 shadow-sm whitespace-nowrap h-[52px] rounded-[1.25rem]" onClick={handleOpenCreate}>
                             <Plus className="w-4 h-4" /> Create Task
                         </Button>
                     </div>

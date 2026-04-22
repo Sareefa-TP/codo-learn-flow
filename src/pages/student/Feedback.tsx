@@ -33,6 +33,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import PageSearch from "@/components/shared/PageSearch";
 
 interface FeedbackEntry {
   id: string;
@@ -138,21 +139,16 @@ const StudentFeedback = () => {
             </div>
           </div>
 
-          {/* Standardized Search Bar (matches Student → Exam exactly) */}
-          <div className="relative mb-10 group animate-in fade-in slide-in-from-top-4 duration-700 delay-100">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-all duration-300" />
-            <input
-              type="text"
-              placeholder="Search feedback..."
-              className="w-full bg-card border border-border/60 rounded-[1.25rem] py-4 pl-12 pr-6 text-sm font-medium focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-sm placeholder:text-muted-foreground/50"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+          {/* Standardized Search Bar */}
+          <PageSearch
+            placeholder="Search feedback..."
+            onSearch={setSearchQuery}
+            className="mb-10"
+          />
 
-          {/* Tab-based Navigation */}
-          <div className="bg-slate-50/50 p-1.5 rounded-[1.5rem] border border-border/40 mb-8 w-full">
-            <div className="grid grid-cols-4 gap-1 sm:gap-2">
+          {/* Tab-based Navigation (Updated to match design) */}
+          <div className="bg-white p-1.5 rounded-full border border-border/40 mb-8 w-full shadow-sm">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-1">
               {[
                 { id: "my-teacher", label: "My Teacher" },
                 { id: "my-mentor", label: "My Mentor" },
@@ -163,13 +159,13 @@ const StudentFeedback = () => {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={cn(
-                    "px-2 sm:px-4 py-3 rounded-2xl text-[9px] sm:text-[10px] md:text-xs font-bold uppercase tracking-widest transition-all duration-300 text-center flex items-center justify-center h-full",
+                    "px-4 py-3 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 text-center flex items-center justify-center h-full",
                     activeTab === tab.id 
-                      ? "bg-primary text-white shadow-lg shadow-primary/20 scale-[1.02]" 
-                      : "text-muted-foreground hover:bg-white hover:text-foreground"
+                      ? "bg-[#28B485] text-white shadow-lg shadow-[#28B485]/20" 
+                      : "text-[#94A3B8] hover:bg-slate-50 hover:text-[#64748B]"
                   )}
                 >
-                  <span className="truncate sm:whitespace-normal">{tab.label}</span>
+                  <span className="truncate">{tab.label}</span>
                 </button>
               ))}
             </div>

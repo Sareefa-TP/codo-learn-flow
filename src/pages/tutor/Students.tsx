@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/dialog";
 import {
     Users,
-    Search,
     BookOpen,
     ClipboardList,
     TrendingUp,
@@ -31,6 +30,7 @@ import {
     Mail,
     ArrowRight
 } from "lucide-react";
+import PageSearch from "@/components/shared/PageSearch";
 import { useState, useEffect } from "react";
 
 // Helper function to auto-calculate progress
@@ -137,15 +137,12 @@ const TutorStudents = () => {
                             <Users className="w-5 h-5 text-primary" />
                             Student roster
                         </CardTitle>
-                        <div className="relative w-full sm:w-72">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input
-                                placeholder="Search name, email, or batch..."
-                                className="pl-9 bg-muted/30"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                        </div>
+                        <PageSearch
+                            placeholder="Search name, email, or batch..."
+                            onSearch={setSearchQuery}
+                            className="w-full sm:w-72 mx-0 mb-0"
+                            animate={false}
+                        />
                     </CardHeader>
                     <CardContent className="p-0">
                         <div className="overflow-x-auto">

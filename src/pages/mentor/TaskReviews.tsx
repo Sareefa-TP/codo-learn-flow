@@ -17,10 +17,11 @@ import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-    Search, ClipboardCheck, User, Calendar, FileText, Download,
+    ClipboardCheck, User, Calendar, FileText, Download,
     Eye as EyeIcon, CheckCircle2, XCircle, RotateCcw, Clock, SlidersHorizontal,
     FileImage, FileVideo, Archive, File,
 } from "lucide-react";
+import PageSearch from "@/components/shared/PageSearch";
 import { toast } from "sonner";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -213,11 +214,12 @@ const MentorTaskReviews = () => {
                             <Separator orientation="vertical" className="hidden sm:block h-5" />
 
                             {/* Search */}
-                            <div className="relative flex-1 min-w-[200px]">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                                <Input placeholder="Search by intern name or task..." className="pl-9 bg-background"
-                                    value={search} onChange={e => setSearch(e.target.value)} />
-                            </div>
+                            <PageSearch
+                                placeholder="Search by intern name or task..."
+                                onSearch={setSearch}
+                                className="flex-1 min-w-[200px] mx-0 mb-0"
+                                animate={false}
+                            />
 
                             {/* Week */}
                             <Select value={filterWeek} onValueChange={setFilterWeek}>

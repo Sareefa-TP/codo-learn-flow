@@ -23,6 +23,10 @@ import {
     Trophy,
     RotateCcw
 } from "lucide-react";
+import PageSearch from "@/components/shared/PageSearch";
+import CourseCard from "@/components/student/CourseCard";
+import { toast } from "sonner";
+
 import {
     AlertDialog,
     AlertDialogAction,
@@ -384,70 +388,33 @@ const StudentExams = () => {
                 </div>
 
                 {/* Standardized Search Bar */}
-                <div className="relative mb-10 group animate-in fade-in slide-in-from-top-4 duration-700 delay-100">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-all duration-300" />
-                    <input
-                        type="text"
-                        placeholder="Search courses by title..."
-                        className="w-full bg-card border border-border/60 rounded-[1.25rem] py-4 pl-12 pr-6 text-sm font-medium focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-sm placeholder:text-muted-foreground/50"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                </div>
+                <PageSearch
+                    placeholder="Search courses by title..."
+                    onSearch={setSearchQuery}
+                    className="mb-10"
+                />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredCourses.map((course) => (
-                        <Card 
-                            key={course.id} 
-                            className="group overflow-hidden border-border/50 hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 rounded-3xl flex flex-col h-full cursor-pointer" 
-                            onClick={() => navigate(`/student/exam/${course.slug}`)}
-                        >
-                            <div className="h-32 bg-slate-100 flex items-center justify-center relative overflow-hidden">
-                                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent" />
-                                <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center relative z-10 transition-transform duration-500 group-hover:scale-110">
-                                    <BookOpen className="w-6 h-6 text-primary" />
-                                </div>
-                                {course.progress !== undefined && (
-                                    <Badge className="absolute top-4 right-4 bg-white/90 text-[10px] font-black uppercase text-slate-900 border-none shadow-sm backdrop-blur-sm">
-                                        {course.progress}% Complete
-                                    </Badge>
-                                )}
-                            </div>
-                            <CardContent className="p-6 flex-1 flex flex-col space-y-6">
-                                <div className="space-y-1">
-                                    <h3 className="text-lg font-bold text-foreground leading-tight group-hover:text-primary transition-colors">
-                                        {course.title}
-                                    </h3>
-                                    <p className="text-xs text-muted-foreground font-medium flex items-center gap-1.5 pt-1">
-                                        <Clock className="w-3 h-3 text-primary" /> {course.duration} Program
-                                    </p>
-                                </div>
-
-                                <div className="flex items-center justify-between gap-4 pt-4 mt-auto">
-                                    <Button 
-                                        variant="ghost" 
-                                        size="sm" 
-                                        className="rounded-xl text-[10px] uppercase font-black tracking-widest text-muted-foreground hover:text-primary px-3"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            navigate(`/student/exam/${course.slug}`);
-                                        }}
-                                    >
-                                        Details
-                                    </Button>
-                                    <Button 
-                                        className="bg-primary hover:bg-primary/90 gap-2 rounded-xl h-10 font-bold text-xs shadow-md shadow-primary/20"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            navigate(`/student/exam/${course.slug}`);
-                                        }}
-                                    >
-                                        View Exams <ArrowRight className="w-4 h-4" />
-                                    </Button>
-                                </div>
-                            </CardContent>
-                        </Card>
+                        <CourseCard
+                            key={course.id}
+                            title={course.title}
+                            category={course.progress !== undefined ? `${course.progress}% Complete` : undefined}
+                            duration={`${course.duration} Program`}
+                            icon={BookOpen}
+                            onDetailsClick={() => {
+                                toast.info(`Viewing exams for ${course.title}`);
+                                navigate(`/student/exam/${course.slug}`);
+                            }}
+                            onActionClick={() => {
+                                toast.info(`Accessing ${course.title} exam area`);
+                                navigate(`/student/exam/${course.slug}`);
+                            }}
+                            actionText="View Exams"
+                            actionIcon={ArrowRight}
+                        />
                     ))}
+
                 </div>
             </div>
         );
@@ -479,95 +446,42 @@ const StudentExams = () => {
                 </div>
 
                 {/* Standardized Search Bar */}
-                <div className="relative mb-10 group animate-in fade-in slide-in-from-top-4 duration-700 delay-100">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-all duration-300" />
-                    <input
-                        type="text"
-                        placeholder="Search exams by title..."
-                        className="w-full bg-card border border-border/60 rounded-[1.25rem] py-4 pl-12 pr-6 text-sm font-medium focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-sm placeholder:text-muted-foreground/50"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                </div>
+                <PageSearch
+                    placeholder="Search exams by title..."
+                    onSearch={setSearchQuery}
+                    className="mb-10"
+                />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredExams.map((exam) => (
-                        <Card 
-                            key={exam.id} 
-                            className="group overflow-hidden border-border/50 hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 rounded-3xl flex flex-col h-full cursor-pointer" 
-                            onClick={() => {
+                        <CourseCard
+                            key={exam.id}
+                            title={exam.exam_title}
+                            category={exam.status}
+                            categoryVariant={exam.status === "Completed" ? "secondary" : "default"}
+                            duration={exam.module_name || "Assessment"}
+                            description={`${exam.total_questions} Questions • ${exam.time_limit} Mins`}
+                            showProgress={false}
+                            icon={PencilLine}
+                            onDetailsClick={() => {
+                                toast.info(`Loading details for ${exam.exam_title}`);
+                                navigate(`/student/exam/${courseSlug}/${exam.exam_slug}${exam.status === "Completed" ? "/details" : ""}`);
+                            }}
+                            onActionClick={() => {
                                 if (exam.status === "Completed") {
+                                    toast.success(`Viewing results for ${exam.exam_title}`);
                                     navigate(`/student/exam/${courseSlug}/${exam.exam_slug}/details`);
                                 } else {
+                                    toast.info(`Preparing ${exam.exam_title}`);
                                     navigate(`/student/exam/${courseSlug}/${exam.exam_slug}`);
                                 }
                             }}
-                        >
-                            <div className="h-40 bg-slate-100 flex items-center justify-center relative overflow-hidden">
-                                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent" />
-                                <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center relative z-10 transition-transform duration-500 group-hover:scale-110">
-                                    <PencilLine className="w-7 h-7 text-primary" />
-                                </div>
-                                <Badge variant={exam.status === "Completed" ? "default" : "secondary"} className={cn(
-                                    "absolute top-4 right-4 font-black uppercase text-[10px] tracking-widest px-2 shadow-sm",
-                                    exam.status === "Completed" ? "bg-emerald-500 text-white" : "bg-primary text-white"
-                                )}>
-                                    {exam.status}
-                                </Badge>
-                            </div>
-                            <CardContent className="p-6 flex-1 flex flex-col space-y-6">
-                                <div className="space-y-1">
-                                    <h3 className="text-lg font-bold text-foreground leading-tight group-hover:text-primary transition-colors">
-                                        {exam.exam_title}
-                                    </h3>
-                                    <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-widest pt-1">
-                                        {exam.module_name || "Assessment"}
-                                    </p>
-                                </div>
-
-                                <div className="space-y-3 pt-2">
-                                    <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                                        <span className="flex items-center gap-1.5"><BookOpen className="w-3.5 h-3.5 text-primary" /> Questions</span>
-                                        <span className="text-foreground">{exam.total_questions}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                                        <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-primary" /> Time Limit</span>
-                                        <span className="text-foreground">{exam.time_limit} Mins</span>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center justify-between gap-4 pt-4 mt-auto">
-                                    <Button 
-                                        variant="ghost" 
-                                        size="sm" 
-                                        className="rounded-xl text-[10px] uppercase font-black tracking-widest text-muted-foreground hover:text-primary px-3"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            navigate(`/student/exam/${courseSlug}/${exam.exam_slug}${exam.status === "Completed" ? "/details" : ""}`);
-                                        }}
-                                    >
-                                        Details
-                                    </Button>
-                                    <Button 
-                                        className={cn(
-                                            "flex-1 bg-primary hover:bg-primary/90 gap-2 rounded-xl h-10 font-bold text-xs shadow-md shadow-primary/20 transition-all",
-                                            exam.status === "Completed" && "bg-slate-800 hover:bg-slate-900 shadow-slate-200"
-                                        )}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            if (exam.status === "Completed") {
-                                                navigate(`/student/exam/${courseSlug}/${exam.exam_slug}/details`);
-                                            } else {
-                                                navigate(`/student/exam/${courseSlug}/${exam.exam_slug}`);
-                                            }
-                                        }}
-                                    >
-                                        {exam.status === "Completed" ? "View Details" : "Start Exam"} <ArrowRight className="w-4 h-4" />
-                                    </Button>
-                                </div>
-                            </CardContent>
-                        </Card>
+                            actionText={exam.status === "Completed" ? "View Details" : "Start Exam"}
+                            actionIcon={ArrowRight}
+                            actionClassName={exam.status === "Completed" ? "bg-slate-800 hover:bg-slate-900 shadow-slate-200" : ""}
+                        />
                     ))}
+
                     {filteredExams.length === 0 && (
                         <div className="col-span-full py-20 text-center bg-muted/20 rounded-3xl border border-dashed border-border/50">
                             <p className="text-muted-foreground font-medium text-sm">No exams found matching your search.</p>
@@ -1059,12 +973,12 @@ const StudentExams = () => {
                     <div className="flex items-center gap-6 bg-primary/5 px-8 py-4 rounded-3xl border border-primary/20 shadow-sm">
                         <div className="text-center">
                             <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest mb-0.5 opacity-60">Accuracy</p>
-                            <p className="text-lg font-black text-primary tabular-nums">{percentage}%</p>
+                            <p className="text-base font-black text-primary tabular-nums">{percentage}%</p>
                         </div>
                         <div className="w-px h-8 bg-primary/20" />
                         <div className="text-center">
                             <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest mb-0.5 opacity-60">Score</p>
-                            <p className="text-lg font-black text-primary tabular-nums">{score} / {total}</p>
+                            <p className="text-base font-black text-primary tabular-nums">{score} / {total}</p>
                         </div>
                     </div>
                 </div>
@@ -1072,7 +986,7 @@ const StudentExams = () => {
                 <div className="bg-card border-l-[12px] border-l-primary border-y border-r border-border/50 rounded-[2.5rem] p-10 sm:p-12 shadow-xl shadow-black/[0.02]">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                         <div>
-                            <h2 className="text-3xl sm:text-4xl font-black text-foreground mb-3 tracking-tight">{selectedExam.exam_title}</h2>
+                            <h2 className="text-xl sm:text-2xl font-black text-foreground mb-3 tracking-tight">{selectedExam.exam_title}</h2>
                             <p className="text-muted-foreground font-bold uppercase tracking-widest text-xs opacity-70 flex items-center gap-2">
                                 <BookOpen className="w-4 h-4" />
                                 {selectedExam.course_name} • Knowledge Review
@@ -1124,7 +1038,7 @@ const StudentExams = () => {
                                         </div>
                                     </div>
 
-                                    <h3 className="text-2xl font-bold text-foreground mb-12 whitespace-pre-wrap leading-tight tracking-tight">
+                                    <h3 className="text-lg font-bold text-foreground mb-12 whitespace-pre-wrap leading-tight tracking-tight">
                                         {question.question_text}
                                     </h3>
 
@@ -1138,14 +1052,14 @@ const StudentExams = () => {
                                                 <div
                                                     key={key}
                                                     className={cn(
-                                                        "p-6 rounded-[1.5rem] border-2 text-base transition-all duration-500 flex items-center gap-6 font-bold relative group",
+                                                        "p-6 rounded-[1.5rem] border-2 text-sm transition-all duration-500 flex items-center gap-6 font-bold relative group",
                                                         isActuallyCorrect 
                                                             ? "bg-green-500/10 border-green-500/50 text-green-700 ring-4 ring-green-500/5 shadow-inner" 
                                                             : (isStudentSelected && !isCorrect ? "bg-destructive/5 border-destructive/50 text-destructive/80" : "bg-muted/10 border-border/40 text-muted-foreground/50 opacity-60")
                                                     )}
                                                 >
                                                     <div className={cn(
-                                                        "w-9 h-9 rounded-xl flex items-center justify-center text-xs font-black shrink-0 shadow-lg transition-all duration-500",
+                                                        "w-9 h-9 rounded-xl flex items-center justify-center text-[10px] font-black shrink-0 shadow-lg transition-all duration-500",
                                                         isActuallyCorrect ? "bg-green-500 text-white scale-110 rotate-3" :
                                                             (isStudentSelected && !isCorrect ? "bg-destructive text-white -rotate-3" : "bg-muted-foreground/20 text-muted-foreground")
                                                     )}>
@@ -1170,7 +1084,7 @@ const StudentExams = () => {
                                                 <div className={cn("w-1.5 h-1.5 rounded-full", isCorrect ? "bg-green-500" : "bg-destructive")} />
                                                 Your Response
                                             </p>
-                                            <p className={cn("text-lg font-black uppercase tracking-tighter", isCorrect ? "text-green-600" : "text-destructive")}>
+                                            <p className={cn("text-sm font-black uppercase tracking-tighter", isCorrect ? "text-green-600" : "text-destructive")}>
                                                 {studentAns ? `Option ${letterMap[studentAns]}` : 'Not Attempted'}
                                             </p>
                                         </div>
@@ -1179,7 +1093,7 @@ const StudentExams = () => {
                                                 <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
                                                 Validated Answer
                                             </p>
-                                            <p className="text-lg font-black uppercase text-green-600 tracking-tighter">
+                                            <p className="text-sm font-black uppercase text-green-600 tracking-tighter">
                                                 Option {letterMap[question.correct_answer]}
                                             </p>
                                         </div>

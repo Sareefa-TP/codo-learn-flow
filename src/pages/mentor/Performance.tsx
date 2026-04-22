@@ -10,8 +10,9 @@ import {
     Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import {
-    Users, BookOpen, UserCheck, FileText, Activity, Eye, Play, Plus
+    Users, BookOpen, UserCheck, FileText, Activity, Eye, Play, Plus, Search
 } from "lucide-react";
+import PageSearch from "@/components/shared/PageSearch";
 
 //  Types
 interface InternPerformance {
@@ -75,6 +76,7 @@ const MentorPerformance = () => {
 
     const [modalOpen, setModalOpen] = useState(false);
     const [activeIntern, setActiveIntern] = useState<InternPerformance | null>(null);
+    const [searchQuery, setSearchQuery] = useState("");
 
     const openDetails = (intern: InternPerformance) => {
         setActiveIntern(intern);
@@ -83,22 +85,27 @@ const MentorPerformance = () => {
 
     // Calculate processed list
     const processedInterns = useMemo(() => {
-        return internData.map(intern => {
-            const taskVal = intern.tasksAssigned > 0 ? (intern.tasksCompleted / intern.tasksAssigned) * 100 : 0;
-            const attVal = intern.attendanceTotal > 0 ? (intern.attendancePresent / intern.attendanceTotal) * 100 : 0;
-            const repVal = intern.reportsExpected > 0 ? (intern.reportsSubmitted / intern.reportsExpected) * 100 : 0;
+        return internData
+            .filter(intern => 
+                intern.internName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                intern.track.toLowerCase().includes(searchQuery.toLowerCase())
+            )
+            .map(intern => {
+                const taskVal = intern.tasksAssigned > 0 ? (intern.tasksCompleted / intern.tasksAssigned) * 100 : 0;
+                const attVal = intern.attendanceTotal > 0 ? (intern.attendancePresent / intern.attendanceTotal) * 100 : 0;
+                const repVal = intern.reportsExpected > 0 ? (intern.reportsSubmitted / intern.reportsExpected) * 100 : 0;
 
-            // Score Weighting: Task 50%, Attendance 30%, Reports 20%
-            const score = (taskVal * 0.50) + (attVal * 0.30) + (repVal * 0.20);
+                // Score Weighting: Task 50%, Attendance 30%, Reports 20%
+                const score = (taskVal * 0.50) + (attVal * 0.30) + (repVal * 0.20);
 
-            return {
-                ...intern,
-                taskPercentage: Math.round(taskVal),
-                attPercentage: Math.round(attVal),
-                score: Math.round(score),
-            };
-        });
-    }, []);
+                return {
+                    ...intern,
+                    taskPercentage: Math.round(taskVal),
+                    attPercentage: Math.round(attVal),
+                    score: Math.round(score),
+                };
+            });
+    }, [searchQuery]);
 
     // Global Stats
     const metrics = useMemo(() => {
@@ -131,6 +138,12 @@ const MentorPerformance = () => {
                             Monitor intern progress, task completion, attendance, and weekly report submissions.
                         </p>
                     </div>
+                    <PageSearch 
+                        placeholder="Search by intern name or track..."
+                        onSearch={setSearchQuery}
+                        className="sm:w-80 mx-0 mb-0"
+                        animate={false}
+                    />
                 </div>
 
                 {/*  Summary Cards  */}

@@ -6,8 +6,9 @@ import {
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-    CalendarDays, UserCheck, UserX, Info, Clock
+    CalendarDays, UserCheck, UserX, Info, Clock, Search
 } from "lucide-react";
+import PageSearch from "@/components/shared/PageSearch";
 import { format } from "date-fns";
 import { AttendanceDatePicker } from "@/components/mentor/AttendanceDatePicker";
 
@@ -74,13 +75,11 @@ const statusStyles: Record<AttendanceStatus, string> = {
 const MentorAttendance = () => {
     const today = format(new Date(), "yyyy-MM-dd");
     const [selectedDate, setSelectedDate] = useState(today);
+    const [searchQuery, setSearchQuery] = useState("");
 
     const records = useMemo(() => {
         // Return mock data if exists for date, else build a default "Absent" list for all interns
-        if (mockDailyRecords[selectedDate]) {
-            return mockDailyRecords[selectedDate];
-        }
-        return assignedInterns.map(int => ({
+        let dailyRecords = mockDailyRecords[selectedDate] || assignedInterns.map(int => ({
             internId: int.id,
             internName: int.name,
             checkIn: "--",
@@ -88,7 +87,16 @@ const MentorAttendance = () => {
             duration: "--",
             status: "Absent" as AttendanceStatus
         }));
-    }, [selectedDate]);
+
+        if (searchQuery.trim()) {
+            dailyRecords = dailyRecords.filter(r => 
+                r.internName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                r.internId.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        }
+
+        return dailyRecords;
+    }, [selectedDate, searchQuery]);
 
     // Derived stats
     const totalCount = assignedInterns.length;
@@ -113,13 +121,22 @@ const MentorAttendance = () => {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3 bg-muted/30 p-2 rounded-xl border border-border/40 px-4">
-                        <span className="text-sm font-semibold text-muted-foreground">Select Date:</span>
-                        <AttendanceDatePicker
-                            value={selectedDate}
-                            onChange={setSelectedDate}
-                            className="w-[180px] h-9 shadow-sm"
+                    <div className="flex flex-col sm:flex-row items-center gap-3 bg-muted/30 p-2 rounded-xl border border-border/40 px-4">
+                        <PageSearch
+                            placeholder="Search intern name or ID..."
+                            onSearch={setSearchQuery}
+                            className="w-full sm:w-64 mx-0 mb-0"
+                            animate={false}
                         />
+                        <Separator orientation="vertical" className="hidden sm:block h-6 mx-1" />
+                        <div className="flex items-center gap-3 w-full sm:w-auto">
+                            <span className="text-sm font-semibold text-muted-foreground whitespace-nowrap">Select Date:</span>
+                            <AttendanceDatePicker
+                                value={selectedDate}
+                                onChange={setSelectedDate}
+                                className="w-[180px] h-9 shadow-sm"
+                            />
+                        </div>
                     </div>
                 </div>
 

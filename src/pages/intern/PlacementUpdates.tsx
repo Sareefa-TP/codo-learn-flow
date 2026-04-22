@@ -6,8 +6,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { 
-  Search, 
-  Briefcase, 
   MapPin, 
   Calendar, 
   Building2, 
@@ -19,6 +17,7 @@ import {
   DollarSign,
   FileText
 } from "lucide-react";
+import PageSearch from "@/components/shared/PageSearch";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -409,15 +408,10 @@ const PlacementUpdates = () => {
         {/* Search and Filters Container */}
         <div className="space-y-6">
           {/* Global Search Bar */}
-          <div className="relative group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-            <Input 
-              placeholder="Search by role or department (e.g., Engineering, QA)..." 
-              className="pl-12 h-14 bg-background/80 backdrop-blur-sm border-border/50 rounded-2xl shadow-sm focus-visible:ring-primary/20 transition-all text-base font-medium"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+          <PageSearch
+            placeholder="Search by role or department (e.g., Engineering, QA)..."
+            onSearch={setSearchQuery}
+          />
 
           {/* Filter Bar (Match Tasks UI) */}
           <div className="flex items-center gap-2 p-1.5 bg-muted/40 border border-border/40 rounded-2xl w-fit overflow-x-auto max-w-full no-scrollbar shadow-inner mt-2">

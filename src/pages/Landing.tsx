@@ -40,7 +40,7 @@ const Landing = () => {
             Sign In
           </Button>
           <Button 
-            onClick={() => navigate("/select-role")}
+            onClick={() => navigate("/login")}
             className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold rounded-xl px-6 h-10 shadow-lg shadow-primary/20"
           >
             Join Now
@@ -80,7 +80,7 @@ const Landing = () => {
             <div className="pt-6 flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in stagger-3">
               <Button 
                 size="lg" 
-                onClick={() => navigate("/select-role")}
+                onClick={() => navigate("/login")}
                 className="w-full sm:w-auto h-14 px-10 text-base font-black gap-2 group rounded-2xl shadow-xl shadow-primary/25 hover:shadow-primary/40 transition-all hover:-translate-y-1"
               >
                 Get Started

@@ -49,13 +49,13 @@ import {
   Archive,
   FileQuestion,
   ChevronRight,
-  Search,
   BookOpen,
   MoreVertical,
   Edit2,
   ArrowLeft,
   Layers
 } from "lucide-react";
+import PageSearch from "@/components/shared/PageSearch";
 import { useToast } from "@/hooks/use-toast";
 import {
   Tooltip,
@@ -301,15 +301,12 @@ const TutorMaterials = () => {
             </div>
 
             {/* Search Bar */}
-            <div className="max-w-md relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Search by file name..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-card/50"
-              />
-            </div>
+            <PageSearch
+              placeholder="Search by file name..."
+              onSearch={setSearchQuery}
+              className="max-w-md mx-0"
+              animate={false}
+            />
 
             {/* Modules & Materials */}
             <div className="space-y-8">

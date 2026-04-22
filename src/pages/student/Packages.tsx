@@ -10,6 +10,8 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import CourseCard from "@/components/student/CourseCard";
+import PageSearch from "@/components/shared/PageSearch";
+import { toast } from "sonner";
 
 // Mock Data Array
 const coursesData = [
@@ -700,16 +702,11 @@ const StudentPackages = () => {
 
         {/* Search Bar for Course List - New Full-Width Position */}
         {!activeCourse && (
-          <div className="relative mb-6 sm:mb-10 group animate-in fade-in slide-in-from-top-4 duration-700 delay-100">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-all duration-300" />
-            <input
-              type="text"
-              placeholder="Search courses by title, category, or mentor..."
-              className="w-full bg-card border border-border/60 rounded-[1.25rem] py-3.5 sm:py-4 pl-12 pr-6 text-sm font-medium focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-sm placeholder:text-muted-foreground/50"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+          <PageSearch
+            placeholder="Search courses by title, category, or mentor..."
+            onSearch={setSearchQuery}
+            className="mb-6 sm:mb-10"
+          />
         )}
 
         {/* Course List / Dynamic Content */}
@@ -720,10 +717,17 @@ const StudentPackages = () => {
                 key={course.id}
                 title={course.title}
                 category={course.category}
-                duration={course.duration}
+                duration={`${course.duration} Program`}
+                description={course.description}
                 progress={course.progress}
-                onDetailsClick={() => setViewingCourseDetailsId(course.id)}
-                onActionClick={() => handleCourseClick(course)}
+                onDetailsClick={() => {
+                  toast.success(`Loading details for ${course.title}`);
+                  setViewingCourseDetailsId(course.id);
+                }}
+                onActionClick={() => {
+                  toast.info(course.progress > 0 ? `Resuming ${course.title}` : `Starting ${course.title}`);
+                  handleCourseClick(course);
+                }}
               />
             ))}
           </div>
@@ -802,17 +806,12 @@ const StudentPackages = () => {
             <div className="space-y-4">
               <h2 className="text-xl font-semibold text-foreground mb-4">Course Content</h2>
 
-              {/* Search Bar (matches "My Enrolled Courses" searchbar styling) */}
-              <div className="relative group animate-in fade-in slide-in-from-top-4 duration-700 delay-100">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-all duration-300" />
-                <input
-                  type="text"
-                  placeholder="Search modules or sessions..."
-                  className="w-full bg-card border border-border/60 rounded-[1.25rem] py-4 pl-12 pr-6 text-sm font-medium focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-sm placeholder:text-muted-foreground/50"
-                  value={contentSearchQuery}
-                  onChange={(e) => setContentSearchQuery(e.target.value)}
-                />
-              </div>
+              {/* Standardized Search Bar */}
+              <PageSearch
+                placeholder="Search modules or sessions..."
+                onSearch={setContentSearchQuery}
+                className="mb-0"
+              />
 
               <div className="flex flex-col gap-3">
                 {activeCourse.modules.map((mod) => {

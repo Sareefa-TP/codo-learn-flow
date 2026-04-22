@@ -22,13 +22,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { 
-  Search, 
   Users, 
   CheckCircle2, 
   AlertCircle, 
   Eye, 
   UserCheck2 
 } from "lucide-react";
+import PageSearch from "@/components/shared/PageSearch";
 
 // Mock data for assigned students
 const initialStudents = [
@@ -205,15 +205,11 @@ const MentorStudents = () => {
         <Card className="border-none shadow-sm rounded-[16px]">
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-                <Input
-                  className="pl-10 h-11 rounded-xl bg-muted/30 border-none"
-                  placeholder="Search by name or email..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
+              <PageSearch
+                placeholder="Search by name or email..."
+                onSearch={setSearchTerm}
+                className="flex-1 mx-0"
+              />
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:w-2/3 lg:w-1/2">
                 <Select value={courseFilter} onValueChange={setCourseFilter}>
                   <SelectTrigger className="h-11 rounded-xl bg-muted/30 border-none">

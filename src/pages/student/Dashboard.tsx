@@ -88,21 +88,21 @@ const StudentDashboard = () => {
   const upcomingClasses = [
     {
       id: 1,
-      title: "React State Management & Context API",
+      title: "Advanced React Patterns & Performance",
       mentor: "John Doe",
-      date: "25 March 2026",
+      date: "22 April 2026",
       time: "07:00 PM - 08:30 PM",
       link: "https://meet.google.com/xyz-demo-link",
-      timestamp: new Date("2026-03-25T19:00:00").getTime(),
+      timestamp: new Date("2026-04-22T19:00:00").getTime(),
     },
     {
       id: 2,
-      title: "Introduction to Node.js & Express",
+      title: "Building Scalable APIs with Node.js",
       mentor: "Jane Smith",
-      date: "28 March 2026",
+      date: "25 April 2026",
       time: "06:00 PM - 07:30 PM",
       link: "https://meet.google.com/abc-demo-link",
-      timestamp: new Date("2026-03-28T18:00:00").getTime(),
+      timestamp: new Date("2026-04-25T18:00:00").getTime(),
     },
   ];
 

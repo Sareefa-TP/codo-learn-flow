@@ -4,7 +4,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Video, Calendar, Clock, PlayCircle, User, Info, RefreshCw, X } from "lucide-react";
+import { Video, Calendar, Clock, PlayCircle, User, Info, RefreshCw, X, Radio } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
 import {
@@ -19,7 +19,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import type { MeetRegularSession, MeetSession, MeetTabId } from "@/modules/meet/types";
-import { InternSearchBar } from "@/components/inputs/InternSearchBar";
+import PageSearch from "@/components/shared/PageSearch";
 
 const STATUS_UI: Record<MeetSession["status"], { label: string; className: string }> = {
   live: { label: "Live Now", className: "bg-red-500/10 text-red-600 border-red-500/20" },
@@ -61,46 +61,50 @@ const MeetTabs = ({
   onTabChange: (tab: MeetTabId) => void;
   counts: Record<MeetTabId, number>;
 }) => {
-  const tabs: Array<{ id: MeetTabId; label: string }> = [
-    { id: "live", label: "Live Now" },
-    { id: "upcoming", label: "Upcoming" },
-    { id: "recordings", label: "Recordings" },
-    { id: "regular", label: "Regular" },
+  const tabs: Array<{ id: MeetTabId; label: string; icon: any }> = [
+    { id: "live", label: "Live Now", icon: Radio },
+    { id: "upcoming", label: "Upcoming", icon: Calendar },
+    { id: "recordings", label: "Recordings", icon: PlayCircle },
+    { id: "regular", label: "Regular", icon: RefreshCw },
   ];
 
   return (
-    <div className="flex items-center gap-1 bg-muted/50 p-1 rounded-2xl border border-border/40 w-fit flex-wrap shadow-sm">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5 bg-white p-1.5 rounded-full w-full flex-wrap shadow-sm border border-border/40 mb-2">
       {tabs.map((t) => {
         const isActive = activeTab === t.id;
         const count = counts[t.id];
+        const Icon = t.icon;
         return (
           <button
             key={t.id}
             onClick={() => onTabChange(t.id)}
             className={cn(
-              "flex items-center gap-2 px-4 h-10 rounded-xl text-xs font-bold transition-all relative focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+              "flex items-center justify-center gap-2.5 px-4 h-11 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 relative focus:outline-none w-full",
               isActive
-                ? "bg-background shadow-sm text-foreground border border-border/60"
-                : "text-muted-foreground hover:text-foreground hover:bg-background/50",
+                ? "bg-[#28B485] text-white shadow-lg shadow-[#28B485]/20"
+                : "text-[#94A3B8] hover:text-[#64748B] hover:bg-slate-50",
             )}
           >
-            <span className="relative flex items-center gap-2">
+            <Icon className={cn("w-4 h-4", isActive ? "text-white" : "text-[#94A3B8]")} />
+            <span className="flex items-center gap-2">
               {t.label}
-              {t.id === "live" && count > 0 && (
+              {isActive && t.id === "live" && (
                 <span className="flex h-2 w-2 relative">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
                 </span>
               )}
             </span>
-            <span
-              className={cn(
-                "text-[10px] px-2 py-0.5 rounded-full font-black tabular-nums min-w-[28px] text-center",
-                isActive ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground",
-              )}
-            >
-              {count}
-            </span>
+            {count > 0 && (
+              <span
+                className={cn(
+                  "text-[10px] px-2 py-0.5 rounded-full font-black tabular-nums min-w-[24px] text-center ml-0.5",
+                  isActive ? "bg-white/20 text-white" : "bg-slate-100 text-[#94A3B8]",
+                )}
+              >
+                {count}
+              </span>
+            )}
           </button>
         );
       })}
@@ -497,10 +501,11 @@ export function MeetPage({
 
         <div className="flex flex-col gap-4">
           {enableSearch && (
-            <InternSearchBar
+            <PageSearch
               placeholder={searchPlaceholder}
-              value={searchQuery}
-              onChange={setSearchQuery}
+              onSearch={setSearchQuery}
+              className="max-w-none mb-0"
+              animate={false}
             />
           )}
 

@@ -120,73 +120,12 @@ const InternCertificates = () => {
             <CardContent className="px-6 pb-8 pt-4">
               {certificateData.internshipStatus === "Completed" ? (
                 /* Unlocked Artwork - Full Width */
-                <div className="relative w-full rounded-2xl border-[3px] border-amber-400/30 bg-gradient-to-br from-amber-50/80 via-background to-amber-50/40 dark:from-amber-950/20 dark:via-background dark:to-amber-950/10 p-12 text-center space-y-8 overflow-hidden shadow-xl">
-                  {/* Decorative corner stars */}
-                  <Star className="absolute top-4 left-4 w-6 h-6 text-amber-300/40 fill-amber-300/20" />
-                  <Star className="absolute top-4 right-4 w-6 h-6 text-amber-300/40 fill-amber-300/20" />
-                  <Star className="absolute bottom-4 left-4 w-6 h-6 text-amber-300/40 fill-amber-300/20" />
-                  <Star className="absolute bottom-4 right-4 w-6 h-6 text-amber-300/40 fill-amber-300/20" />
-
-                  {/* Logo / Issuer */}
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-400/30 flex items-center justify-center">
-                      <Building2 className="w-6 h-6 text-amber-600" />
-                    </div>
-                    <p className="text-base font-bold tracking-widest text-amber-700 dark:text-amber-400 uppercase">
-                      {certificateData.issuedBy}
-                    </p>
-                  </div>
-
-                  {/* Title */}
-                  <div className="space-y-1.5">
-                    <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground font-semibold">
-                      Certificate of Completion
-                    </p>
-                    <div className="w-24 h-px bg-amber-400/40 mx-auto" />
-                  </div>
-
-                  {/* Body text */}
-                  <div className="space-y-3 max-w-lg mx-auto">
-                    <p className="text-sm text-muted-foreground">This certifies that</p>
-                    <p className="text-3xl font-bold tracking-tight text-foreground">
-                      {certificateData.internName}
-                    </p>
-                    <p className="text-sm text-muted-foreground leading-relaxed italic">
-                      has successfully completed the
-                    </p>
-                    <p className="text-xl font-bold text-amber-700 dark:text-amber-400">
-                      {certificateData.internshipTitle}
-                    </p>
-                    <p className="text-sm text-muted-foreground font-medium">
-                      {certificateData.duration}
-                    </p>
-                  </div>
-
-                  {/* Separator */}
-                  <div className="flex items-center gap-4 max-w-xs mx-auto opacity-60">
-                    <div className="flex-1 h-px bg-amber-400/30" />
-                    <Award className="w-5 h-5 text-amber-500" />
-                    <div className="flex-1 h-px bg-amber-400/30" />
-                  </div>
-
-                  {/* Footer meta */}
-                  <div className="grid grid-cols-2 gap-8 text-xs max-w-sm mx-auto">
-                    <div className="text-center">
-                      <p className="text-muted-foreground uppercase tracking-wider text-[10px]">Issue Date</p>
-                      <p className="font-bold mt-1 text-foreground">{certificateData.issueDate}</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-muted-foreground uppercase tracking-wider text-[10px]">Authorised By</p>
-                      <p className="font-bold mt-1 text-foreground">{certificateData.approvedBy}</p>
-                    </div>
-                  </div>
-
-                  {/* Certificate ID */}
-                  <div className="pt-2">
-                    <p className="text-[10px] text-muted-foreground/50 font-mono tracking-widest">
-                      VERIFICATION ID: {certificateData.certificateId}
-                    </p>
-                  </div>
+                <div className="relative w-full rounded-2xl border-none bg-white shadow-xl overflow-hidden p-0">
+                  <img 
+                    src="/certificate.png" 
+                    alt="Internship Certificate" 
+                    className="w-full h-auto object-contain"
+                  />
                 </div>
               ) : (
                 /* Locked State */

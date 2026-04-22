@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/components/ui/use-toast";
+import PageSearch from "@/components/shared/PageSearch";
 
 import {
     Layers,
@@ -128,6 +129,8 @@ const BatchManagement = () => {
         tutorId: "",
         studentIds: [],
     });
+
+    const [searchTerm, setSearchTerm] = useState("");
 
     // Calculate phase dynamically based on current date
     const getPhase = (batch: Batch): Phase => {
@@ -240,6 +243,15 @@ const BatchManagement = () => {
             }
         });
     };
+
+    const filteredBatches = batches.filter(batch => {
+        const tutor = mockTutors.find(t => t.id === batch.tutorId);
+        const searchLower = searchTerm.toLowerCase();
+        return (
+            batch.name.toLowerCase().includes(searchLower) ||
+            tutor?.name.toLowerCase().includes(searchLower)
+        );
+    });
 
     return (
         <DashboardLayout>
@@ -370,8 +382,14 @@ const BatchManagement = () => {
                     </Dialog>
                 </div>
 
+                {/* Standardized Search Bar */}
+                <PageSearch
+                    placeholder="Search by batch name or tutor..."
+                    onSearch={setSearchTerm}
+                />
+
                 {/* Dynamic Table Section */}
-                {batches.length > 0 ? (
+                {filteredBatches.length > 0 ? (
                     <Card className="border-border/50 overflow-hidden shadow-sm">
                         <div className="overflow-x-auto">
                             <Table>
@@ -386,7 +404,7 @@ const BatchManagement = () => {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {batches.map((batch) => {
+                                    {filteredBatches.map((batch) => {
                                         const tutor = mockTutors.find(t => t.id === batch.tutorId);
                                         const phase = getPhase(batch);
                                         const enrollmentPercentage = (batch.studentIds.length / batch.capacity) * 100;

@@ -30,7 +30,6 @@ import {
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format, parseISO } from "date-fns";
 import {
-  Search,
   Eye,
   Briefcase,
   Users,
@@ -48,6 +47,7 @@ import {
   GraduationCap,
   Save
 } from "lucide-react";
+import PageSearch from "@/components/shared/PageSearch";
 import { mentees as initialMentees, Mentee } from "@/data/mentorData";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -215,15 +215,12 @@ const MentorInterns = () => {
               </CardTitle>
 
               <div className="flex flex-col sm:flex-row items-center gap-3">
-                <div className="relative w-full sm:w-64">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search interns..."
-                    className="pl-9 h-9 rounded-lg"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                  />
-                </div>
+                <PageSearch
+                  placeholder="Search interns..."
+                  onSearch={setSearch}
+                  className="sm:w-64 mx-0 mb-0"
+                  animate={false}
+                />
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                   <Button variant="outline" size="sm" className="h-9 gap-2 rounded-lg">
                     <Filter className="w-4 h-4" />

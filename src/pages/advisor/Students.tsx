@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { InternSearchBar } from "@/components/inputs/InternSearchBar";
+import PageSearch from "@/components/shared/PageSearch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { StandardModal } from "@/components/modals/StandardModal";
@@ -266,10 +266,9 @@ const AdvisorStudents = () => {
         </Button>
       </div>
 
-      <InternSearchBar
+      <PageSearch
         placeholder="Search students..."
-        value={searchQuery}
-        onChange={setSearchQuery}
+        onSearch={setSearchQuery}
       />
 
       <StandardModal
