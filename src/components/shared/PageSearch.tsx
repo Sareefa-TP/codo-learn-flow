@@ -1,6 +1,8 @@
 import { Search, X } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface PageSearchProps {
   /** Placeholder text for the input */
@@ -72,22 +74,25 @@ const PageSearch = ({
         className
       )}
     >
-      <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-primary transition-all duration-300" />
-      <input
+      <Search className="absolute left-4 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-all duration-300 group-focus-within:text-primary" />
+      <Input
         type="text"
         placeholder={placeholder}
         value={inputValue}
         onChange={handleInputChange}
-        className="w-full bg-white border border-slate-200 rounded-2xl py-4 pl-12 pr-12 text-sm font-medium focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-sm placeholder:text-slate-400 text-slate-900"
+        className="h-12 rounded-2xl border-border/70 bg-card pl-11 pr-12 font-medium"
       />
       {inputValue && (
-        <button
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
           onClick={handleClear}
           title="Clear search"
-          className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-xl text-slate-400 hover:text-destructive hover:bg-destructive/5 transition-all outline-none focus:ring-2 focus:ring-destructive/20"
+          className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2 rounded-xl text-muted-foreground hover:text-destructive"
         >
           <X className="w-4 h-4" />
-        </button>
+        </Button>
       )}
     </div>
   );

@@ -209,7 +209,7 @@ export default function StudentGame() {
         description="A 60‑second quick math challenge to sharpen your speed. Pick a difficulty, start the timer, and aim for a streak."
       >
         <div className="grid grid-cols-12 gap-4 sm:gap-6">
-          <Card className="col-span-12 lg:col-span-8 min-w-0 overflow-hidden border-border/60 bg-card/80 shadow-sm backdrop-blur-sm">
+          <Card className="col-span-12 xl:col-span-8 min-w-0 overflow-hidden border-border/60 bg-card/80 shadow-sm backdrop-blur-sm">
             <CardHeader className="border-b border-border/60 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-4 sm:p-6">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0 space-y-1">
@@ -284,9 +284,9 @@ export default function StudentGame() {
             </CardHeader>
 
             <CardContent className="p-4 sm:p-6">
-              <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-12">
-                <div className="lg:col-span-5 flex items-center justify-center">
-                  <div className="rounded-3xl border border-border/60 bg-background/40 p-4 sm:p-6 shadow-sm w-full">
+              <div className="grid grid-cols-1 items-stretch gap-4 sm:gap-6 xl:grid-cols-12">
+                <div className="xl:col-span-5 flex">
+                  <div className="w-full rounded-3xl border border-border/60 bg-background/40 p-4 shadow-sm sm:p-6 xl:h-full">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Timer className="h-4 w-4" />
@@ -330,7 +330,7 @@ export default function StudentGame() {
                       </CircularProgress>
                     </div>
 
-                    <div className="mt-5 grid grid-cols-3 gap-2 sm:gap-3">
+                    <div className="mt-5 grid grid-cols-1 gap-2 sm:gap-3">
                       <div className="rounded-2xl border border-border/60 bg-card/60 p-3 text-center">
                         <div className="text-xs text-muted-foreground">Score</div>
                         <div className="text-lg font-semibold tabular-nums">{score}</div>
@@ -347,9 +347,9 @@ export default function StudentGame() {
                   </div>
                 </div>
 
-                <div className="lg:col-span-7">
-                  <div className="rounded-3xl border border-border/60 bg-background/40 p-4 sm:p-6 shadow-sm min-w-0">
-                    <div className="flex items-center justify-between gap-3">
+                <div className="xl:col-span-7 flex">
+                  <div className="min-w-0 w-full rounded-3xl border border-border/60 bg-background/40 p-4 shadow-sm sm:p-6 xl:h-full">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Sparkles className="h-4 w-4 text-primary" />
                         Current question
@@ -362,7 +362,7 @@ export default function StudentGame() {
                       )}
                     </div>
 
-                    <div className="mt-5 rounded-3xl border border-border/60 bg-card/70 p-4 sm:p-6 min-w-0">
+                    <div className="mt-5 min-w-0 rounded-3xl border border-border/60 bg-card/70 p-4 sm:p-6">
                       <div className="text-center">
                         <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
                           Solve
@@ -372,31 +372,27 @@ export default function StudentGame() {
                         </div>
                       </div>
 
-                      <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-12">
-                        <div className="sm:col-span-8">
-                          <Input
-                            ref={inputRef}
-                            inputMode="numeric"
-                            placeholder={gameState === "running" ? "Type your answer…" : "Press Start to begin"}
-                            value={inputValue}
-                            onChange={(e) => setInputValue(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") submitAnswer();
-                            }}
-                            disabled={gameState !== "running" || isSubmitting}
-                            className="h-11 rounded-xl bg-background/60 border-border/60 shadow-sm text-base"
-                            aria-label="Answer input"
-                          />
-                        </div>
-                        <div className="sm:col-span-4">
-                          <Button
-                            onClick={submitAnswer}
-                            disabled={gameState !== "running" || isSubmitting}
-                            className="w-full h-11 rounded-xl shadow-sm"
-                          >
-                            {isSubmitting ? "Checking…" : "Submit"}
-                          </Button>
-                        </div>
+                      <div className="mt-6 space-y-3">
+                        <Input
+                          ref={inputRef}
+                          inputMode="numeric"
+                          placeholder={gameState === "running" ? "Type your answer…" : "Press Start to begin"}
+                          value={inputValue}
+                          onChange={(e) => setInputValue(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") submitAnswer();
+                          }}
+                          disabled={gameState !== "running" || isSubmitting}
+                          className="h-11 rounded-xl bg-background/60 border-border/60 shadow-sm text-base"
+                          aria-label="Answer input"
+                        />
+                        <Button
+                          onClick={submitAnswer}
+                          disabled={gameState !== "running" || isSubmitting}
+                          className="h-11 w-full rounded-xl shadow-sm"
+                        >
+                          {isSubmitting ? "Checking…" : "Submit"}
+                        </Button>
                       </div>
 
                       {lastResult && (
@@ -422,19 +418,19 @@ export default function StudentGame() {
                       )}
 
                       {gameState === "finished" && (
-                        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                          <div className="text-sm text-muted-foreground">
+                        <div className="mt-6 space-y-3">
+                          <div className="text-sm leading-relaxed text-muted-foreground">
                             Want another run? You can change difficulty before starting.
                           </div>
-                          <div className="flex flex-col sm:flex-row gap-2">
+                          <div className="flex flex-col gap-2 md:flex-row">
                             <Button
                               variant="outline"
-                              className="rounded-xl"
+                              className="w-full rounded-xl md:w-auto"
                               onClick={reset}
                             >
                               Back to Ready
                             </Button>
-                            <Button className="rounded-xl" onClick={start}>
+                            <Button className="w-full rounded-xl md:w-auto" onClick={start}>
                               Play Again
                             </Button>
                           </div>
@@ -447,7 +443,7 @@ export default function StudentGame() {
             </CardContent>
           </Card>
 
-          <Card className="col-span-12 lg:col-span-4 border-border/60 bg-card/80 shadow-sm backdrop-blur-sm">
+          <Card className="col-span-12 xl:col-span-4 border-border/60 bg-card/80 shadow-sm backdrop-blur-sm">
             <CardHeader className="border-b border-border/60">
               <CardTitle className="text-base">How it works</CardTitle>
             </CardHeader>

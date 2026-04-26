@@ -4,6 +4,10 @@ import CourseCard from "@/components/student/CourseCard";
 import PageSearch from "@/components/shared/PageSearch";
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { studentData } from "@/data/studentData";
+import { downloadCertificatePdf } from "@/lib/pdf/certificatePdf";
 
 // Mock Certificates Data
 const CERTIFICATES = [
@@ -32,6 +36,7 @@ const CERTIFICATES = [
 
 const StudentCertificates = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [previewCertId, setPreviewCertId] = useState<string | null>(null);
 
   const filteredCertificates = useMemo(() => {
     return CERTIFICATES.filter(cert => 
@@ -40,9 +45,25 @@ const StudentCertificates = () => {
     );
   }, [searchQuery]);
 
+  const previewCertificate = useMemo(
+    () => CERTIFICATES.find((cert) => cert.id === previewCertId) || null,
+    [previewCertId],
+  );
+
+  const handleDownload = (cert: (typeof CERTIFICATES)[number]) => {
+    downloadCertificatePdf({
+      certificateId: cert.id,
+      courseName: cert.courseName,
+      issueDate: cert.issueDate,
+      credentialId: cert.credentialId,
+      studentName: studentData.profile.name,
+    });
+    toast.success(`${cert.courseName} certificate downloaded`);
+  };
+
   return (
     <DashboardLayout>
-      <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8 max-w-6xl mx-auto px-4 md:px-6 lg:px-8">
+      <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 mx-auto w-full max-w-7xl space-y-8 px-4 md:px-6 lg:px-8">
         
         {/* Header Section */}
         <div className="space-y-2 text-left">
@@ -58,11 +79,11 @@ const StudentCertificates = () => {
         <PageSearch
           placeholder="Search certificates by course name or ID..."
           onSearch={setSearchQuery}
-          className="mb-10"
+          className="mb-6"
         />
 
         {/* Certificates Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-12">
+        <div className="grid grid-cols-1 gap-4 pb-12 sm:grid-cols-2 lg:grid-cols-3 xl:gap-6">
           {filteredCertificates.map((cert) => (
             <CourseCard
               key={cert.id}
@@ -73,19 +94,13 @@ const StudentCertificates = () => {
               showProgress={false}
               icon={Award}
               detailsText="Preview"
-              actionText="Download PDF"
+              actionText="Download"
               actionIcon={Download}
               onDetailsClick={() => {
-                toast.success(`Opening preview for ${cert.courseName}`);
-                console.log("Viewing certificate details:", cert.id);
+                setPreviewCertId(cert.id);
               }}
               onActionClick={() => {
-                toast.promise(new Promise((resolve) => setTimeout(resolve, 1500)), {
-                  loading: 'Preparing certificate...',
-                  success: 'Certificate downloaded successfully!',
-                  error: 'Error'
-                });
-                console.log("Downloading certificate:", cert.id);
+                handleDownload(cert);
               }}
             />
           ))}
@@ -96,6 +111,42 @@ const StudentCertificates = () => {
             </div>
           )}
         </div>
+
+        <Dialog open={!!previewCertificate} onOpenChange={(open) => !open && setPreviewCertId(null)}>
+          <DialogContent className="max-w-4xl rounded-3xl">
+            <DialogHeader>
+              <DialogTitle>Certificate Preview</DialogTitle>
+            </DialogHeader>
+            {previewCertificate ? (
+              <div className="space-y-5">
+                <div className="rounded-2xl border border-border/70 bg-gradient-to-br from-card via-card to-muted/20 p-6 sm:p-8">
+                  <div className="mx-auto max-w-3xl rounded-2xl border border-primary/20 bg-background/80 p-6 text-center shadow-soft sm:p-8">
+                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">CODO LMS</p>
+                    <h3 className="mt-3 font-display text-3xl text-foreground sm:text-4xl">Certificate of Completion</h3>
+                    <p className="mt-5 text-sm text-muted-foreground">This certifies that</p>
+                    <p className="mt-2 font-display text-3xl text-primary sm:text-4xl">{studentData.profile.name}</p>
+                    <p className="mt-5 text-sm text-muted-foreground">has successfully completed</p>
+                    <p className="mt-2 text-2xl font-bold text-foreground sm:text-3xl">{previewCertificate.courseName}</p>
+                    <div className="mx-auto mt-6 h-px w-full max-w-md bg-border" />
+                    <p className="mt-4 text-sm text-muted-foreground">Issued on {previewCertificate.issueDate}</p>
+                    <p className="mt-1 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                      Credential ID: {previewCertificate.credentialId}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+                  <Button variant="outline" onClick={() => setPreviewCertId(null)}>
+                    Close
+                  </Button>
+                  <Button onClick={() => handleDownload(previewCertificate)}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Download PDF
+                  </Button>
+                </div>
+              </div>
+            ) : null}
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   );

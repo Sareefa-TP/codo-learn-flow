@@ -1,8 +1,6 @@
 import { ReactNode, useEffect, useState } from "react";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Search, Bell, Command as CommandIcon } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +12,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { useNavigate } from "react-router-dom";
+import AppShell from "@/components/layout/AppShell";
 
 interface FinanceLayoutProps {
   children: ReactNode;
@@ -35,13 +34,9 @@ const FinanceLayout = ({ children }: FinanceLayoutProps) => {
   }, []);
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-svh w-full overflow-hidden bg-[#fafafa]">
-        <AppSidebar />
-
-        <div className="flex-1 flex flex-col min-w-0">
-          {/* Header Bar */}
-          <header className="sticky top-0 z-30 flex h-20 items-center justify-between px-8 bg-white/80 backdrop-blur-md border-b border-border/40">
+    <>
+      <AppShell withCard={false} maxWidthClassName="max-w-[1440px]" contentPaddingClassName="p-6 md:p-8 lg:p-10" topbar={
+        <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-border/40 bg-background/80 px-6 backdrop-blur-md lg:px-8">
             <div className="flex items-center gap-6 flex-1">
               <SidebarTrigger className="md:hidden" />
               
@@ -75,15 +70,9 @@ const FinanceLayout = ({ children }: FinanceLayoutProps) => {
               </Button>
             </div>
           </header>
-
-          <main className="flex-1 overflow-auto p-8 lg:p-10">
-            <div className="mx-auto w-full max-w-[1440px]">
-              {children}
-            </div>
-          </main>
-        </div>
-      </div>
-
+      }>
+        {children}
+      </AppShell>
       {/* Command Menu */}
       <CommandDialog open={open} onOpenChange={setOpen}>
         <CommandInput placeholder="Type a command or search..." />
@@ -97,7 +86,7 @@ const FinanceLayout = ({ children }: FinanceLayoutProps) => {
           </CommandGroup>
         </CommandList>
       </CommandDialog>
-    </SidebarProvider>
+    </>
   );
 };
 

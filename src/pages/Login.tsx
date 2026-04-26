@@ -224,9 +224,9 @@ const Login = () => {
                 <Label htmlFor="password" className="text-xs font-black uppercase tracking-widest text-slate-500">
                   Password
                 </Label>
-                <a href="#" className="text-xs font-bold text-primary hover:underline transition-colors">
+                <Link to="/forgot-password" className="text-xs font-bold text-primary hover:underline transition-colors">
                   Forgot?
-                </a>
+                </Link>
               </div>
               <div className="relative">
                 <Input

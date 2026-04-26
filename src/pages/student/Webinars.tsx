@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PageSearch from "@/components/shared/PageSearch";
 import CourseCard from "@/components/student/CourseCard";
+import { PageEmptyState, PageHeader } from "@/components/shared/PageScaffold";
 
 // Types
 interface Webinar {
@@ -194,42 +195,38 @@ const StudentWebinars = () => {
     return (
         <DashboardLayout>
             <div className="animate-fade-in space-y-0 max-w-6xl mx-auto pb-10 px-4 md:px-6 lg:px-8">
-                {/* Header Section */}
                 <div className="mb-6 pt-6">
-                    <div className="space-y-1.5 text-center sm:text-left">
-                        <div className="flex items-center justify-center sm:justify-start gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-sm border border-primary/10">
-                                <MonitorPlay className="w-6 h-6" />
-                            </div>
-                            <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight">
-                                Webinars
-                            </h1>
-                        </div>
-                        <p className="text-slate-500 text-sm font-medium leading-relaxed sm:pl-13">
-                            Exclusive sessions with industry leaders to boost your learning journey.
-                        </p>
-                    </div>
+                  <PageHeader
+                    title="Webinars"
+                    description="Exclusive sessions with industry leaders to boost your learning journey."
+                    className="mb-0"
+                    actions={
+                      <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-primary/15 bg-primary/10 text-primary shadow-sm">
+                        <MonitorPlay className="h-6 w-6" />
+                      </div>
+                    }
+                  />
                 </div>
-
-                {/* Search Bar - Positioned as the "Mid" element */}
-                <PageSearch
+                <div className="flex flex-col gap-4">
+                  <PageSearch
                     placeholder="Search by webinar title, course, or speaker..."
                     onSearch={setSearchQuery}
-                    className="mb-8"
-                />
+                    className="max-w-none mb-0"
+                    animate={false}
+                  />
 
                 {/* Tabs for Organization */}
                 <Tabs defaultValue="upcoming" className="space-y-8">
-                    <TabsList className="grid grid-cols-1 md:grid-cols-3 gap-1.5 bg-white p-1.5 rounded-full w-full h-auto shadow-sm border border-border/40">
+                    <TabsList className="grid grid-cols-1 md:grid-cols-3 gap-1.5 bg-white p-1.5 rounded-full w-full h-auto shadow-sm border border-border/40 mb-2">
                         <TabsTrigger 
                             value="upcoming" 
-                            className="flex items-center justify-center gap-2 px-6 h-11 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all duration-300 data-[state=active]:bg-[#28B485] data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-[#28B485]/20 text-[#94A3B8] hover:bg-slate-50"
+                            className="flex items-center justify-center gap-2.5 px-4 h-11 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 relative focus:outline-none w-full data-[state=active]:bg-[#28B485] data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-[#28B485]/20 text-[#94A3B8] hover:text-[#64748B] hover:bg-slate-50"
                         >
                             <Calendar className="w-4 h-4 shrink-0" />
-                            <span>Upcoming Sessions</span>
+                            <span className="flex items-center gap-2">Upcoming Sessions</span>
                             <span className={cn(
-                                "text-[10px] px-2 py-0.5 rounded-full font-black ml-1",
-                                "bg-slate-100 text-[#94A3B8] group-data-[state=active]:bg-white/20 group-data-[state=active]:text-white"
+                                "text-[10px] px-2 py-0.5 rounded-full font-black tabular-nums min-w-[24px] text-center ml-0.5",
+                                "bg-slate-100 text-[#94A3B8] data-[state=active]:bg-white/20 data-[state=active]:text-white"
                             )}>
                                 {categorizedWebinars.upcoming.length}
                             </span>
@@ -237,13 +234,13 @@ const StudentWebinars = () => {
                         
                         <TabsTrigger 
                             value="registered" 
-                            className="flex items-center justify-center gap-2 px-6 h-11 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all duration-300 data-[state=active]:bg-[#28B485] data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-[#28B485]/20 text-[#94A3B8] hover:bg-slate-50"
+                            className="flex items-center justify-center gap-2.5 px-4 h-11 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 relative focus:outline-none w-full data-[state=active]:bg-[#28B485] data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-[#28B485]/20 text-[#94A3B8] hover:text-[#64748B] hover:bg-slate-50"
                         >
                             <CheckCircle className="w-4 h-4 shrink-0" />
                             <span>Registered</span>
                             <span className={cn(
-                                "text-[10px] px-2 py-0.5 rounded-full font-black ml-1",
-                                "bg-slate-100 text-[#94A3B8] group-data-[state=active]:bg-white/20 group-data-[state=active]:text-white"
+                                "text-[10px] px-2 py-0.5 rounded-full font-black tabular-nums min-w-[24px] text-center ml-0.5",
+                                "bg-slate-100 text-[#94A3B8] data-[state=active]:bg-white/20 data-[state=active]:text-white"
                             )}>
                                 {categorizedWebinars.registered.length}
                             </span>
@@ -251,13 +248,13 @@ const StudentWebinars = () => {
 
                         <TabsTrigger 
                             value="past" 
-                            className="flex items-center justify-center gap-2 px-6 h-11 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all duration-300 data-[state=active]:bg-[#28B485] data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-[#28B485]/20 text-[#94A3B8] hover:bg-slate-50"
+                            className="flex items-center justify-center gap-2.5 px-4 h-11 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 relative focus:outline-none w-full data-[state=active]:bg-[#28B485] data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-[#28B485]/20 text-[#94A3B8] hover:text-[#64748B] hover:bg-slate-50"
                         >
                             <PlayCircle className="w-4 h-4 shrink-0" />
                             <span>Recorded/Past</span>
                             <span className={cn(
-                                "text-[10px] px-2 py-0.5 rounded-full font-black ml-1",
-                                "bg-slate-100 text-[#94A3B8] group-data-[state=active]:bg-white/20 group-data-[state=active]:text-white"
+                                "text-[10px] px-2 py-0.5 rounded-full font-black tabular-nums min-w-[24px] text-center ml-0.5",
+                                "bg-slate-100 text-[#94A3B8] data-[state=active]:bg-white/20 data-[state=active]:text-white"
                             )}>
                                 {categorizedWebinars.past.length}
                             </span>
@@ -300,20 +297,19 @@ const StudentWebinars = () => {
                         </div>
                     </TabsContent>
                 </Tabs>
+                </div>
             </div>
         </DashboardLayout>
     );
 };
 
 const EmptyState = ({ message }: { message: string }) => (
-    <div className="col-span-full h-64 flex flex-col items-center justify-center text-center space-y-4 bg-muted/20 border-2 border-dashed border-border/50 rounded-2xl">
-        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-            <Video className="w-6 h-6 text-muted-foreground" />
-        </div>
-        <div>
-            <p className="text-lg font-bold">No sessions found</p>
-            <p className="text-sm text-muted-foreground">{message}</p>
-        </div>
+    <div className="col-span-full">
+      <PageEmptyState
+        title="No sessions found"
+        description={message}
+        icon={<Video className="h-6 w-6 text-muted-foreground" />}
+      />
     </div>
 );
 

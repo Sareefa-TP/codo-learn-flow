@@ -309,7 +309,7 @@ const Revenue = () => {
               Revenue ledger
             </h1>
             <p className="text-sm font-medium text-muted-foreground max-w-md">
-              Every incoming payment to Codo Academy — courses, bundles, webinars, subscriptions, wallet top-ups.
+              Every incoming payment to CODO Academy — courses, bundles, webinars, subscriptions, wallet top-ups.
             </p>
           </div>
           
@@ -452,7 +452,7 @@ const Revenue = () => {
         {/* ── Footnote ── */}
         <div className="flex items-center justify-center py-6 gap-3 opacity-30">
           <ShieldCheck className="w-4 h-4" />
-          <p className="text-[10px] font-black uppercase tracking-[0.3em]">Operational Financial Ledger — Codo Academy</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.3em]">Operational Financial Ledger — CODO Academy</p>
         </div>
       </div>
 

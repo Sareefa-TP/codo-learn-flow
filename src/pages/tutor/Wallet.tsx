@@ -610,7 +610,7 @@ const TutorWallet = () => {
                             </Button>
                             <Button className="rounded-xl px-6 bg-primary hover:bg-primary/90 gap-2">
                                 <Download className="w-4 h-4" />
-                                Download PDF
+                                Download
                             </Button>
                         </div>
                     </div>

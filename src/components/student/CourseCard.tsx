@@ -23,6 +23,7 @@ interface CourseCardProps {
   actionIcon?: any;
   actionClassName?: string;
   categoryVariant?: "default" | "secondary" | "destructive" | "outline";
+  onCardClick?: () => void;
 }
 
 const CourseCard = ({
@@ -41,35 +42,51 @@ const CourseCard = ({
   actionText = "Resume Learning",
   actionIcon: ActionIcon = PlayCircle,
   actionClassName,
-  categoryVariant = "default"
+  categoryVariant = "default",
+  onCardClick,
 }: CourseCardProps) => {
   return (
-    <Card className="group overflow-hidden border-border/50 hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 rounded-3xl flex flex-col h-full bg-card">
-      <div className="h-24 sm:h-32 bg-slate-100 flex items-center justify-center relative overflow-hidden">
+    <Card
+      className="group flex h-full flex-col overflow-hidden rounded-3xl border-border/60 bg-card transition-all duration-500 hover:border-primary/20 hover:shadow-lift"
+      onClick={onCardClick}
+      role={onCardClick ? "button" : undefined}
+      tabIndex={onCardClick ? 0 : undefined}
+      onKeyDown={
+        onCardClick
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onCardClick();
+              }
+            }
+          : undefined
+      }
+    >
+      <div className="relative flex h-24 items-center justify-center overflow-hidden bg-muted/40 sm:h-28">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent" />
-        <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center relative z-10 transition-transform duration-500 group-hover:scale-110">
+        <div className="relative z-10 flex h-12 w-12 items-center justify-center rounded-2xl border border-border/40 bg-card shadow-soft transition-transform duration-500 group-hover:scale-110">
           <Icon className="w-6 h-6 text-primary" />
         </div>
         {category && (
           <Badge 
             variant={categoryVariant}
             className={cn(
-              "absolute top-4 right-4 text-[10px] uppercase font-black tracking-widest px-2 shadow-sm",
-              categoryVariant === "default" || !categoryVariant ? "bg-white/90 text-slate-900 border-none backdrop-blur-sm" : ""
+              "absolute right-3 top-3 max-w-[62%] truncate px-2 text-[10px] uppercase tracking-widest shadow-sm",
+              categoryVariant === "default" || !categoryVariant ? "bg-card/90 text-foreground border-none backdrop-blur-sm" : ""
             )}
           >
             {category}
           </Badge>
         )}
       </div>
-      <CardContent className="p-4 sm:p-6 flex-1 flex flex-col space-y-5 sm:space-y-6">
+      <CardContent className="flex flex-1 flex-col space-y-4 p-4 sm:space-y-5 sm:p-5">
         <div className="space-y-1">
           {topLabel && (
             <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">
               {topLabel}
             </p>
           )}
-          <h3 className="text-lg font-bold text-foreground leading-tight group-hover:text-primary transition-colors line-clamp-2 min-h-[3rem]">
+          <h3 className="line-clamp-2 min-h-[2.8rem] text-xl font-display leading-tight text-foreground transition-colors group-hover:text-primary sm:min-h-[3rem]">
             {title}
           </h3>
           {duration && (
@@ -80,27 +97,27 @@ const CourseCard = ({
         </div>
 
         {description && (
-          <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
+          <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">
             {description}
           </p>
         )}
 
         {showProgress && (
-          <div className="space-y-2 pt-2">
+          <div className="space-y-2 pt-1">
             <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
               <span>{progressLabel}</span>
               <span className="text-primary">{progress}%</span>
             </div>
-            <Progress value={progress} className="h-1.5" />
+            <Progress value={progress} className="h-2" />
           </div>
         )}
 
-        <div className="flex items-center justify-between gap-3 pt-4 mt-auto">
+        <div className="mt-auto flex flex-col-reverse gap-2 pt-3 sm:flex-row sm:items-center sm:justify-between">
           {onDetailsClick && (
             <Button 
               variant="ghost" 
               size="sm" 
-              className="rounded-xl text-[10px] uppercase font-black tracking-widest text-muted-foreground hover:text-primary px-3"
+              className="justify-start rounded-xl px-2 text-[10px] uppercase tracking-widest text-muted-foreground hover:text-primary sm:justify-center"
               onClick={(e) => {
                 e.stopPropagation();
                 onDetailsClick();
@@ -111,7 +128,7 @@ const CourseCard = ({
           )}
           <Button 
             className={cn(
-              "flex-1 bg-primary hover:bg-primary/90 gap-2 rounded-xl h-10 font-bold text-xs shadow-md shadow-primary/20",
+              "h-10 w-full gap-2 rounded-xl bg-primary text-xs font-bold shadow-md shadow-primary/20 hover:bg-primary/90 sm:h-11 sm:w-auto sm:min-w-[160px]",
               actionClassName
             )}
             onClick={(e) => {

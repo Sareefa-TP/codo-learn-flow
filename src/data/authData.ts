@@ -9,3 +9,7 @@ export const MOCK_CREDENTIALS = {
   coordinator: { email: "coordinator@codo.com", password: "password123" },
   advisor: { email: "advisor@codo.com", password: "password123" },
 };
+
+export const MOCK_ACCOUNT_EMAILS = Object.values(MOCK_CREDENTIALS).map((account) => account.email.toLowerCase());
+
+export const isMockAccountEmail = (email: string) => MOCK_ACCOUNT_EMAILS.includes(email.trim().toLowerCase());

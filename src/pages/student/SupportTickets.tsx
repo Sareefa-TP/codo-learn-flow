@@ -13,7 +13,8 @@ import {
     ShieldQuestion,
     LifeBuoy,
     Download,
-    X
+    X,
+    Eye
 } from "lucide-react";
 import PageSearch from "@/components/shared/PageSearch";
 import { toast } from "sonner";
@@ -30,6 +31,19 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { PageEmptyState, PageHeader } from "@/components/shared/PageScaffold";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 // Types
 type TicketStatus = "Open" | "In Progress" | "Resolved" | "Closed";
@@ -52,8 +66,15 @@ interface Ticket {
     priority: TicketPriority;
     status: TicketStatus;
     date: string;
+    closedAt?: string;
     lastUpdate: string;
     messages: Message[];
+}
+
+interface AttachmentPreview {
+    url: string;
+    name: string;
+    isImage: boolean;
 }
 
 // Mock Data
@@ -125,6 +146,7 @@ const SupportTickets = () => {
     const [replyText, setReplyText] = useState("");
     const [replyFile, setReplyFile] = useState<File | null>(null);
     const [isSending, setIsSending] = useState(false);
+    const [previewAttachment, setPreviewAttachment] = useState<AttachmentPreview | null>(null);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const replyFileInputRef = useRef<HTMLInputElement>(null);
@@ -263,45 +285,111 @@ const SupportTickets = () => {
         }, 800);
     };
 
+    const handleCloseTicket = () => {
+        if (!selectedTicket || selectedTicket.status === "Closed") return;
+
+        const updatedTicket = {
+            ...selectedTicket,
+            status: "Closed" as TicketStatus,
+            closedAt: new Date().toLocaleString('en-GB', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+            }),
+            lastUpdate: "Just now",
+        };
+
+        setTickets(tickets.map(t => t.id === selectedTicket.id ? updatedTicket : t));
+        setSelectedTicket(updatedTicket);
+        toast.success(`Ticket ${selectedTicket.id} has been closed.`);
+    };
+
     const handleDownload = (url: string, filename: string) => {
         // Simulated download
         toast.info(`Downloading ${filename}...`);
         console.log(`Downloading from ${url}`);
     };
 
+    const handleViewAttachment = (url: string, filename: string) => {
+        setPreviewAttachment({
+            url,
+            name: filename,
+            isImage: isImageAttachment(filename),
+        });
+    };
+
+    const isImageAttachment = (filename?: string) => {
+        if (!filename) return false;
+        return /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(filename);
+    };
+
     return (
         <DashboardLayout>
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-6xl mx-auto px-4 md:px-6 lg:px-8 pb-10">
                 {/* Header Section */}
-                <div className="mb-8 p-4 bg-primary/5 rounded-2xl border border-primary/10">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div className="space-y-1">
-                            <h1 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight">
-                                Support Tickets
-                            </h1>
-                            <p className="text-muted-foreground text-sm font-medium">
-                                Need help? Raise a ticket and track its resolution.
-                            </p>
-                        </div>
-                        {view === "list" && (
-                            <Button onClick={() => setView("create")} className="w-full sm:w-auto gap-2 shadow-md">
-                                <Plus className="w-4 h-4" />
-                                Raise New Ticket
-                            </Button>
-                        )}
-                    </div>
+                <div className="mb-8">
+                  <PageHeader
+                    title="Support Tickets"
+                    description="Need help? Raise a ticket and track its resolution."
+                    actions={
+                      view === "list" ? (
+                        <Button onClick={() => setView("create")} className="w-full sm:w-auto gap-2">
+                          <Plus className="w-4 h-4" />
+                          Raise New Ticket
+                        </Button>
+                      ) : view === "details" && selectedTicket ? (
+                        selectedTicket.status === "Closed" ? (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="h-10 rounded-xl px-4 font-semibold"
+                            disabled
+                          >
+                            Ticket Closed
+                          </Button>
+                        ) : (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button type="button" className="h-10 rounded-xl px-4 font-semibold">
+                                Close Ticket
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="rounded-2xl">
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Close this ticket?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  You can reopen it later only through support. Are you sure you want to close {selectedTicket.id}?
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                <AlertDialogAction className="rounded-xl" onClick={handleCloseTicket}>
+                                  Yes, close ticket
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )
+                      ) : undefined
+                    }
+                    className="mb-0"
+                  />
                 </div>
 
                 {/* 1️⃣ Ticket List View */}
                 {view === "list" && (
                     <div className="space-y-6">
                         {/* Standardized Search Bar */}
-                        <PageSearch
-                            placeholder="Search tickets by ID or subject..."
-                            onSearch={setSearchQuery}
-                            className="mb-10 mx-0"
-                            animate={false}
-                        />
+                        <div className="mb-1">
+                            <PageSearch
+                              placeholder="Search tickets by ID or subject..."
+                              onSearch={setSearchQuery}
+                              className="mx-0"
+                              animate={false}
+                            />
+                        </div>
 
                         <div className="grid gap-4">
                             {filteredTickets.length > 0 ? (
@@ -348,17 +436,16 @@ const SupportTickets = () => {
                                     </Card>
                                 ))
                             ) : (
-                                <div className="text-center py-20 bg-muted/20 rounded-2xl border border-dashed flex flex-col items-center">
-                                    <LifeBuoy className="w-12 h-12 text-muted-foreground/30 mb-4" />
-                                    <p className="text-muted-foreground">
-                                        {searchQuery ? `No tickets found matching "${searchQuery}"` : "You haven't raised any tickets yet."}
-                                    </p>
-                                    {searchQuery && (
-                                        <Button variant="link" onClick={() => setSearchQuery("")} className="mt-2 text-primary">
-                                            Clear Search
-                                        </Button>
-                                    )}
-                                </div>
+                                <PageEmptyState
+                                  title="No Tickets Found"
+                                  description={searchQuery ? `No tickets found matching "${searchQuery}"` : "You haven't raised any tickets yet."}
+                                  icon={<LifeBuoy className="h-12 w-12 text-muted-foreground/30" />}
+                                  action={searchQuery ? (
+                                    <Button variant="link" onClick={() => setSearchQuery("")} className="text-primary">
+                                      Clear Search
+                                    </Button>
+                                  ) : undefined}
+                                />
                             )}
                         </div>
                     </div>
@@ -487,15 +574,6 @@ const SupportTickets = () => {
                 {/* 3️⃣ Ticket Details View */}
                 {view === "details" && selectedTicket && (
                     <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
-                        <div className="flex items-center gap-3">
-                            <Button variant="outline" size="sm" onClick={() => setView("list")}>
-                                <ArrowLeft className="w-4 h-4 mr-2" />
-                                Back to Tickets
-                            </Button>
-                            <div className="h-4 w-px bg-border mx-2" />
-                            <span className="text-sm font-mono text-muted-foreground">{selectedTicket.id}</span>
-                        </div>
-
                         <Card className="border-primary/20 bg-card overflow-hidden">
                             <CardHeader className="bg-primary/5 border-b p-6">
                                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
@@ -519,8 +597,20 @@ const SupportTickets = () => {
                                                 <Clock className="w-4 h-4" />
                                                 Raised on {selectedTicket.date}
                                             </span>
+                                            {selectedTicket.status === "Closed" && selectedTicket.closedAt ? (
+                                                <span className="flex items-center gap-1.5 font-semibold text-foreground">
+                                                    <CheckCircle2 className="w-4 h-4 text-primary" />
+                                                    Closed on {selectedTicket.closedAt}
+                                                </span>
+                                            ) : null}
                                         </div>
                                     </div>
+                                    <Badge
+                                        variant="outline"
+                                        className="w-fit rounded-lg border-border/60 bg-background px-3 py-1 font-mono text-xs font-semibold text-muted-foreground"
+                                    >
+                                        {selectedTicket.id}
+                                    </Badge>
                                 </div>
                             </CardHeader>
 
@@ -529,44 +619,73 @@ const SupportTickets = () => {
                                 <div className="max-h-[500px] overflow-y-auto p-6 space-y-6 bg-muted/5">
                                     {selectedTicket.messages.map((msg, idx) => (
                                         <div key={msg.id} className={cn(
-                                            "flex flex-col max-w-[85%] sm:max-w-[70%]",
+                                            "flex w-full flex-col sm:w-auto sm:max-w-[70%]",
                                             msg.sender === "Student" ? "ml-auto items-end" : "mr-auto items-start"
                                         )}>
                                             <div className={cn(
-                                                "rounded-2xl p-4 shadow-sm text-sm leading-relaxed",
+                                                "w-full rounded-2xl p-4 text-sm leading-relaxed shadow-sm",
                                                 msg.sender === "Student"
                                                     ? "bg-primary text-primary-foreground rounded-tr-none"
                                                     : "bg-card border border-border rounded-tl-none text-foreground"
                                             )}>
-                                                {msg.text}
+                                                <p className="whitespace-pre-wrap break-words break-all">
+                                                    {msg.text}
+                                                </p>
                                                 {msg.attachment_url && (
                                                     <div className={cn(
-                                                        "mt-3 p-3 rounded-lg border flex items-center gap-3 bg-muted/50 border-border/50 transition-all hover:bg-muted",
+                                                        "mt-3 rounded-lg border border-border/50 bg-muted/50 p-3 transition-all hover:bg-muted",
                                                         msg.sender === "Student" ? "bg-white/10 border-white/20 hover:bg-white/20" : "bg-card hover:border-primary/30"
                                                     )}>
-                                                        <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center shrink-0">
-                                                            <Paperclip className="w-4 h-4 text-primary" />
+                                                        {isImageAttachment(msg.attachment_name) ? (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleViewAttachment(msg.attachment_url!, msg.attachment_name || "image")}
+                                                                className="mb-3 block w-full overflow-hidden rounded-lg border border-border/40"
+                                                            >
+                                                                <img
+                                                                    src={msg.attachment_url}
+                                                                    alt={msg.attachment_name || "attachment preview"}
+                                                                    className="h-36 w-full object-cover sm:h-44"
+                                                                />
+                                                            </button>
+                                                        ) : null}
+
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-primary/10">
+                                                                <Paperclip className="h-4 w-4 text-primary" />
+                                                            </div>
+                                                            <div className="min-w-0 flex-1">
+                                                                <p className="mb-0.5 truncate text-xs font-medium">
+                                                                    {msg.attachment_name || "attachment"}
+                                                                </p>
+                                                                <p className="text-[10px] opacity-70">
+                                                                    {isImageAttachment(msg.attachment_name) ? "Image Attachment" : "File Attachment"}
+                                                                </p>
+                                                            </div>
+                                                            <div className="flex items-center gap-1">
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="outline"
+                                                                    className="h-8 rounded-md px-2 text-[10px]"
+                                                                    onClick={() => handleViewAttachment(msg.attachment_url!, msg.attachment_name || "file")}
+                                                                >
+                                                                    <Eye className="mr-1 h-3 w-3" />
+                                                                    View
+                                                                </Button>
+                                                                <Button
+                                                                    size="icon"
+                                                                    variant="ghost"
+                                                                    className="h-8 w-8 hover:bg-primary/20"
+                                                                    onClick={() => handleDownload(msg.attachment_url!, msg.attachment_name || "file")}
+                                                                >
+                                                                    <Download className="h-4 w-4" />
+                                                                </Button>
+                                                            </div>
                                                         </div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <p className="text-xs font-medium truncate mb-0.5">
-                                                                {msg.attachment_name || "attachment"}
-                                                            </p>
-                                                            <p className="text-[10px] opacity-70">
-                                                                File Attachment
-                                                            </p>
-                                                        </div>
-                                                        <Button
-                                                            size="icon"
-                                                            variant="ghost"
-                                                            className="h-8 w-8 hover:bg-primary/20"
-                                                            onClick={() => handleDownload(msg.attachment_url!, msg.attachment_name || "file")}
-                                                        >
-                                                            <Download className="w-4 h-4" />
-                                                        </Button>
                                                     </div>
                                                 )}
                                             </div>
-                                            <span className="text-[10px] text-muted-foreground mt-1 px-1">
+                                            <span className="mt-1 px-1 text-[10px] text-muted-foreground">
                                                 {msg.sender === "Support" ? "Support Executive" : "You"} • {msg.timestamp}
                                             </span>
                                         </div>
@@ -598,7 +717,7 @@ const SupportTickets = () => {
                                                     value={replyText}
                                                     onChange={e => setReplyText(e.target.value)}
                                                 />
-                                                <div className="absolute bottom-3 right-3 flex items-center gap-2">
+                                                <div className="absolute bottom-3 left-3 right-3 flex items-center gap-2 sm:left-auto sm:right-3 sm:w-auto">
                                                     <input
                                                         type="file"
                                                         ref={replyFileInputRef}
@@ -632,7 +751,7 @@ const SupportTickets = () => {
                                                     <Button 
                                                         onClick={handleSendReply} 
                                                         size="sm" 
-                                                        className="h-9 gap-2 min-w-[120px]" 
+                                                        className="h-9 flex-1 gap-2 sm:min-w-[120px] sm:flex-none" 
                                                         disabled={isSending || (!replyText.trim() && !replyFile)}
                                                     >
                                                         {isSending ? (
@@ -656,6 +775,51 @@ const SupportTickets = () => {
                         </Card>
                     </div>
                 )}
+
+                <Dialog
+                    open={!!previewAttachment}
+                    onOpenChange={(open) => {
+                        if (!open) setPreviewAttachment(null);
+                    }}
+                >
+                    <DialogContent className="max-w-4xl rounded-2xl">
+                        <DialogHeader>
+                            <DialogTitle className="truncate pr-8">
+                                {previewAttachment?.name || "Attachment Preview"}
+                            </DialogTitle>
+                        </DialogHeader>
+                        {previewAttachment ? (
+                            previewAttachment.isImage ? (
+                                <div className="overflow-hidden rounded-xl border border-border/60 bg-muted/20">
+                                    <img
+                                        src={previewAttachment.url}
+                                        alt={previewAttachment.name}
+                                        className="max-h-[70vh] w-full object-contain"
+                                    />
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    <div className="overflow-hidden rounded-xl border border-border/60">
+                                        <iframe
+                                            src={previewAttachment.url}
+                                            title={previewAttachment.name}
+                                            className="h-[65vh] w-full bg-background"
+                                        />
+                                    </div>
+                                    <div className="flex justify-end">
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => handleDownload(previewAttachment.url, previewAttachment.name)}
+                                        >
+                                            <Download className="mr-2 h-4 w-4" />
+                                            Download
+                                        </Button>
+                                    </div>
+                                </div>
+                            )
+                        ) : null}
+                    </DialogContent>
+                </Dialog>
             </div>
         </DashboardLayout>
     );

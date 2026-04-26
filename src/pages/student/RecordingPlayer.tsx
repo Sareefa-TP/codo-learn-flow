@@ -3,7 +3,8 @@ import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlayCircle, ArrowLeft } from "lucide-react";
+import { PlayCircle } from "lucide-react";
+import BackButton from "@/components/shared/BackButton";
 
 type LocationState = {
   url?: string;
@@ -74,13 +75,7 @@ const StudentRecordingPlayer = () => {
   return (
     <DashboardLayout>
       <div className="animate-fade-in space-y-6 max-w-6xl mx-auto px-4 md:px-6 lg:px-8 pb-10">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back
-        </button>
+        <BackButton label="Back" onClick={() => navigate(-1)} className="w-fit" />
 
         <Card className="border-border/60 bg-card/80 shadow-sm rounded-3xl overflow-hidden">
           <CardHeader className="p-4 sm:p-6 border-b border-border/60 bg-muted/5">

@@ -12,7 +12,8 @@ import {
   Award,
   CheckCircle2,
   AlertCircle,
-  TrendingUp
+  TrendingUp,
+  XCircle
 } from "lucide-react";
 
 const AssessmentReport = () => {
@@ -113,7 +114,7 @@ const AssessmentReport = () => {
                 <BarChart3 className="w-5 h-5 text-primary" />
                 Performance Metrics
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div className="p-5 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col items-center gap-2 group hover:border-primary/20 transition-all shadow-sm">
                   <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
                     <BookOpen className="w-5 h-5 text-blue-600" />
@@ -139,6 +140,17 @@ const AssessmentReport = () => {
                   <div className="text-center">
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Test Accuracy</p>
                     <p className="text-2xl font-black text-primary">{assessmentData.details.accuracy}</p>
+                  </div>
+                </div>
+                <div className="p-5 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col items-center gap-2 group hover:border-destructive/20 transition-all shadow-sm">
+                  <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
+                    <XCircle className="w-5 h-5 text-destructive" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Incorrect Answers</p>
+                    <p className="text-2xl font-black text-destructive">
+                      {assessmentData.details.totalQuestions - assessmentData.details.correctAnswers}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -186,7 +198,7 @@ const AssessmentReport = () => {
           <div className="p-8 border-t border-primary/5 bg-slate-50/30 text-center space-y-6">
             <div className="inline-flex items-center gap-2 p-3 bg-blue-50/50 rounded-xl text-xs text-blue-700 font-bold border border-blue-100 shadow-sm">
               <AlertCircle className="w-4 h-4" />
-              This is an official assessment record from Codo Academy
+              This is an official assessment record from CODO Academy
             </div>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Button 
@@ -200,7 +212,7 @@ const AssessmentReport = () => {
                 onClick={() => window.print()}
                 className="font-bold min-w-[200px] shadow-lg shadow-primary/10"
               >
-                Download PDF Report
+                Download Report
               </Button>
             </div>
           </div>

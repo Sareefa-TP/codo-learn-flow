@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
 import NotFound from "./pages/NotFound";
 
 // Student Pages
@@ -31,6 +32,7 @@ import StudentWebinars from "./pages/student/Webinars";
 import WebinarDetails from "./pages/student/WebinarDetails";
 import StudentMeet from "./pages/student/Meet";
 import StudentGame from "./pages/student/Game";
+import StudentNotes from "./pages/student/Notes";
 
 // Intern Pages
 import InternDashboard from "./pages/intern/Dashboard";
@@ -211,6 +213,7 @@ const App = () => (
             {/* Public Routes */}
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
 
           {/* Student Routes */}
           <Route path="/student" element={<StudentDashboard />} />
@@ -245,6 +248,7 @@ const App = () => (
           <Route path="/student/support-tickets" element={<StudentSupportTickets />} />
           <Route path="/student/webinar" element={<StudentWebinars />} />
           <Route path="/student/webinar/:id" element={<WebinarDetails />} />
+          <Route path="/student/notes" element={<StudentNotes />} />
           <Route path="/student/meet" element={<StudentMeet />} />
           <Route path="/student/meet/:tab" element={<StudentMeet />} />
           <Route path="/student/game" element={<StudentGame />} />

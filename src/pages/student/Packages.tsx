@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ChevronDown, ChevronUp, PlayCircle, BookOpen, Clock, CheckCircle2, FileText, Eye, UploadCloud, X, Info, Play, ArrowLeft, Search, Globe, Video, ExternalLink, Layout, MessageSquare, GraduationCap, ChevronRight, Home } from "lucide-react";
+import { ChevronDown, ChevronUp, PlayCircle, BookOpen, Clock, CheckCircle2, FileText, Eye, UploadCloud, X, Info, Play, Search, Globe, Video, ExternalLink, Layout, MessageSquare, GraduationCap, ChevronRight, Home } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useParams, Link } from "react-router-dom";
@@ -626,79 +626,16 @@ const StudentPackages = () => {
 
   return (
     <DashboardLayout>
-      <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-6xl mx-auto px-4 md:px-6 lg:px-8 pb-10">
-        {/* Breadcrumb Navigation */}
-        <div className="flex items-center gap-2 mb-6 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 overflow-x-auto whitespace-nowrap pb-2 no-scrollbar">
-          <Link to="/student" className="flex items-center gap-1.5 hover:text-primary transition-colors">
-            <Home className="w-3 h-3" />
-            Dashboard
-          </Link>
-          <ChevronRight className="w-3 h-3 opacity-40" />
-          <Link to="/student/my-course" className={cn(
-            "hover:text-primary transition-colors",
-            !courseSlug && "text-primary font-black"
-          )}>
-            My Courses
-          </Link>
-          {activeCourse && (
-            <>
-              <ChevronRight className="w-3 h-3 opacity-40" />
-              <Link to={`/student/my-course/${activeCourse.slug}`} className={cn(
-                "hover:text-primary transition-colors",
-                courseSlug && !moduleSlug && "text-primary font-black"
-              )}>
-                {activeCourse.title}
-              </Link>
-            </>
-          )}
-          {activeModule && (
-            <>
-              <ChevronRight className="w-3 h-3 opacity-40" />
-              <Link to={`/student/my-course/${activeCourse?.slug}/${activeModule.slug}`} className={cn(
-                "hover:text-primary transition-colors",
-                moduleSlug && !sessionSlug && "text-primary font-black"
-              )}>
-                {activeModule.title.split(":")[0]}
-              </Link>
-            </>
-          )}
-          {activeSession && (
-            <>
-              <ChevronRight className="w-3 h-3 opacity-40" />
-              <span className="text-primary font-black whitespace-nowrap">
-                {activeSession.title.split(":")[0]}
-              </span>
-            </>
-          )}
-        </div>
-
+      <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 mx-auto w-full max-w-7xl px-4 pb-10 md:px-6 lg:px-8">
         {/* Header Section */}
-        <div className="mb-8">
-          <div className="space-y-2">
-            {!activeCourse ? (
-              <>
-                <h1 className="text-3xl font-black tracking-tight text-foreground">My Enrolled Courses</h1>
-                <p className="text-muted-foreground text-sm font-medium">Manage and track your progress across all your active learning programs.</p>
-              </>
-            ) : (
-              <div className="flex flex-col gap-4">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-fit -ml-3 text-muted-foreground hover:text-primary transition-all group"
-                  onClick={() => navigate("/student/my-course")}
-                >
-                  <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-                  Back to All Courses
-                </Button>
-                <div>
-                  <h1 className="text-3xl font-black tracking-tight text-foreground">{activeCourse.title}</h1>
-                  <p className="text-muted-foreground text-sm font-medium">Course Curriculum and Learning Resources</p>
-                </div>
-              </div>
-            )}
+        {!activeCourse ? (
+          <div className="mb-8 space-y-2">
+            <h1 className="text-3xl font-black tracking-tight text-foreground">My Enrolled Courses</h1>
+            <p className="text-muted-foreground text-sm font-medium">
+              Manage and track your progress across all your active learning programs.
+            </p>
           </div>
-        </div>
+        ) : null}
 
         {/* Search Bar for Course List - New Full-Width Position */}
         {!activeCourse && (
@@ -711,7 +648,7 @@ const StudentPackages = () => {
 
         {/* Course List / Dynamic Content */}
         {!activeCourse ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 sm:gap-5 xl:gap-6">
             {filteredCourses.map((course) => (
               <CourseCard
                 key={course.id}
@@ -728,25 +665,22 @@ const StudentPackages = () => {
                   toast.info(course.progress > 0 ? `Resuming ${course.title}` : `Starting ${course.title}`);
                   handleCourseClick(course);
                 }}
+                onCardClick={() => handleCourseClick(course)}
               />
             ))}
           </div>
         ) : (
-          <div className="animate-in fade-in slide-in-from-right-8 duration-500 max-w-6xl mx-auto space-y-6">
+          <div className="animate-in fade-in slide-in-from-right-8 duration-500 mx-auto w-full max-w-7xl space-y-6">
             {/* Active Course Header Section */}
-            <Card className="border-primary/20 bg-card overflow-hidden">
-              <div className="bg-primary/5 p-6 border-b border-primary/10">
-                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                  <div>
-                    <div className="flex items-center gap-3 mb-2">
-                      <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
-                        {activeCourse.title}
-                      </h1>
-                      <Badge variant="default" className="bg-primary text-primary-foreground">
-                        {activeCourse.status}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2">
+            <Card className="overflow-hidden border-primary/20 bg-card">
+              <div className="border-b border-primary/10 bg-primary/5 p-4 sm:p-6">
+                <div className="space-y-4">
+                  <h1 className="text-2xl font-display text-foreground sm:text-3xl">
+                    {activeCourse.title}
+                  </h1>
+
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1.5 focus-visible:outline-none">
                         <Clock className="w-4 h-4" />
                         Duration: {activeCourse.duration}
@@ -756,42 +690,46 @@ const StudentPackages = () => {
                         {activeCourse.modules.length} Modules
                       </span>
                     </div>
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-3 mt-4 md:mt-0 w-full md:w-auto">
-                    <Button
-                      variant="outline"
-                      className="w-full sm:w-auto bg-card hover:bg-muted"
-                      onClick={() => setViewingCourseDetailsId(activeCourse.id)}
-                    >
-                      <Info className="w-4 h-4 mr-2" />
-                      Detailed View
-                    </Button>
 
-                    <Button
-                      className={cn(
-                        "w-full sm:w-auto gap-2 text-secondary-foreground",
-                        activeCourse.progress > 0 ? "bg-secondary hover:bg-secondary/90" : "bg-primary hover:bg-primary/90 text-primary-foreground"
-                      )}
-                      onClick={() => {
-                        const firstIncompleteMod = activeCourse.modules.find(m => m.progress < 100 && m.progress > -1) || activeCourse.modules[0];
-                        if (firstIncompleteMod) {
-                          navigate(`/student/my-course/${activeCourse.slug}/${firstIncompleteMod.slug}`);
-                        }
-                        window.scrollBy({ top: 300, behavior: 'smooth' });
-                      }}
-                    >
-                      {activeCourse.progress > 0 ? <PlayCircle className="w-4 h-4" /> : <Play className="w-4 h-4 fill-current" />}
-                      {activeCourse.progress > 0 ? "Continue Learning" : "Start Learning"}
-                    </Button>
+                    <div className="flex w-full flex-wrap items-center gap-2 sm:gap-3 lg:w-auto lg:justify-end">
+                      <Badge variant="default" className="h-9 rounded-xl bg-primary px-4 text-primary-foreground">
+                        {activeCourse.status}
+                      </Badge>
+                      <Button
+                        variant="outline"
+                        className="h-10 flex-1 min-w-[170px] bg-card hover:bg-muted sm:flex-none"
+                        onClick={() => setViewingCourseDetailsId(activeCourse.id)}
+                      >
+                        <Info className="mr-2 h-4 w-4" />
+                        Detailed View
+                      </Button>
+
+                      <Button
+                        className={cn(
+                          "h-10 flex-1 min-w-[170px] gap-2 sm:flex-none",
+                          activeCourse.progress > 0 ? "bg-secondary text-secondary-foreground hover:bg-secondary/90" : "bg-primary text-primary-foreground hover:bg-primary/90"
+                        )}
+                        onClick={() => {
+                          const firstIncompleteMod = activeCourse.modules.find(m => m.progress < 100 && m.progress > -1) || activeCourse.modules[0];
+                          if (firstIncompleteMod) {
+                            navigate(`/student/my-course/${activeCourse.slug}/${firstIncompleteMod.slug}`);
+                          }
+                          window.scrollBy({ top: 300, behavior: 'smooth' });
+                        }}
+                      >
+                        {activeCourse.progress > 0 ? <PlayCircle className="h-4 w-4" /> : <Play className="h-4 w-4 fill-current" />}
+                        {activeCourse.progress > 0 ? "Continue Learning" : "Start Learning"}
+                      </Button>
+                    </div>
                   </div>
                 </div>
 
                 {/* Added short description to header */}
-                <p className="mt-4 text-sm text-muted-foreground max-w-3xl leading-relaxed">
+                <p className="mt-4 max-w-3xl text-sm leading-relaxed text-muted-foreground">
                   {activeCourse.description}
                 </p>
               </div>
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between text-sm">
                     <span className="font-medium text-foreground">Current Progress</span>
@@ -804,7 +742,6 @@ const StudentPackages = () => {
 
             {/* Modules Section */}
             <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-foreground mb-4">Course Content</h2>
 
               {/* Standardized Search Bar */}
               <PageSearch
@@ -964,7 +901,21 @@ const StudentPackages = () => {
                                                       <FileText className="w-4 h-4 text-orange-400" />
                                                       <span className="text-xs font-medium text-foreground/80 group-hover/note:text-foreground">{note.title}</span>
                                                     </div>
-                                                    <Button variant="ghost" size="sm" className="h-8 text-[10px] font-bold text-orange-600 hover:text-orange-700 hover:bg-orange-50" onClick={() => window.open(note.link, '_blank')}>
+                                                    <Button
+                                                      variant="ghost"
+                                                      size="sm"
+                                                      className="h-8 text-[10px] font-bold text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                                                      onClick={() =>
+                                                        navigate("/student/notes", {
+                                                          state: {
+                                                            notes: session.notes,
+                                                            sessionTitle: session.title,
+                                                            moduleTitle: mod.title,
+                                                            courseTitle: activeCourse?.title,
+                                                          },
+                                                        })
+                                                      }
+                                                    >
                                                       View Note
                                                     </Button>
                                                   </div>
