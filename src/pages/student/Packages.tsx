@@ -807,6 +807,7 @@ const StudentPackages = () => {
                         </div>
                       </div>
 
+
                       {/* Accordion Content (Sessions List) */}
                       {isOpen && (
                         <div className="bg-muted/5 border-t border-border/50 animate-in fade-in slide-in-from-top-2 duration-300">
