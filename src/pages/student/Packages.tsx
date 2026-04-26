@@ -520,14 +520,7 @@ const StudentPackages = () => {
               </div>
 
               {/* Modal Footer */}
-              <div className="p-6 border-t border-border/50 bg-muted/5 flex items-center justify-end gap-3 flex-shrink-0">
-                <Button
-                  variant="outline"
-                  className="rounded-xl px-6"
-                  onClick={() => setViewingCourseDetailsId(null)}
-                >
-                  Close
-                </Button>
+              <div className="p-6 border-t border-border/50 bg-muted/5 flex items-center justify-center gap-3 flex-shrink-0">
                 <Button
                   className="rounded-xl px-6 bg-primary hover:bg-primary/90"
                   onClick={() => {
@@ -773,9 +766,9 @@ const StudentPackages = () => {
                       {/* Accordion Header */}
                       <div
                         onClick={() => handleModuleClick(mod)}
-                        className="p-4 cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card hover:bg-muted/30 transition-colors"
+                        className="cursor-pointer bg-card p-4 transition-colors hover:bg-muted/30 sm:p-5"
                       >
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-start gap-3">
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isCompleted
                             ? "bg-primary/10 text-primary"
                             : isNotStarted
@@ -784,24 +777,24 @@ const StudentPackages = () => {
                             }`}>
                             {isCompleted ? <CheckCircle2 className="w-5 h-5" /> : <BookOpen className="w-4 h-4" />}
                           </div>
-                          <h3 className={`font-medium ${isOpen ? "text-foreground" : "text-foreground/90"}`}>
+                          <h3 className={`text-base font-semibold leading-snug sm:text-lg ${isOpen ? "text-foreground" : "text-foreground/90"}`}>
                             {mod.title}
                           </h3>
                         </div>
 
-                        <div className="flex items-center gap-4 sm:gap-6 pl-11 sm:pl-0">
-                          <div className="flex items-center gap-3 min-w-32">
+                        <div className="mt-3 flex items-center justify-between gap-3 pl-11 sm:mt-4 sm:gap-6 sm:pl-0">
+                          <div className="min-w-0 flex-1">
                             {isNotStarted ? (
-                              <span className="text-sm font-medium text-muted-foreground w-full text-right">Not Started</span>
+                              <span className="block text-sm font-medium text-muted-foreground sm:text-right">Not Started</span>
                             ) : (
-                              <div className="flex items-center gap-2 w-full">
+                              <div className="flex items-center gap-2">
                                 <Progress value={mod.progress} className="h-1.5 flex-1" />
-                                <span className="text-sm font-medium w-10 text-right">{mod.progress}%</span>
+                                <span className="w-10 text-right text-base font-semibold sm:text-sm">{mod.progress}%</span>
                               </div>
                             )}
                           </div>
 
-                          <button className="text-muted-foreground hover:text-foreground p-1 transition-colors">
+                          <button className="p-1 text-muted-foreground transition-colors hover:text-foreground">
                             {isOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
                           </button>
                         </div>
@@ -824,25 +817,27 @@ const StudentPackages = () => {
                                         handleSessionClick(session);
                                       }}
                                       className={cn(
-                                        "p-5 cursor-pointer flex items-center justify-between transition-colors",
+                                        "cursor-pointer p-4 transition-colors sm:p-5",
                                         isSessionOpen ? "bg-primary/5" : "hover:bg-muted/30"
                                       )}
                                     >
-                                      <div className="flex items-center gap-4">
+                                      <div className="flex items-start gap-3 sm:gap-4">
                                         <div className={cn(
                                           "w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs transition-colors",
                                           isSessionOpen ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground group-hover/session:bg-primary/10 group-hover/session:text-primary"
                                         )}>
                                           {sIdx + 1}
                                         </div>
-                                        <div>
-                                          <h4 className="font-bold text-sm text-foreground">{session.title}</h4>
+                                        <div className="min-w-0">
+                                          <h4 className="text-lg font-semibold leading-tight text-foreground sm:text-sm sm:font-bold">
+                                            {session.title}
+                                          </h4>
                                           <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider mt-0.5">
                                             {session.videoLessons.length} Videos • {session.notes.length} Notes • {session.assignment ? "1 Assignment" : "No Assignment"}
                                           </p>
                                         </div>
                                       </div>
-                                      <div className="flex items-center gap-3">
+                                      <div className="mt-3 flex items-center justify-between gap-3 pl-[3.25rem] sm:mt-0 sm:justify-end sm:pl-0">
                                         <Badge variant="outline" className={cn(
                                           "px-2 py-0 text-[9px] font-black uppercase tracking-widest",
                                           isSessionOpen ? "border-primary/20 text-primary bg-primary/5" : "border-border/60 text-muted-foreground"

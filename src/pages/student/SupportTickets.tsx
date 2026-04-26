@@ -329,7 +329,7 @@ const SupportTickets = () => {
         <DashboardLayout>
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-6xl mx-auto px-4 md:px-6 lg:px-8 pb-10">
                 {/* Header Section */}
-                <div className="mb-8">
+                <div className="mb-6 sm:mb-8">
                   <PageHeader
                     title="Support Tickets"
                     description="Need help? Raise a ticket and track its resolution."
@@ -352,7 +352,7 @@ const SupportTickets = () => {
                         ) : (
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button type="button" className="h-10 rounded-xl px-4 font-semibold">
+                              <Button type="button" className="h-10 w-full sm:w-auto rounded-xl px-4 font-semibold">
                                 Close Ticket
                               </Button>
                             </AlertDialogTrigger>
@@ -573,18 +573,20 @@ const SupportTickets = () => {
 
                 {/* 3️⃣ Ticket Details View */}
                 {view === "details" && selectedTicket && (
-                    <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
+                    <div className="space-y-4 sm:space-y-6 animate-in slide-in-from-right-4 duration-300">
                         <Card className="border-primary/20 bg-card overflow-hidden">
-                            <CardHeader className="bg-primary/5 border-b p-6">
-                                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                                    <div>
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <CardTitle className="text-2xl font-bold">{selectedTicket.subject}</CardTitle>
+                            <CardHeader className="bg-primary/5 border-b p-4 sm:p-6">
+                                <div className="flex flex-col md:flex-row md:items-start justify-between gap-3 sm:gap-4">
+                                    <div className="min-w-0">
+                                        <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                                            <CardTitle className="text-2xl sm:text-3xl font-bold leading-tight break-words">
+                                              {selectedTicket.subject}
+                                            </CardTitle>
                                             <Badge variant="outline" className={cn(getStatusColor(selectedTicket.status))}>
                                                 {selectedTicket.status}
                                             </Badge>
                                         </div>
-                                        <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground mt-2">
+                                        <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs text-muted-foreground mt-2">
                                             <span className="flex items-center gap-1.5">
                                                 <ShieldQuestion className="w-4 h-4" />
                                                 Category: {selectedTicket.category}

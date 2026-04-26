@@ -183,7 +183,7 @@ const StudentWebinars = () => {
                 actionText={actionText}
                 actionIcon={ActionIcon}
                 actionClassName={cn(
-                    "flex-1 transition-all",
+                    "transition-all",
                     actionClassName,
                     webinar.status === "Live" && "animate-pulse"
                 )}
@@ -216,17 +216,17 @@ const StudentWebinars = () => {
                   />
 
                 {/* Tabs for Organization */}
-                <Tabs defaultValue="upcoming" className="space-y-8">
-                    <TabsList className="grid grid-cols-1 md:grid-cols-3 gap-1.5 bg-white p-1.5 rounded-full w-full h-auto shadow-sm border border-border/40 mb-2">
+                <Tabs defaultValue="upcoming" className="space-y-6 sm:space-y-8">
+                    <TabsList className="no-scrollbar flex w-full h-auto justify-start gap-1.5 overflow-x-auto rounded-full border border-border/40 bg-white p-1.5 shadow-sm md:grid md:grid-cols-3 md:justify-stretch md:overflow-visible mb-2">
                         <TabsTrigger 
                             value="upcoming" 
-                            className="flex items-center justify-center gap-2.5 px-4 h-11 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 relative focus:outline-none w-full data-[state=active]:bg-[#28B485] data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-[#28B485]/20 text-[#94A3B8] hover:text-[#64748B] hover:bg-slate-50"
+                            className="flex min-w-max shrink-0 items-center justify-center gap-2.5 px-4 h-11 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 relative focus:outline-none md:min-w-0 md:w-full md:shrink data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20 text-muted-foreground hover:text-foreground hover:bg-muted/50"
                         >
                             <Calendar className="w-4 h-4 shrink-0" />
                             <span className="flex items-center gap-2">Upcoming Sessions</span>
                             <span className={cn(
                                 "text-[10px] px-2 py-0.5 rounded-full font-black tabular-nums min-w-[24px] text-center ml-0.5",
-                                "bg-slate-100 text-[#94A3B8] data-[state=active]:bg-white/20 data-[state=active]:text-white"
+                                "bg-muted text-muted-foreground data-[state=active]:bg-primary-foreground/20 data-[state=active]:text-primary-foreground"
                             )}>
                                 {categorizedWebinars.upcoming.length}
                             </span>
@@ -234,13 +234,13 @@ const StudentWebinars = () => {
                         
                         <TabsTrigger 
                             value="registered" 
-                            className="flex items-center justify-center gap-2.5 px-4 h-11 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 relative focus:outline-none w-full data-[state=active]:bg-[#28B485] data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-[#28B485]/20 text-[#94A3B8] hover:text-[#64748B] hover:bg-slate-50"
+                            className="flex min-w-max shrink-0 items-center justify-center gap-2.5 px-4 h-11 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 relative focus:outline-none md:min-w-0 md:w-full md:shrink data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20 text-muted-foreground hover:text-foreground hover:bg-muted/50"
                         >
                             <CheckCircle className="w-4 h-4 shrink-0" />
                             <span>Registered</span>
                             <span className={cn(
                                 "text-[10px] px-2 py-0.5 rounded-full font-black tabular-nums min-w-[24px] text-center ml-0.5",
-                                "bg-slate-100 text-[#94A3B8] data-[state=active]:bg-white/20 data-[state=active]:text-white"
+                                "bg-muted text-muted-foreground data-[state=active]:bg-primary-foreground/20 data-[state=active]:text-primary-foreground"
                             )}>
                                 {categorizedWebinars.registered.length}
                             </span>
@@ -248,13 +248,13 @@ const StudentWebinars = () => {
 
                         <TabsTrigger 
                             value="past" 
-                            className="flex items-center justify-center gap-2.5 px-4 h-11 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 relative focus:outline-none w-full data-[state=active]:bg-[#28B485] data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-[#28B485]/20 text-[#94A3B8] hover:text-[#64748B] hover:bg-slate-50"
+                            className="flex min-w-max shrink-0 items-center justify-center gap-2.5 px-4 h-11 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 relative focus:outline-none md:min-w-0 md:w-full md:shrink data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20 text-muted-foreground hover:text-foreground hover:bg-muted/50"
                         >
                             <PlayCircle className="w-4 h-4 shrink-0" />
                             <span>Recorded/Past</span>
                             <span className={cn(
                                 "text-[10px] px-2 py-0.5 rounded-full font-black tabular-nums min-w-[24px] text-center ml-0.5",
-                                "bg-slate-100 text-[#94A3B8] data-[state=active]:bg-white/20 data-[state=active]:text-white"
+                                "bg-muted text-muted-foreground data-[state=active]:bg-primary-foreground/20 data-[state=active]:text-primary-foreground"
                             )}>
                                 {categorizedWebinars.past.length}
                             </span>

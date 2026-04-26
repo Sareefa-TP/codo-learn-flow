@@ -1,8 +1,20 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { 
   ArrowLeft, 
   FileText, 
@@ -15,9 +27,11 @@ import {
   TrendingUp,
   XCircle
 } from "lucide-react";
+import { downloadAssessmentReportPdf } from "@/lib/pdf/assessmentReportPdf";
 
 const AssessmentReport = () => {
   const navigate = useNavigate();
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
   // Mock data (matching Dashboard.tsx sources)
   const assessmentData = {
@@ -48,20 +62,20 @@ const AssessmentReport = () => {
     <DashboardLayout>
       <div className="animate-fade-in space-y-6 max-w-6xl mx-auto px-4 md:px-6 lg:px-8 pb-10">
         {/* Navigation Header */}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 items-center text-center sm:items-start sm:text-left">
           <Button 
             variant="ghost" 
             size="sm" 
             onClick={() => navigate('/student')}
-            className="w-fit text-muted-foreground hover:text-primary -ml-2 gap-2"
+            className="w-fit text-muted-foreground hover:text-primary gap-2 sm:-ml-2"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Dashboard
           </Button>
 
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex w-full flex-col items-center gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-1">
-              <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
+              <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center justify-center gap-3 sm:justify-start">
                 <FileText className="w-8 h-8 text-primary" />
                 Assessment Report
               </h1>
@@ -208,12 +222,47 @@ const AssessmentReport = () => {
               >
                 Back to Dashboard
               </Button>
-              <Button 
-                onClick={() => window.print()}
-                className="font-bold min-w-[200px] shadow-lg shadow-primary/10"
-              >
-                Download Report
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button className="font-bold min-w-[200px] shadow-lg shadow-primary/10">
+                    Download Report
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="rounded-2xl">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Download assessment report?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      We will generate a PDF copy of this report and download it to your device.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="rounded-xl"
+                      onClick={() => {
+                        setIsDownloadingPdf(true);
+                        try {
+                          downloadAssessmentReportPdf({
+                            assessmentName: assessmentData.name,
+                            courseName: assessmentData.courseName,
+                            date: assessmentData.date,
+                            score: assessmentData.score,
+                            status: assessmentData.status,
+                            totalQuestions: assessmentData.details.totalQuestions,
+                            correctAnswers: assessmentData.details.correctAnswers,
+                            accuracy: assessmentData.details.accuracy,
+                            sections: assessmentData.details.sections,
+                          });
+                        } finally {
+                          setIsDownloadingPdf(false);
+                        }
+                      }}
+                    >
+                      {isDownloadingPdf ? "Generating..." : "Confirm Download"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
         </Card>

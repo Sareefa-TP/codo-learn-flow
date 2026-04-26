@@ -146,17 +146,20 @@ const StudentProfile = () => {
     }
   };
 
-  const toggleEdit = () => {
-    if (isEditing) {
-      // Save logic would go here
-      setIsEditing(false);
-      toast({
-        title: "Profile Updated",
-        description: "Your changes have been saved successfully.",
-      });
-    } else {
-      setIsEditing(true);
-    }
+  const handleStartEdit = () => {
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+  };
+
+  const handleSaveEdit = () => {
+    setIsEditing(false);
+    toast({
+      title: "Profile Updated",
+      description: "Your changes have been saved successfully.",
+    });
   };
 
   return (
@@ -172,23 +175,33 @@ const StudentProfile = () => {
               View and manage your personal and academic details.
             </p>
           </div>
-          <Button
-            onClick={toggleEdit}
-            variant={isEditing ? "outline" : "default"}
-            className="gap-2"
-          >
-            {isEditing ? (
-              <>
+          {isEditing ? (
+            <div className="flex w-full sm:w-auto items-center gap-2">
+              <Button
+                onClick={handleCancelEdit}
+                variant="outline"
+                className="flex-1 sm:flex-none gap-2"
+              >
                 <X className="w-4 h-4" />
                 Cancel
-              </>
-            ) : (
-              <>
-                <Edit className="w-4 h-4" />
-                Edit Profile
-              </>
-            )}
-          </Button>
+              </Button>
+              <Button
+                onClick={handleSaveEdit}
+                className="flex-1 sm:flex-none gap-2"
+              >
+                <Save className="w-4 h-4" />
+                Save Changes
+              </Button>
+            </div>
+          ) : (
+            <Button
+              onClick={handleStartEdit}
+              className="gap-2"
+            >
+              <Edit className="w-4 h-4" />
+              Edit Profile
+            </Button>
+          )}
         </div>
 
         {/* Profile Header Card */}
@@ -330,14 +343,6 @@ const StudentProfile = () => {
                 </div>
               </div>
             </CardContent>
-            {isEditing && (
-              <div className="p-6 pt-0 flex justify-end">
-                <Button onClick={toggleEdit} className="gap-2">
-                  <Save className="w-4 h-4" />
-                  Save Changes
-                </Button>
-              </div>
-            )}
           </Card>
 
           <Card className="border-border/50 shadow-sm">

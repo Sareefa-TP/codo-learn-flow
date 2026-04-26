@@ -70,7 +70,7 @@ const MeetTabs = ({
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-5 gap-1.5 bg-white p-1.5 rounded-full w-full flex-wrap shadow-sm border border-border/40 mb-2">
+    <div className="no-scrollbar flex gap-1.5 overflow-x-auto bg-white p-1.5 rounded-full w-full shadow-sm border border-border/40 mb-2 md:grid md:grid-cols-5 md:overflow-visible">
       {tabs.map((t) => {
         const isActive = activeTab === t.id;
         const count = counts[t.id];
@@ -80,13 +80,13 @@ const MeetTabs = ({
             key={t.id}
             onClick={() => onTabChange(t.id)}
             className={cn(
-              "flex items-center justify-center gap-2.5 px-4 h-11 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 relative focus:outline-none w-full",
+              "flex min-w-max shrink-0 items-center justify-center gap-2.5 px-4 h-11 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 relative focus:outline-none md:min-w-0 md:w-full md:shrink",
               isActive
-                ? "bg-[#28B485] text-white shadow-lg shadow-[#28B485]/20"
-                : "text-[#94A3B8] hover:text-[#64748B] hover:bg-slate-50",
+                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
             )}
           >
-            <Icon className={cn("w-4 h-4", isActive ? "text-white" : "text-[#94A3B8]")} />
+            <Icon className={cn("w-4 h-4", isActive ? "text-primary-foreground" : "text-muted-foreground")} />
             <span className="flex items-center gap-2">
               {t.label}
               {isActive && t.id === "live" && (
@@ -100,7 +100,7 @@ const MeetTabs = ({
               <span
                 className={cn(
                   "text-[10px] px-2 py-0.5 rounded-full font-black tabular-nums min-w-[24px] text-center ml-0.5",
-                  isActive ? "bg-white/20 text-white" : "bg-slate-100 text-[#94A3B8]",
+                  isActive ? "bg-primary-foreground/20 text-primary-foreground" : "bg-muted text-muted-foreground",
                 )}
               >
                 {count}
@@ -310,10 +310,10 @@ const SessionRow = ({
               className="bg-background border border-border/50 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col animate-in fade-in zoom-in duration-200"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between p-6 border-b border-border/50 bg-muted/5 flex-shrink-0">
+              <div className="flex items-start justify-between p-4 sm:p-6 border-b border-border/50 bg-muted/5 flex-shrink-0 gap-3">
                 <div className="min-w-0">
-                  <h2 className="text-xl font-bold tracking-tight truncate">{session.title}</h2>
-                  <p className="text-sm text-muted-foreground mt-1 truncate">
+                  <h2 className="text-lg sm:text-xl font-bold tracking-tight break-words">{session.title}</h2>
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1 break-words">
                     {session.mentor} • {session.date} • {session.time} ({session.duration})
                   </p>
                 </div>
@@ -332,11 +332,7 @@ const SessionRow = ({
                 </div>
               </div>
 
-              <div className="p-6 border-t border-border/50 bg-muted/5 flex items-center justify-end gap-3 flex-shrink-0">
-                <Button variant="outline" onClick={() => setIsRecordingOpen(false)} className="rounded-xl px-6">
-                  Close
-                </Button>
-              </div>
+              <div className="p-6 border-t border-border/50 bg-muted/5 flex-shrink-0" />
             </div>
           </div>,
           document.body,
@@ -372,7 +368,7 @@ const RegularSessionRow = ({ session }: { session: MeetRegularSession }) => {
         </div>
       </div>
 
-      <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-end sm:gap-3">
+      <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:items-center sm:justify-end sm:gap-3">
         <span
           className={cn(
             "text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full border w-fit",
@@ -387,7 +383,7 @@ const RegularSessionRow = ({ session }: { session: MeetRegularSession }) => {
             <AlertDialogTrigger asChild>
               <Button
                 size="sm"
-                className="h-9 rounded-xl px-5 text-xs font-bold bg-primary hover:bg-primary/90 shadow-sm"
+                className="h-9 w-full rounded-xl px-5 text-xs font-bold bg-primary hover:bg-primary/90 shadow-sm sm:w-auto"
                 disabled={isJoining}
               >
                 {isJoining ? "Joining…" : "Join Now"}
