@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { Gamepad2, RotateCcw, Sparkles, Timer, Trophy } from "lucide-react";
+import { Gamepad2, RotateCcw, Sparkles, Timer, Trophy, CheckCircle2, XCircle, Info } from "lucide-react";
 
 type Difficulty = "easy" | "medium" | "hard";
 type GameState = "idle" | "running" | "finished";
@@ -204,55 +204,60 @@ export default function StudentGame() {
 
   return (
     <DashboardLayout>
-        <div className="grid grid-cols-12 gap-4 sm:gap-6">
-          <Card className="col-span-12 xl:col-span-8 min-w-0 overflow-hidden border-border/60 bg-card/80 shadow-sm backdrop-blur-sm">
-            <CardHeader className="border-b border-border/60 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-4 sm:p-6">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="min-w-0 space-y-1">
-                  <CardTitle className="flex items-center gap-2 min-w-0">
-                    <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-primary/10 text-primary border border-primary/15">
-                      <Gamepad2 className="h-5 w-5" />
-                    </span>
-                    <span className="truncate">Quick Math Sprint</span>
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    Answer as many as you can. Wrong answers reset your streak.
-                  </p>
+      <PageTemplate
+        title="Game"
+        description="A 60‑second quick math challenge to sharpen your speed. Pick a difficulty, start the timer, and aim for a streak."
+      >
+        <div className="grid grid-cols-12 gap-6">
+          {/* ── Main Content (Left) ── */}
+          <Card className="col-span-12 lg:col-span-8 border-border/60 bg-card/80 shadow-sm backdrop-blur-sm overflow-hidden flex flex-col">
+            <CardHeader className="border-b border-border/60 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-2xl bg-primary/10 text-primary border border-primary/15 flex items-center justify-center shrink-0 shadow-sm">
+                    <Gamepad2 className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl font-bold tracking-tight text-foreground">Quick Math Sprint</CardTitle>
+                    <p className="text-xs font-medium text-muted-foreground mt-0.5">
+                      Answer as many as you can. Wrong answers reset your streak.
+                    </p>
+                  </div>
                 </div>
 
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <div className="flex items-center gap-3">
                   <Select
                     value={difficulty}
                     onValueChange={(v) => setDifficulty(v as Difficulty)}
                     disabled={gameState === "running"}
                   >
-                    <SelectTrigger className="w-full sm:w-[180px] rounded-xl bg-background/60 border-border/60 shadow-sm">
+                    <SelectTrigger className="w-[140px] rounded-xl bg-background/60 border-border/60 shadow-sm font-bold text-xs uppercase tracking-widest">
                       <SelectValue placeholder="Difficulty" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="easy">Easy</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="hard">Hard</SelectItem>
+                    <SelectContent className="rounded-xl">
+                      <SelectItem value="easy" className="text-xs font-bold">Easy</SelectItem>
+                      <SelectItem value="medium" className="text-xs font-bold">Medium</SelectItem>
+                      <SelectItem value="hard" className="text-xs font-bold">Hard</SelectItem>
                     </SelectContent>
                   </Select>
 
                   {gameState !== "running" ? (
                     <Button
                       onClick={start}
-                      className="rounded-xl shadow-sm"
+                      className="rounded-xl px-8 font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary/20"
                       disabled={isSubmitting}
                     >
-                      Start
+                      Start Game
                     </Button>
                   ) : (
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button
                           variant="outline"
-                          className="rounded-xl"
+                          className="rounded-xl border-border/60 font-black text-[10px] uppercase tracking-widest px-6"
                           disabled={isSubmitting}
                         >
-                          <RotateCcw className="mr-2 h-4 w-4" />
+                          <RotateCcw className="mr-2 h-3.5 w-3.5" />
                           Restart
                         </Button>
                       </AlertDialogTrigger>
@@ -279,214 +284,226 @@ export default function StudentGame() {
               </div>
             </CardHeader>
 
-            <CardContent className="p-4 sm:p-6">
-              <div className="grid grid-cols-1 items-stretch gap-4 sm:gap-6 xl:grid-cols-12">
-                <div className="xl:col-span-5 flex">
-                  <div className="w-full rounded-3xl border border-border/60 bg-background/40 p-4 shadow-sm sm:p-6 xl:h-full">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Timer className="h-4 w-4" />
-                        Time left
-                      </div>
-                      <Badge variant="secondary" className="rounded-full">
-                        {gameState === "running" ? "Live" : gameState === "finished" ? "Finished" : "Ready"}
-                      </Badge>
+            <CardContent className="p-0">
+              <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch min-h-[550px]">
+                
+                {/* Left Column: Timer & Stats */}
+                <div className="lg:col-span-5 p-8 flex flex-col border-r border-border/40">
+                  <div className="flex items-center justify-between mb-8">
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+                      <Timer className="h-3.5 w-3.5 text-primary" />
+                      Time left
                     </div>
+                    <Badge className={cn(
+                      "rounded-full font-black text-[8px] uppercase px-2 py-0",
+                      gameState === "running" ? "bg-emerald-500 text-white shadow-lg shadow-emerald-200" : "bg-muted text-muted-foreground"
+                    )}>
+                      {gameState === "running" ? "Live" : gameState === "finished" ? "Finished" : "Ready"}
+                    </Badge>
+                  </div>
 
-                    <div className="flex items-center justify-center">
+                  <div className="flex-1 flex items-center justify-center">
+                    <div className="relative">
                       <CircularProgress
                         value={timePercent}
-                        size={132}
-                        strokeWidth={10}
-                        className="sm:hidden"
+                        size={240}
+                        strokeWidth={16}
+                        className="transition-all duration-1000 ease-linear"
                       >
                         <div className="text-center">
-                          <div className="text-3xl font-bold tabular-nums">
+                          <div className="text-7xl font-black tabular-nums tracking-tighter">
                             {secondsLeft}
                           </div>
-                          <div className="text-xs uppercase tracking-wider text-muted-foreground">
+                          <div className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground mt-1">
                             seconds
                           </div>
                         </div>
                       </CircularProgress>
-                      <CircularProgress
-                        value={timePercent}
-                        size={150}
-                        strokeWidth={10}
-                        className="hidden sm:inline-flex"
-                      >
-                        <div className="text-center">
-                          <div className="text-3xl font-bold tabular-nums">
-                            {secondsLeft}
-                          </div>
-                          <div className="text-xs uppercase tracking-wider text-muted-foreground">
-                            seconds
-                          </div>
-                        </div>
-                      </CircularProgress>
+                      {gameState === "finished" && (
+                         <div className="absolute inset-0 flex items-center justify-center bg-card/40 backdrop-blur-[2px] rounded-full animate-in fade-in">
+                           <div className="p-3 rounded-2xl bg-white shadow-xl border border-border/50">
+                              <Trophy className="w-8 h-8 text-amber-500 animate-bounce" />
+                           </div>
+                         </div>
+                      )}
                     </div>
+                  </div>
 
-                    <div className="mt-5 grid grid-cols-1 gap-2 sm:gap-3">
-                      <div className="rounded-2xl border border-border/60 bg-card/60 p-3 text-center">
-                        <div className="text-xs text-muted-foreground">Score</div>
-                        <div className="text-lg font-semibold tabular-nums">{score}</div>
-                      </div>
-                      <div className="rounded-2xl border border-border/60 bg-card/60 p-3 text-center">
-                        <div className="text-xs text-muted-foreground">Streak</div>
-                        <div className="text-lg font-semibold tabular-nums">{streak}</div>
-                      </div>
-                      <div className="rounded-2xl border border-border/60 bg-card/60 p-3 text-center">
-                        <div className="text-xs text-muted-foreground">Accuracy</div>
-                        <div className="text-lg font-semibold tabular-nums">{accuracy}%</div>
-                      </div>
+                  <div className="mt-8">
+                    <div className="grid grid-cols-3 gap-3">
+                      {[
+                        { label: "Score", val: score, color: "text-foreground" },
+                        { label: "Streak", val: streak, color: "text-primary" },
+                        { label: "Accuracy", val: `${accuracy}%`, color: "text-foreground" }
+                      ].map((stat) => (
+                        <div key={stat.label} className="rounded-[2rem] border border-border/60 bg-muted/5 p-5 text-center shadow-inner">
+                          <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1.5">{stat.label}</p>
+                          <p className={cn("text-2xl font-black tabular-nums tracking-tight", stat.color)}>{stat.val}</p>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
 
-                <div className="xl:col-span-7 flex">
-                  <div className="min-w-0 w-full rounded-3xl border border-border/60 bg-background/40 p-4 shadow-sm sm:p-6 xl:h-full">
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Sparkles className="h-4 w-4 text-primary" />
-                        Current question
-                      </div>
-                      {gameState === "finished" && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <Trophy className="h-4 w-4 text-primary" />
-                          <span className="font-medium">Great run.</span>
-                        </div>
-                      )}
+                {/* Right Column: Question & Interaction */}
+                <div className="lg:col-span-7 p-8 flex flex-col bg-muted/5">
+                  <div className="flex items-center justify-between mb-8">
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+                      <Sparkles className="h-3.5 w-3.5 text-primary" />
+                      Current question
                     </div>
-
-                    <div className="mt-5 min-w-0 rounded-3xl border border-border/60 bg-card/70 p-4 sm:p-6">
-                      <div className="text-center">
-                        <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
-                          Solve
-                        </div>
-                        <div className="text-3xl sm:text-5xl font-bold tracking-tight tabular-nums leading-tight break-words">
-                          {question.prompt}
-                        </div>
+                    {gameState === "finished" && (
+                      <div className="flex items-center gap-2 text-[10px] font-black uppercase text-emerald-600 font-black tracking-widest">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        Session Complete
                       </div>
+                    )}
+                  </div>
 
-                      <div className="mt-6 space-y-3">
-                        <Input
-                          ref={inputRef}
-                          inputMode="numeric"
-                          placeholder={gameState === "running" ? "Type your answer…" : "Press Start to begin"}
-                          value={inputValue}
-                          onChange={(e) => setInputValue(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") submitAnswer();
-                          }}
-                          disabled={gameState !== "running" || isSubmitting}
-                          className="h-11 rounded-xl bg-background/60 border-border/60 shadow-sm text-base"
-                          aria-label="Answer input"
-                        />
-                        <Button
-                          onClick={submitAnswer}
-                          disabled={gameState !== "running" || isSubmitting}
-                          className="h-11 w-full rounded-xl shadow-sm"
-                        >
-                          {isSubmitting ? "Checking…" : "Submit"}
-                        </Button>
+                  <div className="flex-1 flex flex-col items-center justify-center">
+                    <div className="text-center">
+                      <p className="text-[11px] font-black uppercase tracking-[0.5em] text-muted-foreground opacity-30 mb-4">Solve the problem</p>
+                      <div className="text-9xl font-black tracking-tighter tabular-nums text-foreground animate-in zoom-in-95 duration-500">
+                        {question.prompt}
                       </div>
+                    </div>
+                  </div>
 
-                      {lastResult && (
-                        <div
-                          className={cn(
-                            "mt-4 rounded-2xl border p-3 text-sm",
-                            lastResult.correct
-                              ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
-                              : "border-rose-500/25 bg-rose-500/10 text-rose-700 dark:text-rose-300",
-                          )}
-                          role="status"
-                          aria-live="polite"
-                        >
-                          {lastResult.correct ? (
-                            <span className="font-medium">Correct.</span>
+                  <div className="mt-8">
+                    {gameState !== "finished" ? (
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-3">
+                          <Input
+                            ref={inputRef}
+                            inputMode="numeric"
+                            placeholder={gameState === "running" ? "Type your answer…" : "Press Start above"}
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") submitAnswer();
+                            }}
+                            disabled={gameState !== "running" || isSubmitting}
+                            className="h-20 rounded-[2rem] bg-white border-border/60 shadow-md text-3xl font-black tabular-nums text-center focus:ring-primary/20 transition-all focus:scale-[1.02]"
+                          />
+                          <Button
+                            onClick={submitAnswer}
+                            disabled={gameState !== "running" || isSubmitting}
+                            className="h-20 px-12 rounded-[2rem] shadow-xl shadow-primary/20 font-black text-xs uppercase tracking-[0.2em] hover:scale-[1.02] transition-transform"
+                          >
+                            {isSubmitting ? "..." : "Submit"}
+                          </Button>
+                        </div>
+
+                        <div className="h-16 flex items-center justify-center">
+                          {lastResult ? (
+                            <div
+                              className={cn(
+                                "w-full rounded-2xl border px-6 py-4 text-sm font-black flex items-center justify-center gap-4 animate-in fade-in slide-in-from-top-4",
+                                lastResult.correct
+                                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-700"
+                                  : "border-rose-500/30 bg-rose-500/10 text-rose-700",
+                              )}
+                            >
+                              {lastResult.correct ? (
+                                <><CheckCircle2 className="w-5 h-5" /> Perfect! Correct.</>
+                              ) : (
+                                <><XCircle className="w-5 h-5" /> Incorrect. Answer: {lastResult.expected}</>
+                              )}
+                            </div>
                           ) : (
-                            <>
-                              <span className="font-medium">Not quite.</span>{" "}
-                              <span className="opacity-90">Correct answer: {lastResult.expected}</span>
-                            </>
+                            <p className="text-[11px] font-bold text-muted-foreground/30 uppercase tracking-[0.3em]">Waiting for your move</p>
                           )}
                         </div>
-                      )}
-
-                      {gameState === "finished" && (
-                        <div className="mt-6 space-y-3">
-                          <div className="text-sm leading-relaxed text-muted-foreground">
-                            Want another run? You can change difficulty before starting.
+                      </div>
+                    ) : (
+                      <div className="rounded-[2.5rem] border border-primary/20 bg-primary/5 p-8 animate-in zoom-in-95">
+                        <div className="flex flex-col sm:flex-row items-center gap-8">
+                          <div className="flex-1 text-center sm:text-left space-y-2">
+                            <h4 className="text-lg font-black tracking-tight text-primary">Session Over!</h4>
+                            <p className="text-xs font-medium text-muted-foreground leading-relaxed">
+                              Great run! You can review your accuracy or change difficulty before your next attempt.
+                            </p>
                           </div>
-                          <div className="flex flex-col gap-2 md:flex-row">
-                            <Button
+                          <div className="flex flex-col gap-3 shrink-0">
+                            <Button 
+                              className="h-12 px-8 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary/30"
+                              onClick={start}
+                            >
+                              Play Again
+                            </Button>
+                            <Button 
                               variant="outline"
-                              className="w-full rounded-xl md:w-auto"
+                              className="h-12 px-8 rounded-2xl font-black text-[10px] uppercase tracking-widest text-muted-foreground hover:bg-white"
                               onClick={reset}
                             >
                               Back to Ready
                             </Button>
-                            <Button className="w-full rounded-xl md:w-auto" onClick={start}>
-                              Play Again
-                            </Button>
                           </div>
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="col-span-12 xl:col-span-4 border-border/60 bg-card/80 shadow-sm backdrop-blur-sm">
-            <CardHeader className="border-b border-border/60">
-              <CardTitle className="text-base">How it works</CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 sm:p-6 space-y-4">
-              <div className="rounded-2xl border border-border/60 bg-background/40 p-4">
-                <div className="text-sm font-semibold">Rules</div>
-                <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
-                  <li className="flex gap-2">
-                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary/60 shrink-0" />
-                    <span>You have <span className="font-medium text-foreground">60 seconds</span>.</span>
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary/60 shrink-0" />
-                    <span>Each correct answer adds <span className="font-medium text-foreground">+1</span> score.</span>
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary/60 shrink-0" />
-                    <span>Wrong answers reset your <span className="font-medium text-foreground">streak</span>.</span>
-                  </li>
-                </ul>
-              </div>
+          {/* ── Sidebar (Right) ── */}
+          <div className="col-span-12 lg:col-span-4 space-y-6">
+            <Card className="border-border/60 bg-card/80 shadow-sm backdrop-blur-sm overflow-hidden h-full">
+              <CardHeader className="pb-2 border-b border-border/40 bg-muted/5">
+                <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
+                  <Info className="h-4 w-4 text-primary" />
+                  How it works
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-8 space-y-8">
+                <div className="space-y-4">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-primary">Rules</p>
+                  <ul className="space-y-4">
+                    {[
+                      { text: "You have 60 seconds.", sub: "Timer starts on first answer." },
+                      { text: "Each correct answer adds +1.", sub: "Accuracy affects final streak." },
+                      { text: "Wrong answers reset streak.", sub: "Consistent wins bonus points." }
+                    ].map((rule, i) => (
+                      <li key={i} className="flex gap-4 group">
+                        <div className="w-8 h-8 rounded-xl bg-primary/5 border border-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
+                           <span className="text-xs font-black text-primary">{i+1}</span>
+                        </div>
+                        <div className="space-y-0.5">
+                           <p className="text-xs font-black text-foreground">{rule.text}</p>
+                           <p className="text-[10px] font-medium text-muted-foreground">{rule.sub}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
-              <div className="rounded-2xl border border-border/60 bg-background/40 p-4">
-                <div className="text-sm font-semibold">Tips</div>
-                <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
-                  <li className="flex gap-2">
-                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary/60 shrink-0" />
-                    <span>Use <span className="font-medium text-foreground">Enter</span> to submit faster.</span>
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary/60 shrink-0" />
-                    <span>Go for consistency first, then raise difficulty.</span>
-                  </li>
-                </ul>
-              </div>
+                <div className="p-6 rounded-[2rem] border border-border/60 bg-muted/5 space-y-3">
+                   <p className="text-[10px] font-black uppercase tracking-widest text-primary">Pro Tips</p>
+                   <ul className="space-y-3">
+                      <li className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
+                         <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                         Use Enter for rapid fire
+                      </li>
+                      <li className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
+                         <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                         Prioritize speed over hard mode
+                      </li>
+                   </ul>
+                </div>
 
-              <div className="rounded-2xl border border-border/60 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-4">
-                <div className="text-sm font-semibold text-foreground">Goal</div>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Build speed and confidence with small daily sprints.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+                <div className="p-6 rounded-[2rem] bg-gradient-to-br from-primary to-primary/80 text-white shadow-xl shadow-primary/20">
+                   <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Objective</p>
+                   <p className="text-sm font-black mt-2 leading-tight">
+                      Build mental math speed & confidence with daily 60s sprints.
+                   </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      
+      </PageTemplate>
     </DashboardLayout>
   );
 }
-
