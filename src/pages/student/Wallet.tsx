@@ -588,7 +588,82 @@ const StudentWallet = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            <ScrollArea className="w-full">
+            <div className="divide-y divide-border/60 md:hidden">
+              {courseData.paymentHistory.map((payment) => (
+                <div key={payment.invoiceId} className="space-y-3 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Invoice ID</p>
+                      <p className="mt-1 font-mono text-xs text-muted-foreground">{payment.invoiceId}</p>
+                    </div>
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        "text-[10px] font-bold px-1.5 h-5",
+                        payment.status === "Paid"
+                          ? "bg-primary/10 text-primary border-primary/20"
+                          : payment.status === "Pending"
+                            ? "bg-warning/10 text-warning border-warning/20"
+                            : "bg-destructive/10 text-destructive border-destructive/20",
+                      )}
+                    >
+                      {payment.status}
+                    </Badge>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Date</p>
+                      <p className="mt-1 text-sm font-semibold">{payment.date}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Amount</p>
+                      <p className="mt-1 inline-flex items-center text-sm font-bold">
+                        <IndianRupee className="w-3.5 h-3.5" />
+                        {payment.amount.toLocaleString("en-IN")}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Description</p>
+                    <p className="mt-1 text-sm font-semibold text-foreground">{payment.description}</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-3">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Method</p>
+                      <p className="mt-1 text-xs font-medium text-muted-foreground">{payment.method}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Transaction ID</p>
+                      <code className="mt-1 inline-block rounded border bg-muted px-2 py-1 font-mono text-[10px] text-muted-foreground">
+                        {payment.txnId}
+                      </code>
+                    </div>
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    className="w-full rounded-xl"
+                    onClick={() => {
+                      downloadInvoicePdf({
+                        studentName: studentData.profile.name,
+                        courseName: courseData.courseName,
+                        category: courseData.category,
+                        transaction: payment,
+                      });
+                      toast.success(`Invoice ${payment.invoiceId} downloaded`);
+                    }}
+                  >
+                    <Download className="mr-2 w-4 h-4" />
+                    Download Invoice
+                  </Button>
+                </div>
+              ))}
+            </div>
+
+            <ScrollArea className="hidden w-full md:block">
               <Table>
                 <TableHeader className="bg-muted/50">
                   <TableRow>

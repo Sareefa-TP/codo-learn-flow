@@ -120,6 +120,53 @@ const WebinarDetails = () => {
         }
     };
 
+    const handleShare = async () => {
+        if (!webinar) return;
+
+        const [eventDate = webinar.dateTime, eventTime = ""] = webinar.dateTime.split(",");
+        const accessLink = webinar.meetingLink || webinar.recordingLink || window.location.href;
+        const shareTitle = `${webinar.title} | CODO Webinar`;
+        const shareText = [
+            `Webinar: ${webinar.title}`,
+            `Speaker: ${webinar.speaker}`,
+            `Date: ${eventDate.trim()}`,
+            `Time: ${eventTime.trim() || "TBA"}`,
+            `Status: ${webinar.status}`,
+            `Mode: Online Event`,
+            "",
+            `About: ${webinar.description}`,
+            "",
+            `Access Link: ${accessLink}`,
+        ].join("\n");
+
+        try {
+            if (navigator.share) {
+                await navigator.share({
+                    title: shareTitle,
+                    text: shareText,
+                    url: accessLink,
+                });
+                toast({
+                    title: "Shared successfully",
+                    description: "Webinar details were shared.",
+                });
+                return;
+            }
+
+            await navigator.clipboard.writeText(`${shareTitle}\n\n${shareText}`);
+            toast({
+                title: "Details copied",
+                description: "Webinar details copied to clipboard. You can now share them anywhere.",
+            });
+        } catch {
+            toast({
+                title: "Unable to share",
+                description: "Please try again or copy details manually.",
+                variant: "destructive",
+            });
+        }
+    };
+
     if (!webinar) {
         return (
             <DashboardLayout>
@@ -243,7 +290,12 @@ const WebinarDetails = () => {
                                         <MapPin className="w-4 h-4" />
                                         Online Event
                                     </div>
-                                    <Button variant="ghost" size="sm" className="w-full justify-start gap-2 h-9 text-muted-foreground">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="w-full justify-start gap-2 h-9 text-muted-foreground"
+                                        onClick={handleShare}
+                                    >
                                         <Share2 className="w-4 h-4" />
                                         Share Event
                                     </Button>

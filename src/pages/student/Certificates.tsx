@@ -134,10 +134,7 @@ const StudentCertificates = () => {
                     </p>
                   </div>
                 </div>
-                <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
-                  <Button variant="outline" onClick={() => setPreviewCertId(null)}>
-                    Close
-                  </Button>
+                <div className="flex justify-center">
                   <Button onClick={() => handleDownload(previewCertificate)}>
                     <Download className="mr-2 h-4 w-4" />
                     Download PDF

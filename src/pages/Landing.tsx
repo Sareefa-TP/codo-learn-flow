@@ -227,21 +227,21 @@ const Landing = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-8 text-sm sm:grid-cols-2">
+          <div className="grid grid-cols-2 gap-8 text-sm">
             <div>
               <p className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Company</p>
               <div className="flex flex-col items-start gap-3 text-muted-foreground">
-                <button className="footer-link">About</button>
-                <button className="footer-link">Contact</button>
-                <button className="footer-link">Careers</button>
+                <button className="footer-link" onClick={() => navigate("/about")}>About</button>
+                <button className="footer-link" onClick={() => navigate("/contact")}>Contact</button>
+                <button className="footer-link" onClick={() => navigate("/careers")}>Careers</button>
               </div>
             </div>
             <div>
               <p className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Legal</p>
               <div className="flex flex-col items-start gap-3 text-muted-foreground">
-                <button className="footer-link">Privacy</button>
-                <button className="footer-link">Terms</button>
-                <button className="footer-link">Cookies</button>
+                <button className="footer-link" onClick={() => navigate("/privacy")}>Privacy</button>
+                <button className="footer-link" onClick={() => navigate("/terms")}>Terms</button>
+                <button className="footer-link" onClick={() => navigate("/cookies")}>Cookies</button>
               </div>
             </div>
           </div>

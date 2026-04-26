@@ -204,10 +204,6 @@ export default function StudentGame() {
 
   return (
     <DashboardLayout>
-      <PageTemplate
-        title="Game"
-        description="A 60‑second quick math challenge to sharpen your speed. Pick a difficulty, start the timer, and aim for a streak."
-      >
         <div className="grid grid-cols-12 gap-4 sm:gap-6">
           <Card className="col-span-12 xl:col-span-8 min-w-0 overflow-hidden border-border/60 bg-card/80 shadow-sm backdrop-blur-sm">
             <CardHeader className="border-b border-border/60 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-4 sm:p-6">
@@ -489,7 +485,7 @@ export default function StudentGame() {
             </CardContent>
           </Card>
         </div>
-      </PageTemplate>
+      
     </DashboardLayout>
   );
 }

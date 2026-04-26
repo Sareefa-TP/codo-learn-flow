@@ -496,24 +496,28 @@ const StudentExams = () => {
         if (!selectedExam) return null;
 
         return (
-            <div className="mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
+            <div className="mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-5 sm:space-y-8">
                 <Button
                     variant="ghost"
-                    className="text-muted-foreground hover:text-foreground pl-0 group font-bold text-xs uppercase tracking-widest"
+                    className="text-muted-foreground hover:text-foreground pl-0 group font-bold text-[11px] uppercase tracking-widest"
                     onClick={() => navigate(`/student/exam/${courseSlug}`)}
                 >
                     <ChevronLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
                     Back to Exams
                 </Button>
 
-                <Card className="border-border/50 bg-card overflow-hidden rounded-[2rem] shadow-2xl shadow-primary/5 mx-auto">
+                <Card className="border-border/50 bg-card overflow-hidden rounded-[1.5rem] sm:rounded-[2rem] shadow-xl sm:shadow-2xl shadow-primary/5 mx-auto">
                     {/* Header */}
-                    <div className="bg-gradient-to-br from-primary/10 via-background to-background p-10 sm:p-12 border-b border-border/40">
-                        <div className="flex flex-col sm:flex-row justify-between items-start gap-8">
-                            <div className="flex-1 space-y-4">
+                    <div className="bg-gradient-to-br from-primary/10 via-background to-background p-5 sm:p-12 border-b border-border/40">
+                        <div className="flex flex-col sm:flex-row justify-between items-start gap-4 sm:gap-8">
+                            <div className="flex-1 space-y-3 sm:space-y-4">
                                 <Badge variant="outline" className="font-black uppercase tracking-widest text-[9px] px-3 border-primary/20 text-primary bg-primary/5">Examination Hub</Badge>
-                                <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight leading-none">{selectedExam.exam_title}</h2>
-                                <p className="text-muted-foreground font-bold text-lg">{selectedExam.course_name} {selectedExam.module_name ? `• ${selectedExam.module_name}` : ''}</p>
+                                <h2 className="text-2xl sm:text-4xl font-black text-foreground tracking-tight leading-[1.05]">
+                                  {selectedExam.exam_title}
+                                </h2>
+                                <p className="text-muted-foreground font-bold text-base sm:text-lg">
+                                  {selectedExam.course_name} {selectedExam.module_name ? `• ${selectedExam.module_name}` : ""}
+                                </p>
                             </div>
                             <div className="shrink-0">
                                 <Badge 
@@ -528,31 +532,31 @@ const StudentExams = () => {
                         </div>
                     </div>
 
-                    <CardContent className="p-10 sm:p-12 space-y-12">
+                    <CardContent className="p-5 sm:p-12 space-y-8 sm:space-y-12">
                         {/* Metrics Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <div className="bg-muted/30 p-6 rounded-2xl border border-border/40 space-y-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                            <div className="bg-muted/30 p-4 sm:p-6 rounded-2xl border border-border/40 space-y-2">
                                 <div className="flex items-center gap-2 text-muted-foreground/60">
                                     <Clock className="w-4 h-4" />
                                     <span className="text-[10px] font-black uppercase tracking-widest">Duration</span>
                                 </div>
                                 <p className="text-2xl font-black text-foreground">{selectedExam.time_limit} Mins</p>
                             </div>
-                            <div className="bg-muted/30 p-6 rounded-2xl border border-border/40 space-y-2">
+                            <div className="bg-muted/30 p-4 sm:p-6 rounded-2xl border border-border/40 space-y-2">
                                 <div className="flex items-center gap-2 text-muted-foreground/60">
                                     <BookOpen className="w-4 h-4" />
                                     <span className="text-[10px] font-black uppercase tracking-widest">Questions</span>
                                 </div>
                                 <p className="text-2xl font-black text-foreground">{selectedExam.total_questions}</p>
                             </div>
-                            <div className="bg-muted/30 p-6 rounded-2xl border border-border/40 space-y-2">
+                            <div className="bg-muted/30 p-4 sm:p-6 rounded-2xl border border-border/40 space-y-2">
                                 <div className="flex items-center gap-2 text-muted-foreground/60">
                                     <GraduationCap className="w-4 h-4" />
                                     <span className="text-[10px] font-black uppercase tracking-widest">Pass Mark</span>
                                 </div>
                                 <p className="text-2xl font-black text-foreground">{selectedExam.pass_mark}%</p>
                             </div>
-                            <div className="bg-muted/30 p-6 rounded-2xl border border-border/40 space-y-2">
+                            <div className="bg-muted/30 p-4 sm:p-6 rounded-2xl border border-border/40 space-y-2">
                                 <div className="flex items-center gap-2 text-muted-foreground/60">
                                     <AlertCircle className="w-4 h-4" />
                                     <span className="text-[10px] font-black uppercase tracking-widest">Attempts</span>
@@ -563,11 +567,11 @@ const StudentExams = () => {
 
                         {/* Instructions Section */}
                         <div className="space-y-6">
-                            <h3 className="text-xl font-bold text-foreground flex items-center gap-3">
+                            <h3 className="text-lg sm:text-xl font-bold text-foreground flex items-center gap-3">
                                 <div className="w-1.5 h-6 bg-primary rounded-full" />
                                 Exam Instructions
                             </h3>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6 bg-muted/20 p-8 rounded-3xl border border-border/40">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 sm:gap-y-6 bg-muted/20 p-4 sm:p-8 rounded-3xl border border-border/40">
                                 <div className="flex gap-4 items-start">
                                     <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 font-bold text-xs shadow-inner">1</div>
                                     <p className="text-sm text-muted-foreground font-medium leading-relaxed">Ensure a stable internet connection. The timer will not pause once started.</p>
@@ -589,10 +593,10 @@ const StudentExams = () => {
 
                         {/* Declaration Section */}
                         <div className="space-y-6">
-                            <div className="p-8 rounded-3xl border-2 border-primary/20 bg-primary/[0.02] space-y-6">
+                            <div className="p-4 sm:p-8 rounded-3xl border-2 border-primary/20 bg-primary/[0.02] space-y-4 sm:space-y-6">
                                 <div className="flex items-center gap-3 text-primary">
                                     <ShieldCheck className="w-6 h-6" />
-                                    <h3 className="text-xl font-bold tracking-tight">Final Declaration</h3>
+                                    <h3 className="text-lg sm:text-xl font-bold tracking-tight">Final Declaration</h3>
                                 </div>
                                 <div className="space-y-4">
                                     <p className="text-sm text-foreground/80 font-bold leading-relaxed italic">
@@ -622,17 +626,17 @@ const StudentExams = () => {
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="pt-4 flex flex-col sm:flex-row gap-4">
+                        <div className="pt-2 sm:pt-4 flex flex-col sm:flex-row gap-3 sm:gap-4">
                             <Button 
                                 variant="outline" 
-                                className="sm:flex-1 h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-xs border-2 hover:bg-muted"
+                                className="sm:flex-1 h-12 sm:h-14 rounded-2xl font-black uppercase tracking-[0.16em] sm:tracking-[0.2em] text-[11px] sm:text-xs border-2 hover:bg-muted"
                                 onClick={() => navigate(`/student/exam/${courseSlug}`)}
                             >
                                 Not Today
                             </Button>
                             <Button 
                                 className={cn(
-                                    "sm:flex-1 h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-xs transition-all duration-500",
+                                    "sm:flex-1 h-12 sm:h-14 rounded-2xl font-black uppercase tracking-[0.16em] sm:tracking-[0.2em] text-[11px] sm:text-xs transition-all duration-500",
                                     isDeclared || selectedExam.status === "Completed" ? "bg-primary shadow-2xl shadow-primary/30" : "bg-muted text-muted-foreground/40_cursor-not-allowed"
                                 )}
                                 disabled={!isDeclared && selectedExam.status !== "Completed"}

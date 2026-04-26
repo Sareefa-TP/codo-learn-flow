@@ -223,12 +223,12 @@ const StudentFeedback = () => {
           <PageSearch
             placeholder="Search feedback..."
             onSearch={setSearchQuery}
-            className="mb-10"
+            className="mb-6 sm:mb-10"
           />
 
           {/* Tab-based Navigation (Updated to match design) */}
           <div className="bg-white p-1.5 rounded-full border border-border/40 mb-8 w-full shadow-sm">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-1">
+            <div className="no-scrollbar flex justify-start gap-1 overflow-x-auto md:grid md:grid-cols-4 md:overflow-visible">
               {[
                 { id: "my-teacher", label: "My Teacher" },
                 { id: "my-mentor", label: "My Mentor" },
@@ -239,10 +239,10 @@ const StudentFeedback = () => {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={cn(
-                    "px-4 py-3 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 text-center flex items-center justify-center h-full",
-                    activeTab === tab.id 
-                      ? "bg-[#28B485] text-white shadow-lg shadow-[#28B485]/20" 
-                      : "text-[#94A3B8] hover:bg-slate-50 hover:text-[#64748B]"
+                    "min-w-max shrink-0 px-4 py-3 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 text-center flex items-center justify-center h-full md:min-w-0 md:shrink",
+                    activeTab === tab.id
+                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
                   )}
                 >
                   <span className="truncate">{tab.label}</span>
@@ -253,12 +253,12 @@ const StudentFeedback = () => {
 
           {/* Content Area */}
           <div className="bg-card rounded-[2.5rem] border border-border/40 shadow-xl shadow-slate-200/50 min-h-[500px] overflow-hidden flex flex-col">
-            <div className="p-8 pb-4 flex items-center justify-between border-b border-border/20 bg-muted/5">
-              <div>
-                <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2 capitalize">
+            <div className="p-4 sm:p-8 sm:pb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border/20 bg-muted/5">
+              <div className="min-w-0">
+                <div className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2 capitalize leading-tight">
                   <History className="w-5 h-5 text-primary" />
                   {activeTab.replace(/-/g, ' ')} Feedbacks
-                </h2>
+                </div>
                 <p className="text-xs text-muted-foreground font-medium mt-1">
                   Total {filteredEntries.length} Records Found
                 </p>
@@ -266,14 +266,14 @@ const StudentFeedback = () => {
               {activeTab.startsWith("my-") ? (
                 <Button
                   onClick={() => setIsModalOpen(true)}
-                  className="rounded-xl px-4 h-10 font-semibold"
+                  className="w-full sm:w-auto rounded-xl px-4 h-10 font-semibold"
                 >
                   Create Ticket
                 </Button>
               ) : null}
             </div>
 
-            <CardContent className="p-8 flex-1">
+            <CardContent className="p-4 sm:p-8 flex-1">
               {filteredEntries.length > 0 ? (
                 <div className="flex flex-col gap-4">
                   {filteredEntries.map((entry) => (
@@ -351,13 +351,13 @@ const StudentFeedback = () => {
 
       {/* Add Feedback Modal (Standardized exactly to Weekly Report) */}
     {isModalOpen && (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+      <div className="fixed inset-0 z-[100] flex items-start sm:items-center justify-center bg-black/40 backdrop-blur-sm p-3 sm:p-4 animate-in fade-in duration-200">
         <div 
-          className="bg-background border border-border/50 rounded-2xl shadow-2xl w-full max-w-2xl min-h-[600px] max-h-[90vh] flex flex-col animate-in fade-in zoom-in duration-200"
+          className="bg-background border border-border/50 rounded-2xl shadow-2xl w-full max-w-2xl min-h-0 max-h-[92vh] sm:max-h-[90vh] flex flex-col animate-in fade-in zoom-in duration-200"
           onClick={e => e.stopPropagation()}
         >
           {/* Header (Cloned from Weekly Report) */}
-          <div className="flex items-center justify-between p-6 border-b border-border/50 bg-muted/5">
+          <div className="flex items-start justify-between gap-3 p-4 sm:p-6 border-b border-border/50 bg-muted/5">
             <div>
               <h2 className="text-xl font-bold tracking-tight">Add Feedback</h2>
               <p className="text-sm text-muted-foreground mt-1">
@@ -373,7 +373,7 @@ const StudentFeedback = () => {
           </div>
 
           {/* Body (Cloned from Weekly Report) */}
-          <form className="flex-1 overflow-y-auto p-6 space-y-6">
+          <form className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
             {/* Context Box (Gray-ish background like Month/Week) */}
             <div className="space-y-4 p-4 rounded-xl bg-muted/30 border border-border/40">
               {/* Overall Rating */}
@@ -442,7 +442,7 @@ const StudentFeedback = () => {
               </Label>
               <Textarea 
                 placeholder="Share your experience with us..."
-                className="min-h-[280px] rounded-xl border-border/50 bg-background focus:ring-2 focus:ring-primary/40 p-4 text-sm font-medium resize-none placeholder:text-muted-foreground/40"
+                className="min-h-[220px] sm:min-h-[280px] rounded-xl border-border/50 bg-background focus:ring-2 focus:ring-primary/40 p-4 text-sm font-medium resize-none placeholder:text-muted-foreground/40"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
               />
@@ -450,18 +450,18 @@ const StudentFeedback = () => {
           </form>
 
           {/* Footer (Cloned from Weekly Report) */}
-          <div className="p-6 border-t border-border/50 bg-muted/5 flex items-center justify-end gap-3 mt-auto">
+          <div className="p-4 sm:p-6 border-t border-border/50 bg-muted/5 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2 sm:gap-3 mt-auto">
             <Button 
               variant="outline" 
               onClick={() => setIsModalOpen(false)}
-              className="rounded-xl px-6 h-10 font-semibold"
+              className="w-full sm:w-auto rounded-xl px-6 h-10 font-semibold"
             >
               Cancel
             </Button>
             <Button 
               onClick={handleSubmit}
               disabled={!message.trim() || rating === 0 || !selectedCourse || !selectedTutor}
-              className="rounded-xl px-6 h-10 font-semibold bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/10 transition-all"
+              className="w-full sm:w-auto rounded-xl px-6 h-10 font-semibold bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/10 transition-all"
             >
               Submit Feedback
             </Button>
@@ -472,13 +472,13 @@ const StudentFeedback = () => {
     
     {/* View Feedback Modal (Standardized exactly to Weekly Report) */}
     {isViewModalOpen && selectedFeedback && (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+      <div className="fixed inset-0 z-[100] flex items-start sm:items-center justify-center bg-black/40 backdrop-blur-sm p-3 sm:p-4 animate-in fade-in duration-200">
         <div 
-          className="bg-background border border-border/50 rounded-2xl shadow-2xl w-full max-w-2xl min-h-[600px] max-h-[90vh] flex flex-col animate-in fade-in zoom-in duration-200"
+          className="bg-background border border-border/50 rounded-2xl shadow-2xl w-full max-w-2xl min-h-0 max-h-[92vh] sm:max-h-[90vh] flex flex-col animate-in fade-in zoom-in duration-200"
           onClick={e => e.stopPropagation()}
         >
           {/* Header (Cloned from Weekly Report) */}
-          <div className="flex items-center justify-between p-6 border-b border-border/50 bg-muted/5">
+          <div className="flex items-start justify-between gap-3 p-4 sm:p-6 border-b border-border/50 bg-muted/5">
             <div>
               <h2 className="text-xl font-bold tracking-tight">Feedback Details</h2>
               <p className="text-sm text-muted-foreground mt-1">
@@ -494,10 +494,10 @@ const StudentFeedback = () => {
           </div>
 
           {/* Body (Cloned from Weekly Report) */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
             {/* Meta Context Box (Gray-ish background like Month/Week) */}
             <div className="space-y-4 p-4 rounded-xl bg-muted/30 border border-border/40">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Author</p>
                   <div className="flex items-center gap-2">
@@ -515,7 +515,7 @@ const StudentFeedback = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-2 border-t border-border/20">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-border/20">
                 <div className="space-y-1">
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Rating</p>
                   {isEditMode ? (
@@ -568,7 +568,7 @@ const StudentFeedback = () => {
                   placeholder="Update your feedback..."
                 />
               ) : (
-                <div className="relative p-6 rounded-xl border border-border/40 bg-background min-h-[250px] shadow-sm">
+                <div className="relative p-4 sm:p-6 rounded-xl border border-border/40 bg-background min-h-[180px] sm:min-h-[250px] shadow-sm">
                   <span className="absolute left-4 top-2 text-6xl text-primary/5 font-serif leading-none select-none">"</span>
                   <p className="text-sm text-foreground/80 leading-relaxed italic relative z-10 whitespace-pre-wrap">
                     {selectedFeedback.message}
@@ -580,7 +580,7 @@ const StudentFeedback = () => {
           </div>
 
           {/* Footer (Cloned from Weekly Report) */}
-          <div className="p-6 border-t border-border/50 bg-muted/5 flex items-center justify-end gap-3 mt-auto">
+          <div className="p-4 sm:p-6 border-t border-border/50 bg-muted/5 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2 sm:gap-3 mt-auto">
             {selectedFeedback.author === "You" ? (
               isEditMode ? (
                 <>
@@ -603,21 +603,12 @@ const StudentFeedback = () => {
                   </Button>
                 </>
               ) : (
-                <>
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsViewModalOpen(false)}
-                    className="rounded-xl px-6 h-10 font-semibold"
-                  >
-                    Close
-                  </Button>
-                  <Button
-                    onClick={() => setIsEditMode(true)}
-                    className="rounded-xl px-6 h-10 font-semibold bg-primary hover:bg-primary/90 text-white"
-                  >
-                    Edit Feedback
-                  </Button>
-                </>
+                <Button
+                  onClick={() => setIsEditMode(true)}
+                  className="rounded-xl px-6 h-10 font-semibold bg-primary hover:bg-primary/90 text-white"
+                >
+                  Edit Feedback
+                </Button>
               )
             ) : null}
           </div>

@@ -64,14 +64,14 @@ const CourseCard = ({
     >
       <div className="relative flex h-24 items-center justify-center overflow-hidden bg-muted/40 sm:h-28">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent" />
-        <div className="relative z-10 flex h-12 w-12 items-center justify-center rounded-2xl border border-border/40 bg-card shadow-soft transition-transform duration-500 group-hover:scale-110">
+        <div className="absolute bottom-3 left-4 z-10 flex h-12 w-12 items-center justify-center rounded-2xl border border-border/40 bg-card shadow-soft transition-transform duration-500 group-hover:scale-110 sm:static sm:left-auto sm:bottom-auto">
           <Icon className="w-6 h-6 text-primary" />
         </div>
         {category && (
           <Badge 
             variant={categoryVariant}
             className={cn(
-              "absolute right-3 top-3 max-w-[62%] truncate px-2 text-[10px] uppercase tracking-widest shadow-sm",
+              "absolute right-2.5 top-2.5 max-w-[58%] truncate px-2 py-0.5 text-[9px] uppercase tracking-widest shadow-sm sm:right-3 sm:top-3 sm:max-w-[62%] sm:text-[10px]",
               categoryVariant === "default" || !categoryVariant ? "bg-card/90 text-foreground border-none backdrop-blur-sm" : ""
             )}
           >
@@ -79,14 +79,14 @@ const CourseCard = ({
           </Badge>
         )}
       </div>
-      <CardContent className="flex flex-1 flex-col space-y-4 p-4 sm:space-y-5 sm:p-5">
+      <CardContent className="flex flex-1 flex-col space-y-3.5 p-4 sm:space-y-5 sm:p-5">
         <div className="space-y-1">
           {topLabel && (
             <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">
               {topLabel}
             </p>
           )}
-          <h3 className="line-clamp-2 min-h-[2.8rem] text-xl font-display leading-tight text-foreground transition-colors group-hover:text-primary sm:min-h-[3rem]">
+          <h3 className="line-clamp-2 min-h-[2.5rem] text-lg font-display leading-tight text-foreground transition-colors group-hover:text-primary sm:min-h-[3rem] sm:text-xl">
             {title}
           </h3>
           {duration && (
@@ -112,12 +112,12 @@ const CourseCard = ({
           </div>
         )}
 
-        <div className="mt-auto flex flex-col-reverse gap-2 pt-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-auto flex flex-col-reverse gap-2.5 pt-2.5 sm:flex-row sm:items-center sm:justify-between sm:pt-3">
           {onDetailsClick && (
             <Button 
-              variant="ghost" 
+              variant="outline"
               size="sm" 
-              className="justify-start rounded-xl px-2 text-[10px] uppercase tracking-widest text-muted-foreground hover:text-primary sm:justify-center"
+              className="h-10 w-full justify-center rounded-xl border-border/70 bg-background text-xs font-semibold uppercase tracking-widest text-foreground hover:bg-muted/50 sm:h-9 sm:w-auto sm:justify-center sm:px-3"
               onClick={(e) => {
                 e.stopPropagation();
                 onDetailsClick();
@@ -128,7 +128,7 @@ const CourseCard = ({
           )}
           <Button 
             className={cn(
-              "h-10 w-full gap-2 rounded-xl bg-primary text-xs font-bold shadow-md shadow-primary/20 hover:bg-primary/90 sm:h-11 sm:w-auto sm:min-w-[160px]",
+              "h-10 w-full justify-center gap-2 rounded-xl bg-primary text-xs font-bold shadow-md shadow-primary/20 hover:bg-primary/90 sm:h-11 sm:w-auto sm:min-w-[160px]",
               actionClassName
             )}
             onClick={(e) => {

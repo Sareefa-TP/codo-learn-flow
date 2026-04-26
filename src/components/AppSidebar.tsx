@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Logo from "@/components/Logo";
 import { useRole } from "@/hooks/useRole";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { studentData } from "@/data/studentData";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +30,17 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 // Badge data type
 interface SidebarBadge {
@@ -113,7 +125,12 @@ export function AppSidebar() {
 
   const handleLogout = () => {
     sessionStorage.removeItem("selectedRole");
-    navigate("/");
+    navigate("/", { replace: true });
+    window.setTimeout(() => {
+      if (window.location.pathname !== "/") {
+        window.location.assign("/");
+      }
+    }, 0);
   };
 
   // Get badge info for a nav item
@@ -408,16 +425,39 @@ export function AppSidebar() {
             </div>
           )}
           {!isCollapsed && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleLogout();
-              }}
-              className="p-2 hover:bg-primary/10 rounded-xl transition-colors text-muted-foreground hover:text-primary border border-transparent hover:border-primary/20"
-              title="Logout"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  className="p-2 hover:bg-primary/10 rounded-xl transition-colors text-muted-foreground hover:text-primary border border-transparent hover:border-primary/20"
+                  title="Logout"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="rounded-2xl">
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Logout from your account?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    You will be signed out and redirected to the login page.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                  <AlertDialogAction asChild>
+                    <Button
+                      type="button"
+                      className="rounded-xl"
+                      onClick={handleLogout}
+                    >
+                      Logout
+                    </Button>
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           )}
         </div>
       </SidebarFooter>
