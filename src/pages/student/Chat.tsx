@@ -1,27 +1,61 @@
+import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
-import { MessageSquare } from "lucide-react";
+import ChatWindow from "@/components/student/chat/ChatWindow";
+import { unifiedSupportChat } from "@/data/chatMock";
 
 export default function StudentChat() {
-    return (
-        <DashboardLayout>
-            <div className="animate-fade-in space-y-6 max-w-7xl mx-auto pb-10">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Student Chat</h1>
-                    <p className="text-muted-foreground mt-2">
-                        Communicate with your tutor for questions and support.
-                    </p>
-                </div>
+  const [messages, setMessages] = useState(unifiedSupportChat.messages);
+  const location = useLocation();
+  const navigate = useNavigate();
 
-                <div className="mt-8 flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-xl bg-muted/10 text-center min-h-[400px]">
-                    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 text-primary">
-                        <MessageSquare className="w-8 h-8" />
-                    </div>
-                    <h2 className="text-xl font-semibold mb-2">Chat system will appear here.</h2>
-                    <p className="text-muted-foreground max-w-sm text-sm">
-                        This module is currently under construction. Check back soon for the full messaging experience.
-                    </p>
-                </div>
-            </div>
-        </DashboardLayout>
-    );
+  const isParticipantsOpen = location.pathname === "/student/chat/participants";
+
+  const handleSendMessage = (text: string, courseTag?: string) => {
+    const newMessage = {
+      id: Date.now().toString(),
+      senderId: "s1", // Student ID from mock
+      senderName: "YOU",
+      text,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      courseTag,
+      isOwn: true,
+    };
+    setMessages([...messages, newMessage]);
+  };
+
+  const handleDeleteMessage = (messageId: string) => {
+    setMessages(messages.filter(m => m.id !== messageId));
+  };
+
+  const handleClearHistory = () => {
+    setMessages([]);
+  };
+
+  const handleOpenParticipants = () => {
+    navigate("/student/chat/participants");
+  };
+
+  const handleCloseParticipants = () => {
+    navigate("/student/chat");
+  };
+
+  return (
+    <DashboardLayout>
+      <div className="h-[calc(100vh-140px)] max-w-[1200px] mx-auto animate-fade-in">
+        <div className="bg-white border border-border/40 rounded-[2.5rem] shadow-2xl shadow-slate-200/50 h-full overflow-hidden flex">
+          {/* Main Messaging Canvas - Full Width */}
+          <ChatWindow 
+            messages={messages} 
+            onSendMessage={handleSendMessage} 
+            onDeleteMessage={handleDeleteMessage}
+            onClearHistory={handleClearHistory}
+            isParticipantsOpen={isParticipantsOpen}
+            onOpenParticipants={handleOpenParticipants}
+            onCloseParticipants={handleCloseParticipants}
+          />
+        </div>
+      </div>
+    </DashboardLayout>
+  );
 }
