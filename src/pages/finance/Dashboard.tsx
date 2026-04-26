@@ -319,7 +319,7 @@ const Dashboard = () => {
                         </div>
                         <div className="flex items-center justify-between">
                           <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">{txn.type} · {txn.time}</p>
-                          <Badge variant="ghost" className="text-[9px] font-black uppercase tracking-tighter p-0 h-auto">
+                          <Badge variant="outline" className="text-[9px] font-black uppercase tracking-tighter p-0 h-auto border-none">
                             {txn.status}
                           </Badge>
                         </div>

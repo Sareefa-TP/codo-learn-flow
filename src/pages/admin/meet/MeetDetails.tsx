@@ -145,11 +145,11 @@ const AdminMeetDetails = () => {
                       
                       <div className="flex flex-wrap items-center gap-6 pt-2">
                         <div className="flex items-center gap-2">
-                           <Badge variant="ghost" className="bg-slate-50 text-slate-500 text-[10px] font-black uppercase rounded-lg px-2.5 h-6 border-none">
+                           <Badge variant="outline" className="bg-slate-50 text-slate-500 text-[10px] font-black uppercase rounded-lg px-2.5 h-6 border-none">
                               <LayoutGrid className="w-3 h-3 mr-1.5 opacity-40" />
                               {meet.course}
                            </Badge>
-                           <Badge variant="ghost" className="bg-slate-50 text-slate-500 text-[10px] font-black uppercase rounded-lg px-2.5 h-6 border-none">
+                           <Badge variant="outline" className="bg-slate-50 text-slate-500 text-[10px] font-black uppercase rounded-lg px-2.5 h-6 border-none">
                               <Users className="w-3 h-3 mr-1.5 opacity-40" />
                               {meet.batch}
                            </Badge>
@@ -188,7 +188,7 @@ const AdminMeetDetails = () => {
                               <p className="text-xs font-bold text-slate-800">{p.name}</p>
                            </td>
                            <td className="py-5">
-                              <Badge variant="ghost" className="text-[10px] font-bold text-slate-400 uppercase bg-transparent p-0">
+                               <Badge variant="outline" className="text-[10px] font-bold text-slate-400 uppercase bg-transparent p-0 border-none">
                                  {p.role}
                               </Badge>
                            </td>
