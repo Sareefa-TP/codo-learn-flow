@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import DashboardLayout from "@/components/DashboardLayout";
+import FinanceLayout from "@/components/finance/FinanceLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -108,7 +108,7 @@ const FinanceProfile = () => {
     };
 
     return (
-        <DashboardLayout>
+        <FinanceLayout>
             <div className="animate-fade-in space-y-6 max-w-5xl mx-auto pb-10">
                 {/* Header Section */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
@@ -226,7 +226,7 @@ const FinanceProfile = () => {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-        </DashboardLayout>
+        </FinanceLayout>
     );
 };
 

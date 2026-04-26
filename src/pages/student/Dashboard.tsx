@@ -16,13 +16,7 @@ import {
   MoreVertical,
   ChevronDown
 } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 const MultiSegmentProgress = ({
   student,
@@ -295,26 +289,49 @@ const StudentDashboard = () => {
         </section>
         
         {/* Global Course Selector */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-xl border-primary/10 bg-primary/5 shadow-inner">
-          <div className="space-y-1">
-            <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-primary" />
-              Viewing Data For:
-            </h3>
-            <p className="text-xs text-muted-foreground">Select a course to update progress, assignments, and attendance metrics.</p>
+        <div className="rounded-full bg-white border border-slate-100 shadow-sm overflow-hidden">
+          <div className="grid grid-cols-3 w-full">
+            {courses.map((course) => {
+              const isActive = selectedCourseId === course.id;
+              // Map icons to courses
+              const getIcon = (id: string) => {
+                if (id === "fsd") return <TrendingUp className="w-4 h-4" />;
+                if (id === "ds") return <BookOpen className="w-4 h-4" />;
+                return <Briefcase className="w-4 h-4" />;
+              };
+
+              return (
+                <button
+                  key={course.id}
+                  onClick={() => setSelectedCourseId(course.id)}
+                  className={cn(
+                    "flex items-center justify-center gap-3 py-3.5 transition-all duration-300 outline-none group border-r last:border-r-0 border-slate-50",
+                    isActive 
+                      ? "bg-[#28B485] text-white" 
+                      : "text-slate-400 hover:text-slate-600 hover:bg-slate-50/50"
+                  )}
+                >
+                  <div className={cn(
+                    "shrink-0",
+                    isActive ? "text-white" : "text-slate-300 group-hover:text-slate-400"
+                  )}>
+                    {getIcon(course.id)}
+                  </div>
+                  <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest whitespace-nowrap">
+                    {course.name}
+                  </span>
+                  <div className={cn(
+                    "flex items-center justify-center min-w-[20px] h-5 rounded-full text-[9px] font-black px-1.5",
+                    isActive 
+                      ? "bg-white/20 text-white" 
+                      : "bg-slate-100 text-slate-400"
+                  )}>
+                    {course.attendance.total}
+                  </div>
+                </button>
+              );
+            })}
           </div>
-          <Select value={selectedCourseId} onValueChange={setSelectedCourseId}>
-            <SelectTrigger className="w-full sm:w-[280px] h-10 bg-background shadow-sm border-primary/20 focus:ring-primary/30">
-              <SelectValue placeholder="Select active course" />
-            </SelectTrigger>
-            <SelectContent>
-              {courses.map((course) => (
-                <SelectItem key={course.id} value={course.id} className="text-sm">
-                  {course.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </div>
 
         {/* Progress Grid */}

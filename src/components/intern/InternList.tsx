@@ -6,13 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Table,
   TableBody,
   TableCell,
@@ -22,15 +15,12 @@ import {
 } from "@/components/ui/table";
 import {
   Search,
-  Briefcase,
   Users,
-  CheckCircle,
-  Clock,
   Plus,
-  UserX
 } from "lucide-react";
 import { INTERNS } from "@/data/internData";
 import { useRole } from "@/hooks/useRole";
+import { cn } from "@/lib/utils";
 
 const AdminInterns = () => {
   const navigate = useNavigate();
@@ -76,79 +66,60 @@ const AdminInterns = () => {
           </div>
         </div>
 
-        {/* SUMMARY CARDS (Added for Premium UI) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="rounded-2xl border-border/50 shadow-sm overflow-hidden group">
-            <CardContent className="p-5 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-600 shrink-0 group-hover:scale-110 transition-transform">
-                <Briefcase className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Total Interns</p>
-                <h3 className="text-2xl font-bold">{totalInterns}</h3>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="rounded-2xl border-border/50 shadow-sm overflow-hidden group">
-            <CardContent className="p-5 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 shrink-0 group-hover:scale-110 transition-transform">
-                <CheckCircle className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Active Interns</p>
-                <h3 className="text-2xl font-bold">{activeInterns}</h3>
-              </div>
-            </CardContent>
-          </Card>
 
-          <Card className="rounded-2xl border-border/50 shadow-sm overflow-hidden group">
-            <CardContent className="p-5 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-600 shrink-0 group-hover:scale-110 transition-transform">
-                <Clock className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Completed</p>
-                <h3 className="text-2xl font-bold">{completedInterns}</h3>
-              </div>
-            </CardContent>
-          </Card>
 
-          <Card className="rounded-2xl border-border/50 shadow-sm overflow-hidden group">
-            <CardContent className="p-5 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-rose-500/10 flex items-center justify-center text-rose-600 shrink-0 group-hover:scale-110 transition-transform">
-                <UserX className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Inactive Interns</p>
-                <h3 className="text-2xl font-bold">{inactiveInterns}</h3>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* SECTION B: SEARCH + STATUS */}
-        <div className="flex flex-col gap-4 rounded-2xl border border-border/50 bg-card p-4 shadow-sm sm:flex-row sm:items-center">
+        {/* SEARCH BAR */}
+        <div className="flex flex-col gap-4">
           <div className="relative min-w-0 flex-1">
             <Search className="absolute left-3.5 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search name, email, role, joined date..."
-              className="h-11 rounded-xl border-border/50 bg-muted/30 pl-11"
+              className="h-11 rounded-xl border-border/50 bg-muted/30 pl-11 shadow-sm"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="h-11 w-full shrink-0 rounded-xl border-border/50 bg-muted/30 sm:w-[180px]">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent className="rounded-xl">
-              <SelectItem value="All">All Status</SelectItem>
-              <SelectItem value="Active">Active</SelectItem>
-              <SelectItem value="Completed">Completed</SelectItem>
-              <SelectItem value="Inactive">Inactive</SelectItem>
-            </SelectContent>
-          </Select>
+          
+          {/* Filter Tabs */}
+          <div className="rounded-2xl bg-white border border-slate-100 shadow-sm overflow-hidden w-full">
+            <div className="grid grid-cols-2 md:grid-cols-4 w-full">
+              {[
+                { label: "All", count: totalInterns },
+                { label: "Active", count: activeInterns },
+                { label: "Completed", count: completedInterns },
+                { label: "Inactive", count: inactiveInterns }
+              ].map(tab => {
+                const isActive = filterStatus === tab.label;
+                return (
+                  <button
+                    key={tab.label}
+                    onClick={() => setFilterStatus(tab.label)}
+                    className={cn(
+                      "flex items-center justify-center gap-2.5 py-4 transition-all duration-300 outline-none group border-r last:border-r-0 border-slate-50 relative",
+                      isActive 
+                        ? "bg-primary/[0.03] text-primary" 
+                        : "text-slate-400 hover:text-slate-600 hover:bg-slate-50/50"
+                    )}
+                  >
+                    {isActive && (
+                      <div className="absolute bottom-0 left-0 w-full h-1 bg-primary animate-in fade-in slide-in-from-bottom-1 duration-300" />
+                    )}
+                    <span className="text-xs font-black uppercase tracking-widest whitespace-nowrap">
+                      {tab.label}
+                    </span>
+                    <div className={cn(
+                      "flex items-center justify-center min-w-[20px] h-5 rounded-full text-[9px] font-black px-1.5 transition-colors",
+                      isActive 
+                        ? "bg-primary text-white shadow-sm" 
+                        : "bg-slate-100 text-slate-400 group-hover:bg-slate-200"
+                    )}>
+                      {tab.count}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
 
         {/* SECTION C: INTERNS TABLE */}

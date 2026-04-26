@@ -64,7 +64,7 @@ const AdminMeetDetails = () => {
       case "Upcoming":
         return <Badge className="bg-amber-100 text-amber-700 font-black text-[10px] uppercase border-none rounded-lg px-3 py-1">Upcoming</Badge>;
       case "Live":
-        return <Badge className="bg-red-100 text-red-600 font-black text-[10px] uppercase border-none animate-pulse rounded-lg px-3 py-1">Live Now</Badge>;
+        return <Badge className="bg-red-100 text-red-600 font-black text-[10px] uppercase border-none animate-pulse rounded-lg px-3 py-1">Active</Badge>;
       case "Completed":
         return <Badge className="bg-emerald-100 text-emerald-700 font-black text-[10px] uppercase border-none rounded-lg px-3 py-1">Completed</Badge>;
       default:

@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { StandardModal } from "@/components/modals/StandardModal";
 import PageSearch from "@/components/shared/PageSearch";
+import { cn } from "@/lib/utils";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -683,9 +684,7 @@ const WeeklyReport = () => {
         });
     }, [reports, activeFilter, searchQuery]);
 
-    const handleCardClick = (status: ReportStatus) => {
-        setActiveFilter(prev => (prev === status ? null : status));
-    };
+
 
     const handleNewSubmission = (newReport: Partial<WeeklyReport>) => {
         if (newReport.id) {
@@ -753,45 +752,50 @@ const WeeklyReport = () => {
                         onSearch={setSearchQuery}
                     />
 
-                    {/* ── Summary Strip ── */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        {(["Reviewed", "Pending", "Rejected"] as ReportStatus[]).map(s => {
-                            const count = reports.filter(r => r.status === s).length;
-                            const Icon = statusIcons[s];
-                            const isActive = activeFilter === s;
-                            return (
-                                <Card
-                                    key={s}
-                                    onClick={() => handleCardClick(s)}
-                                    className={`border-border/50 shadow-sm rounded-2xl overflow-hidden cursor-pointer select-none transition-all duration-200 ${
-                                        isActive
-                                            ? "ring-2 ring-primary border-primary/60 shadow-md scale-[1.02]"
-                                            : "hover:shadow-md hover:scale-[1.01] hover:border-border"
-                                    }`}
-                                >
-                                    <CardContent className="p-5 flex items-center gap-4">
-                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 transition-colors ${
-                                            isActive
-                                                ? statusStyles[s].split(" ").slice(0, 1).join(" ") + " opacity-100"
-                                                : statusStyles[s].split(" ").slice(0, 1).join(" ")
-                                        }`}>
-                                            <Icon className={`w-6 h-6 ${isActive ? statusStyles[s].split(" ").slice(1, 2).join(" ") : statusStyles[s].split(" ").slice(1, 2).join(" ")}`} />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className={`text-2xl font-black tracking-tight leading-none transition-colors ${isActive ? "text-primary" : ""}`}>{count}</p>
-                                            <p className={`text-xs font-semibold mt-1 uppercase tracking-wider transition-colors ${isActive ? "text-primary/80" : "text-muted-foreground"}`}>{s}</p>
-                                        </div>
-                                        {isActive && (
-                                            <div className="flex-shrink-0">
-                                                <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-1 rounded-full border border-primary/20">
-                                                    Active
-                                                </span>
-                                            </div>
+                    
+                    {/* Filter Tabs */}
+                    <div className="rounded-2xl bg-white border border-slate-100 shadow-sm overflow-hidden w-full">
+                        <div className="grid grid-cols-2 md:grid-cols-4 w-full">
+                            {[
+                                { label: "All", status: null },
+                                { label: "Received", status: "Reviewed" },
+                                { label: "Pending", status: "Pending" },
+                                { label: "Rejected", status: "Rejected" }
+                            ].map(tab => {
+                                const isActive = activeFilter === tab.status;
+                                const count = tab.status 
+                                    ? reports.filter(r => r.status === tab.status).length 
+                                    : reports.length;
+                                    
+                                return (
+                                    <button
+                                        key={tab.label}
+                                        onClick={() => setActiveFilter(tab.status as ReportStatus | null)}
+                                        className={cn(
+                                            "flex items-center justify-center gap-2.5 py-4 transition-all duration-300 outline-none group border-r last:border-r-0 border-slate-50 relative",
+                                            isActive 
+                                                ? "bg-primary/[0.03] text-primary" 
+                                                : "text-slate-400 hover:text-slate-600 hover:bg-slate-50/50"
                                         )}
-                                    </CardContent>
-                                </Card>
-                            );
-                        })}
+                                    >
+                                        {isActive && (
+                                            <div className="absolute bottom-0 left-0 w-full h-1 bg-primary animate-in fade-in slide-in-from-bottom-1 duration-300" />
+                                        )}
+                                        <span className="text-xs font-black uppercase tracking-widest whitespace-nowrap">
+                                            {tab.label}
+                                        </span>
+                                        <div className={cn(
+                                            "flex items-center justify-center min-w-[20px] h-5 rounded-full text-[9px] font-black px-1.5 transition-colors",
+                                            isActive 
+                                                ? "bg-primary text-white shadow-sm" 
+                                                : "bg-slate-100 text-slate-400 group-hover:bg-slate-200"
+                                        )}>
+                                            {count}
+                                        </div>
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
 
                     {/* ── Reports Table ── */}

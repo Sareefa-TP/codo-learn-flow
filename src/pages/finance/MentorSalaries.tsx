@@ -1,14 +1,14 @@
-import DashboardLayout from "@/components/DashboardLayout";
+import FinanceLayout from "@/components/finance/FinanceLayout";
 import PageTemplate from "@/components/PageTemplate";
 
 const FinanceMentorSalaries = () => {
   return (
-    <DashboardLayout>
+    <FinanceLayout>
       <PageTemplate 
         title="Mentor Salaries" 
         description="Process and track mentor salary payments"
       />
-    </DashboardLayout>
+    </FinanceLayout>
   );
 };
 

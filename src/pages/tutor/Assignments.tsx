@@ -30,6 +30,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { format, parse } from "date-fns";
 import {
   ClipboardList,
   Calendar as CalendarIcon,
@@ -44,7 +51,9 @@ import {
   Users,
   GraduationCap,
   Clock,
-  PlayCircle
+  PlayCircle,
+  Plus,
+  Upload
 } from "lucide-react";
 import PageSearch from "@/components/shared/PageSearch";
 import { useToast } from "@/hooks/use-toast";
@@ -80,6 +89,7 @@ interface Assignment {
   dueDate: string;
   status: "Active" | "Closed";
   totalSubmissions: number;
+  attachments?: { name: string; size: string; url: string }[];
 }
 
 interface Submission {
@@ -132,10 +142,53 @@ const modules: Module[] = [
 ];
 
 const initialAssignments: Assignment[] = [
-  { id: "ASG-001", title: "HTML Portfolio Project", moduleId: "MOD-001", courseId: "C-001", dueDate: "10 Mar 2026", status: "Active", totalSubmissions: 45 },
-  { id: "ASG-002", title: "CSS Layout Challenge", moduleId: "MOD-002", courseId: "C-001", dueDate: "20 Mar 2026", status: "Active", totalSubmissions: 38 },
-  { id: "ASG-003", title: "JavaScript Todo App", moduleId: "MOD-003", courseId: "C-001", dueDate: "25 Mar 2026", status: "Active", totalSubmissions: 12 },
-  { id: "ASG-004", title: "Python Data Parser", moduleId: "MOD-004", courseId: "C-002", dueDate: "15 Mar 2026", status: "Closed", totalSubmissions: 80 },
+  { 
+    id: "ASG-001", 
+    title: "HTML Portfolio Project", 
+    moduleId: "MOD-001", 
+    courseId: "C-001", 
+    dueDate: "10 Mar 2026", 
+    status: "Active", 
+    totalSubmissions: 45,
+    attachments: [
+      { name: "project_brief.pdf", size: "1.2 MB", url: "#" },
+      { name: "assets_starter.zip", size: "5.4 MB", url: "#" }
+    ]
+  },
+  { 
+    id: "ASG-002", 
+    title: "CSS Layout Challenge", 
+    moduleId: "MOD-002", 
+    courseId: "C-001", 
+    dueDate: "20 Mar 2026", 
+    status: "Active", 
+    totalSubmissions: 38,
+    attachments: [
+      { name: "layout_specs.pdf", size: "850 KB", url: "#" }
+    ]
+  },
+  { 
+    id: "ASG-003", 
+    title: "JavaScript Todo App", 
+    moduleId: "MOD-003", 
+    courseId: "C-001", 
+    dueDate: "25 Mar 2026", 
+    status: "Active", 
+    totalSubmissions: 12,
+    attachments: []
+  },
+  { 
+    id: "ASG-004", 
+    title: "Python Data Parser", 
+    moduleId: "MOD-004", 
+    courseId: "C-002", 
+    dueDate: "15 Mar 2026", 
+    status: "Closed", 
+    totalSubmissions: 80,
+    attachments: [
+      { name: "sample_data.csv", size: "120 KB", url: "#" }
+    ]
+  },
 ];
 
 const initialSubmissions: Submission[] = [
@@ -160,6 +213,20 @@ const TutorAssignments = () => {
     feedback: "",
     result: "" as Submission["result"]
   });
+
+  // Edit Assignment Modal State
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
+  const [editAsgData, setEditAsgData] = useState({
+    title: "",
+    dueDate: "",
+    status: "Active" as Assignment["status"],
+    attachments: [] as { name: string; size: string; url: string }[]
+  });
+
+  const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = useState<HTMLInputElement | null>(null); // Actually I'll use useRef for consistency if I find one, else I'll just use a local ref.
+
 
   // Derived list of all assignments with course data
   const allAssignments = useMemo(() => {
@@ -210,6 +277,95 @@ const TutorAssignments = () => {
     toast({ title: "Grade Saved", description: `Evaluation sent to ${gradingSubmission.studentName}.` });
   };
 
+  // Assignment Edit Handlers
+  const openEditModal = (asg: Assignment) => {
+    setEditingAssignment(asg);
+    setEditAsgData({
+      title: asg.title,
+      dueDate: asg.dueDate,
+      status: asg.status,
+      attachments: asg.attachments || []
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveAssignment = () => {
+    if (!editingAssignment) return;
+    
+    setAssignments(assignments.map(asg => 
+      asg.id === editingAssignment.id 
+        ? { ...asg, title: editAsgData.title, dueDate: editAsgData.dueDate, status: editAsgData.status, attachments: editAsgData.attachments }
+        : asg
+    ));
+    
+    setIsEditModalOpen(false);
+    toast({ title: "Assignment Updated", description: "The assignment details and attachments have been successfully updated." });
+  };
+
+  const removeAttachment = (index: number) => {
+    setEditAsgData(prev => ({
+      ...prev,
+      attachments: prev.attachments.filter((_, i) => i !== index)
+    }));
+  };
+
+  const addAttachment = () => {
+    // Simulating a file add
+    const newFile = { name: "new_resource.pdf", size: "1.5 MB", url: "#" };
+    setEditAsgData(prev => ({
+      ...prev,
+      attachments: [...prev.attachments, newFile]
+    }));
+    toast({ title: "File Added", description: "Sample file has been attached." });
+  };
+
+  // Drag and Drop Handlers
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const files = Array.from(e.dataTransfer.files);
+      const newAttachments = files.map(file => ({
+        name: file.name,
+        size: (file.size / (1024 * 1024)).toFixed(1) + " MB",
+        url: "#"
+      }));
+      setEditAsgData(prev => ({
+        ...prev,
+        attachments: [...prev.attachments, ...newAttachments]
+      }));
+      toast({ title: "Files Uploaded", description: `${files.length} file(s) added successfully.` });
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const files = Array.from(e.target.files);
+      const newAttachments = files.map(file => ({
+        name: file.name,
+        size: (file.size / (1024 * 1024)).toFixed(1) + " MB",
+        url: "#"
+      }));
+      setEditAsgData(prev => ({
+        ...prev,
+        attachments: [...prev.attachments, ...newAttachments]
+      }));
+      toast({ title: "Files Selected", description: `${files.length} file(s) added successfully.` });
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="animate-fade-in space-y-6 lg:space-y-8 max-w-6xl mx-auto pb-10">
@@ -232,8 +388,7 @@ const TutorAssignments = () => {
             <PageSearch
               placeholder="Search assignments or courses..."
               onSearch={setCourseSearch}
-              className="max-w-md mx-0"
-              animate={false}
+              className="mb-10 max-w-none"
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -311,7 +466,7 @@ const TutorAssignments = () => {
                         <Button
                           variant="outline"
                           className="w-full justify-center hover:bg-primary/10 hover:text-primary gap-2 font-bold border-border/60"
-                          onClick={() => toast({ title: "Edit Mode", description: "This will open the assignment editor." })}
+                          onClick={() => openEditModal(asg)}
                         >
                           <ClipboardList className="w-4 h-4" />
                           Edit Assignment
@@ -523,6 +678,167 @@ const TutorAssignments = () => {
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsGradeModalOpen(false)} className="font-bold">Cancel</Button>
             <Button onClick={handleSaveGrade} className="font-bold min-w-[120px]">Submit Evaluation</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Assignment Dialog */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="sm:max-w-[450px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl font-bold">
+              <ClipboardList className="w-6 h-6 text-primary" />
+              Edit Assignment
+            </DialogTitle>
+            <DialogDescription className="font-medium">
+              Update the core details for this assessment.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-6 py-4">
+            <div className="grid gap-2">
+              <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Assignment Title</Label>
+              <Input
+                placeholder="e.g. HTML Portfolio Project"
+                value={editAsgData.title}
+                onChange={(e) => setEditAsgData(prev => ({ ...prev, title: e.target.value }))}
+                className="h-11 rounded-xl"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Due Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "h-11 rounded-xl justify-start text-left font-normal pl-10 relative",
+                        !editAsgData.dueDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      {editAsgData.dueDate ? (
+                        <span className="text-sm font-semibold">{editAsgData.dueDate}</span>
+                      ) : (
+                        <span className="text-sm">Pick a date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 rounded-2xl shadow-2xl border-border/50" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={editAsgData.dueDate ? parse(editAsgData.dueDate, "dd MMM yyyy", new Date()) : undefined}
+                      onSelect={(date) => {
+                        if (date) {
+                          setEditAsgData(prev => ({ ...prev, dueDate: format(date, "dd MMM yyyy") }));
+                        }
+                      }}
+                      initialFocus
+                      className="rounded-2xl"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="grid gap-2">
+                <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Status</Label>
+                <Select 
+                  value={editAsgData.status} 
+                  onValueChange={(v) => setEditAsgData(prev => ({ ...prev, status: v as any }))}
+                >
+                  <SelectTrigger className="h-11 rounded-xl">
+                    <SelectValue placeholder="Select Status" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl">
+                    <SelectItem value="Active" className="rounded-lg">Active</SelectItem>
+                    <SelectItem value="Closed" className="rounded-lg">Closed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Attachments Section */}
+            <div className="space-y-3">
+              <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Attached Resources</Label>
+              
+              <div className="space-y-2 max-h-[120px] overflow-y-auto pr-1 custom-scrollbar">
+                {editAsgData.attachments.length > 0 ? (
+                  editAsgData.attachments.map((file, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-2 rounded-xl border border-border/40 bg-muted/20 group hover:border-primary/20 transition-colors">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shrink-0 shadow-sm">
+                          <FileText className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-[11px] font-bold text-foreground truncate">{file.name}</p>
+                          <p className="text-[9px] font-medium text-muted-foreground">{file.size}</p>
+                        </div>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-7 w-7 text-muted-foreground hover:text-rose-500 hover:bg-rose-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => removeAttachment(idx)}
+                      >
+                        <XCircle className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-4 border border-dashed border-border/60 rounded-2xl bg-muted/5">
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">No files attached</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Drag and Drop Zone */}
+              <div
+                className={cn(
+                  "relative flex flex-col items-center justify-center py-5 border-2 border-dashed rounded-2xl transition-all cursor-pointer group",
+                  dragActive 
+                    ? "border-primary bg-primary/5 shadow-inner" 
+                    : "border-border/60 bg-muted/5 hover:border-primary/40 hover:bg-primary/[0.02]"
+                )}
+                onDragEnter={handleDrag}
+                onDragOver={handleDrag}
+                onDragLeave={handleDrag}
+                onDrop={handleDrop}
+                onClick={() => document.getElementById('file-upload-input')?.click()}
+              >
+                <input
+                  id="file-upload-input"
+                  type="file"
+                  multiple
+                  className="hidden"
+                  onChange={handleFileSelect}
+                />
+                <div className="flex flex-col items-center gap-2 pointer-events-none">
+                  <div className={cn(
+                    "w-10 h-10 rounded-full flex items-center justify-center transition-colors",
+                    dragActive ? "bg-primary text-white" : "bg-primary/10 text-primary group-hover:bg-primary/20"
+                  )}>
+                    <Upload className="w-5 h-5" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-[11px] font-bold text-foreground">Click or drag files to upload</p>
+                    <p className="text-[9px] font-medium text-muted-foreground mt-0.5">Maximum size 20MB per file</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="ghost" onClick={() => setIsEditModalOpen(false)} className="font-bold rounded-xl h-11 px-6">
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSaveAssignment} 
+              className="font-bold rounded-xl h-11 px-8 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20"
+            >
+              Save Changes
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

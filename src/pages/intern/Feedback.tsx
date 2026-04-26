@@ -136,26 +136,42 @@ const InternFeedback = () => {
             </Button>
           </div>
 
-          {/* Tab-based Navigation (Custom Grid) */}
-          <div className="bg-slate-50/50 p-1.5 rounded-[1.5rem] border border-border/40 mb-10 w-full max-w-2xl mx-auto">
-            <div className="grid grid-cols-2 gap-1 sm:gap-2">
+          {/* Tab-based Navigation (Standardized 12-column Grid) */}
+          <div className="rounded-2xl bg-white border border-slate-100 shadow-sm overflow-hidden w-full mb-10">
+            <div className="grid grid-cols-2 w-full">
               {[
-                { id: "to-coordinator", label: "To Coordinator" },
-                { id: "from-coordinator", label: "From Coordinator" },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={cn(
-                    "px-4 py-3 rounded-2xl text-[10px] md:text-xs font-bold uppercase tracking-widest transition-all duration-300 text-center flex items-center justify-center h-full",
-                    activeTab === tab.id 
-                      ? "bg-primary text-white shadow-lg shadow-primary/20 scale-[1.02]" 
-                      : "text-muted-foreground hover:bg-white hover:text-foreground"
-                  )}
-                >
-                  {tab.label}
-                </button>
-              ))}
+                { id: "to-coordinator", label: "To Coordinator", count: entries.filter(e => e.type === "to_coordinator").length },
+                { id: "from-coordinator", label: "From Coordinator", count: entries.filter(e => e.type === "from_coordinator").length },
+              ].map((tab) => {
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={cn(
+                      "flex items-center justify-center gap-2.5 py-4 transition-all duration-300 outline-none group border-r last:border-r-0 border-slate-50 relative",
+                      isActive 
+                        ? "bg-primary/[0.03] text-primary" 
+                        : "text-slate-400 hover:text-slate-600 hover:bg-slate-50/50"
+                    )}
+                  >
+                    {isActive && (
+                      <div className="absolute bottom-0 left-0 w-full h-1 bg-primary animate-in fade-in slide-in-from-bottom-1 duration-300" />
+                    )}
+                    <span className="text-xs font-black uppercase tracking-widest whitespace-nowrap">
+                      {tab.label}
+                    </span>
+                    <div className={cn(
+                      "flex items-center justify-center min-w-[20px] h-5 rounded-full text-[9px] font-black px-1.5 transition-colors",
+                      isActive 
+                        ? "bg-primary text-white shadow-sm" 
+                        : "bg-slate-100 text-slate-400 group-hover:bg-slate-200"
+                    )}>
+                      {tab.count}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
 

@@ -141,22 +141,16 @@ import AssignmentDetails from "./pages/admin/assignment/AssignmentDetails";
 
 // Finance Pages
 import FinanceDashboard from "./pages/finance/Dashboard";
-import FinanceStudentFees from "./pages/finance/StudentFees";
-import FinanceWallets from "./pages/finance/Wallets";
-import FinanceStipends from "./pages/finance/Stipends";
-import FinanceTutorSalaries from "./pages/finance/TutorSalaries";
-import FinanceMentorSalaries from "./pages/finance/MentorSalaries";
-import FinanceReports from "./pages/finance/FinanceReports";
-import FinanceNotifications from "./pages/finance/Notifications";
-import FinanceProfile from "./pages/finance/Profile";
-import WalletTopupRequests from "./pages/finance/WalletTopupRequests";
-import StudentWallets from "./pages/finance/StudentWallets";
-import WalletTransactions from "./pages/finance/WalletTransactions";
-import CoursePayments from "./pages/finance/CoursePayments";
-import TutorEarnings from "./pages/finance/TutorEarnings";
-import MentorEarnings from "./pages/finance/MentorEarnings";
-import InternEarnings from "./pages/finance/InternEarnings";
+import FinanceRevenue from "./pages/finance/Revenue";
+import FinanceReconciliation from "./pages/finance/Reconciliation";
+import FinanceTransactions from "./pages/finance/Transactions";
+import FinanceRefunds from "./pages/finance/Refunds";
 import Payouts from "./pages/finance/Payouts";
+import FinanceInvoices from "./pages/finance/Invoices";
+import FinanceTaxCompliance from "./pages/finance/TaxCompliance";
+import FinanceReportsAnalytics from "./pages/finance/ReportsAnalytics";
+import FinanceSettings from "./pages/finance/Settings";
+import FinanceProfile from "./pages/finance/Profile";
 
 
 // Super Admin Pages
@@ -383,25 +377,16 @@ const App = () => (
 
           {/* Finance Routes */}
           <Route path="/finance" element={<FinanceDashboard />} />
-          <Route path="/finance/student-fees" element={<FinanceStudentFees />} />
-          <Route path="/finance/wallets" element={<FinanceWallets />} />
-          <Route path="/finance/stipends" element={<FinanceStipends />} />
-          <Route path="/finance/tutor-salaries" element={<FinanceTutorSalaries />} />
-          <Route path="/finance/mentor-salaries" element={<FinanceMentorSalaries />} />
-          <Route path="/finance/reports" element={<FinanceReports />} />
-          <Route path="/finance/notifications" element={<FinanceNotifications />} />
-          <Route path="/finance/profile" element={<FinanceProfile />} />
-          <Route path="/finance/wallets/topup" element={<WalletTopupRequests />} />
-          <Route path="/finance/wallets/students" element={<StudentWallets />} />
-          <Route path="/finance/wallets/transactions" element={<WalletTransactions />} />
-          <Route path="/finance/revenue/course-payments" element={<CoursePayments />} />
-          <Route path="/finance/earnings/tutors" element={<TutorEarnings />} />
-          <Route path="/finance/earnings/tutor" element={<TutorEarnings />} />
-          <Route path="/finance/earnings/mentors" element={<MentorEarnings />} />
-          <Route path="/finance/earnings/mentor" element={<MentorEarnings />} />
-          <Route path="/finance/earnings/interns" element={<InternEarnings />} />
-          <Route path="/finance/earnings/intern" element={<InternEarnings />} />
+          <Route path="/finance/revenue" element={<FinanceRevenue />} />
+          <Route path="/finance/reconciliation" element={<FinanceReconciliation />} />
+          <Route path="/finance/transactions" element={<FinanceTransactions />} />
+          <Route path="/finance/refunds" element={<FinanceRefunds />} />
           <Route path="/finance/payouts" element={<Payouts />} />
+          <Route path="/finance/invoices" element={<FinanceInvoices />} />
+          <Route path="/finance/tax-compliance" element={<FinanceTaxCompliance />} />
+          <Route path="/finance/reports" element={<FinanceReportsAnalytics />} />
+          <Route path="/finance/settings" element={<FinanceSettings />} />
+          <Route path="/finance/profile" element={<FinanceProfile />} />
 
 
           {/* Super Admin Routes */}

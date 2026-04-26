@@ -29,8 +29,16 @@ import {
     Eye,
     Pencil,
     PlusCircle,
-    Save
+    Save,
+    Calendar as CalendarIcon
 } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { format, parse } from "date-fns";
 import { 
     courses, 
     getCourseStudents, 
@@ -906,6 +914,13 @@ const FileUploadModal = ({ isOpen, onClose, sectionTitle, onUpload }: any) => {
     const [isUploading, setIsUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    // Metadata for Assignments
+    const [asgTitle, setAsgTitle] = useState("");
+    const [dueDate, setDueDate] = useState<string>(format(new Date(), "dd MMM yyyy"));
+    const [status, setStatus] = useState("Active");
+
+    const isAssignment = sectionTitle === "Practical Assignment";
+
     const handleDrag = (e: React.DragEvent) => {
         e.preventDefault();
         e.stopPropagation();
@@ -939,30 +954,49 @@ const FileUploadModal = ({ isOpen, onClose, sectionTitle, onUpload }: any) => {
     };
 
     const handleUploadClick = async () => {
-        if (selectedFiles.length === 0) return;
+        if (isAssignment && !asgTitle) {
+            toast.error("Please provide an assignment title");
+            return;
+        }
+        if (selectedFiles.length === 0) {
+            toast.error("Please attach at least one file");
+            return;
+        }
+
         setIsUploading(true);
         await new Promise(r => setTimeout(r, 1500)); // Simulate upload
         
         const uploadedFiles = selectedFiles.map((f, i) => ({
             id: Date.now() + i,
-            name: f.name,
+            name: i === 0 && isAssignment ? `${asgTitle} (${f.name})` : f.name,
             size: formatSize(f.size),
-            type: f.name.split('.').pop()?.toLowerCase() || 'file'
+            type: f.name.split('.').pop()?.toLowerCase() || 'file',
+            asgTitle: isAssignment ? asgTitle : undefined,
+            dueDate: isAssignment ? dueDate : undefined,
+            status: isAssignment ? status : undefined
         }));
 
         onUpload(uploadedFiles);
         setIsUploading(false);
-        toast.success(`${selectedFiles.length} files uploaded to ${sectionTitle}`);
+        toast.success(isAssignment ? "Assignment created successfully!" : `${selectedFiles.length} files uploaded to ${sectionTitle}`);
     };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200" onClick={onClose}>
-            <div className="bg-background border border-border/50 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col scale-in-center overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="bg-background border border-border/50 rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col scale-in-center overflow-hidden" onClick={e => e.stopPropagation()}>
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-border/50 bg-muted/10">
-                    <div>
-                        <h2 className="text-xl font-bold tracking-tight">Upload {sectionTitle}</h2>
-                        <p className="text-sm text-muted-foreground mt-1">Multi-file drag and drop upload system</p>
+                    <div className="flex items-center gap-3">
+                        <div className={cn(
+                            "w-10 h-10 rounded-xl flex items-center justify-center text-white",
+                            isAssignment ? "bg-emerald-500" : "bg-primary"
+                        )}>
+                            {isAssignment ? <ClipboardList className="w-5 h-5" /> : <UploadCloud className="w-5 h-5" />}
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-black tracking-tight">{isAssignment ? "Create Practical Assignment" : `Upload ${sectionTitle}`}</h2>
+                            <p className="text-xs text-muted-foreground font-medium">Update the core details for this assessment.</p>
+                        </div>
                     </div>
                     <button onClick={onClose} className="p-2 rounded-xl hover:bg-muted transition-colors text-muted-foreground">
                         <X className="w-5 h-5" />
@@ -970,43 +1004,80 @@ const FileUploadModal = ({ isOpen, onClose, sectionTitle, onUpload }: any) => {
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto p-8 space-y-6">
-                    <div 
-                        className={cn(
-                            "relative border-2 border-dashed rounded-2xl p-10 flex flex-col items-center justify-center transition-all group",
-                            dragActive ? "border-primary bg-primary/5 scale-[0.99]" : "border-border/60 hover:border-primary/40 hover:bg-primary/5"
-                        )}
-                        onDragEnter={handleDrag}
-                        onDragLeave={handleDrag}
-                        onDragOver={handleDrag}
-                        onDrop={handleDrop}
-                    >
-                        <input 
-                            ref={fileInputRef}
-                            type="file" 
-                            multiple 
-                            className="absolute inset-0 opacity-0 cursor-pointer" 
-                            onChange={handleFileChange}
-                        />
-                        <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 transition-transform group-hover:scale-110">
-                            <UploadCloud className="w-8 h-8 text-primary" />
-                        </div>
-                        <p className="text-sm font-bold text-foreground">Drag and drop files here</p>
-                        <p className="text-xs text-muted-foreground mt-1">or <span className="text-primary font-bold">browse files</span> from your computer</p>
-                        <p className="text-[10px] text-muted-foreground/60 mt-4 uppercase tracking-widest font-bold">Supported: PDF, JPG, PNG, MP4, DOCX</p>
-                    </div>
+                <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
+                    {isAssignment && (
+                        <div className="space-y-4 animate-in slide-in-from-top-4 duration-500">
+                            <div className="grid gap-2">
+                                <Label className="font-bold text-[10px] uppercase tracking-widest text-muted-foreground">Assignment Title</Label>
+                                <Input 
+                                    placeholder="e.g. HTML Portfolio Project" 
+                                    value={asgTitle}
+                                    onChange={(e) => setAsgTitle(e.target.value)}
+                                    className="h-11 rounded-xl border-border/60 focus:bg-white"
+                                />
+                            </div>
 
-                    {selectedFiles.length > 0 && (
-                        <div className="space-y-3">
-                            <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center justify-between">
-                                Selected Files ({selectedFiles.length})
-                                <button onClick={() => setSelectedFiles([])} className="text-red-500 hover:underline">Clear All</button>
-                            </h3>
-                            <div className="space-y-2 max-h-[250px] pr-2 overflow-y-auto custom-scrollbar">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="grid gap-2">
+                                    <Label className="font-bold text-[10px] uppercase tracking-widest text-muted-foreground">Due Date</Label>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                className={cn(
+                                                    "h-11 rounded-xl justify-start text-left font-normal pl-10 relative border-border/60",
+                                                    !dueDate && "text-muted-foreground"
+                                                )}
+                                            >
+                                                <CalendarIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                                {dueDate ? (
+                                                    <span className="text-sm font-semibold">{dueDate}</span>
+                                                ) : (
+                                                    <span className="text-sm">Pick a date</span>
+                                                )}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0 rounded-2xl shadow-2xl border-border/50" align="start">
+                                            <Calendar
+                                                mode="single"
+                                                selected={dueDate ? parse(dueDate, "dd MMM yyyy", new Date()) : undefined}
+                                                onSelect={(date) => {
+                                                    if (date) setDueDate(format(date, "dd MMM yyyy"));
+                                                }}
+                                                initialFocus
+                                                className="rounded-2xl"
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label className="font-bold text-[10px] uppercase tracking-widest text-muted-foreground">Status</Label>
+                                    <Select value={status} onValueChange={setStatus}>
+                                        <SelectTrigger className="h-11 rounded-xl border-border/60 bg-white">
+                                            <SelectValue placeholder="Select status" />
+                                        </SelectTrigger>
+                                        <SelectContent className="rounded-xl">
+                                            <SelectItem value="Active">Active</SelectItem>
+                                            <SelectItem value="Draft">Draft</SelectItem>
+                                            <SelectItem value="Closed">Closed</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="space-y-2">
+                        <Label className="font-bold text-[10px] uppercase tracking-widest text-muted-foreground">
+                            {isAssignment ? "Attached Resources" : "Select Files"}
+                        </Label>
+                        
+                        {selectedFiles.length > 0 && (
+                            <div className="space-y-2 mb-4 max-h-[160px] overflow-y-auto pr-2 custom-scrollbar">
                                 {selectedFiles.map((file, i) => (
-                                    <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border/40 group animate-in slide-in-from-right-4 duration-300">
+                                    <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-muted/20 border border-border/40 group animate-in slide-in-from-right-4 duration-300">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-lg bg-background border flex items-center justify-center text-primary">
+                                            <div className="w-8 h-8 rounded-lg bg-background border flex items-center justify-center text-primary shadow-sm">
                                                 <FileText className="w-4 h-4" />
                                             </div>
                                             <div className="min-w-0">
@@ -1020,27 +1091,53 @@ const FileUploadModal = ({ isOpen, onClose, sectionTitle, onUpload }: any) => {
                                     </div>
                                 ))}
                             </div>
+                        )}
+
+                        <div 
+                            className={cn(
+                                "relative border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center transition-all group",
+                                dragActive ? "border-primary bg-primary/5 scale-[0.99]" : "border-border/40 hover:border-primary/40 hover:bg-primary/5"
+                            )}
+                            onDragEnter={handleDrag}
+                            onDragLeave={handleDrag}
+                            onDragOver={handleDrag}
+                            onDrop={handleDrop}
+                        >
+                            <input 
+                                ref={fileInputRef}
+                                type="file" 
+                                multiple 
+                                className="absolute inset-0 opacity-0 cursor-pointer" 
+                                onChange={handleFileChange}
+                            />
+                            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-3 transition-transform group-hover:scale-110">
+                                <UploadCloud className="w-6 h-6 text-primary" />
+                            </div>
+                            <p className="text-xs font-bold text-foreground text-center">Click or drag files to upload</p>
+                            <p className="text-[10px] text-muted-foreground mt-1">Maximum size 20MB per file</p>
                         </div>
-                    )}
+                    </div>
                 </div>
 
                 {/* Footer */}
                 <div className="p-6 border-t border-border/50 bg-muted/5 flex items-center justify-end gap-3 flex-shrink-0">
-                    <Button variant="outline" className="rounded-xl px-6 font-bold" onClick={onClose}>Cancel</Button>
+                    <Button variant="ghost" className="rounded-xl px-6 font-bold text-muted-foreground" onClick={onClose}>Cancel</Button>
                     <Button 
-                        className="rounded-xl px-8 font-bold gap-2 min-w-[140px]" 
-                        disabled={selectedFiles.length === 0 || isUploading}
+                        className={cn(
+                            "rounded-xl px-8 font-bold gap-2 min-w-[160px] shadow-lg transition-all",
+                            isAssignment ? "bg-emerald-500 hover:bg-emerald-600 shadow-emerald-200" : "bg-primary hover:bg-primary/90 shadow-primary/20"
+                        )}
+                        disabled={isUploading}
                         onClick={handleUploadClick}
                     >
                         {isUploading ? (
                             <>
                                 <Loader2 className="w-4 h-4 animate-spin" />
-                                Uploading...
+                                Processing...
                             </>
                         ) : (
                             <>
-                                <Plus className="w-4 h-4" />
-                                Start Upload
+                                {isAssignment ? "Save Assignment" : "Start Upload"}
                             </>
                         )}
                     </Button>

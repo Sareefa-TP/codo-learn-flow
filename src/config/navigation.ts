@@ -33,6 +33,8 @@ import {
   Gamepad2,
   LifeBuoy,
   PencilLine,
+  ShieldCheck,
+  RotateCcw,
 } from "lucide-react";
 
 export type UserRole = "student" | "intern" | "tutor" | "mentor" | "admin" | "finance" | "superadmin" | "coordinator" | "advisor";
@@ -183,36 +185,15 @@ export const financeNavigation: RoleNavigation = {
   baseUrl: "/finance",
   mainNav: [
     { title: "Dashboard", url: "/finance", icon: LayoutDashboard },
-    {
-      title: "Wallet",
-      url: "/finance/wallets",
-      icon: Wallet,
-      children: [
-        { title: "Top-up Requests", url: "/finance/wallets/topup", icon: CreditCard },
-        { title: "Student Wallets", url: "/finance/wallets/students", icon: GraduationCap },
-        { title: "Wallet Transactions", url: "/finance/wallets/transactions", icon: BarChart3 },
-      ],
-    },
-    {
-      title: "Revenue",
-      url: "/finance/revenue",
-      icon: TrendingUp,
-      children: [
-        { title: "Course Payments", url: "/finance/revenue/course-payments", icon: DollarSign },
-      ],
-    },
-    {
-      title: "Earnings",
-      url: "/finance/earnings",
-      icon: PieChart,
-      children: [
-        { title: "Tutor Earnings", url: "/finance/earnings/tutor", icon: BookOpen },
-        { title: "Mentor Earnings", url: "/finance/earnings/mentor", icon: Users },
-        { title: "Intern Earnings", url: "/finance/earnings/intern", icon: Briefcase },
-      ],
-    },
-    { title: "Payouts", url: "/finance/payouts", icon: CreditCard },
-    { title: "Reports", url: "/finance/reports", icon: FileBarChart },
+    { title: "Revenue", url: "/finance/revenue", icon: BarChart3 },
+    { title: "Payments & Reconciliation", url: "/finance/reconciliation", icon: CreditCard },
+    { title: "Transactions", url: "/finance/transactions", icon: ListTodo },
+    { title: "Refunds", url: "/finance/refunds", icon: RotateCcw },
+    { title: "Payouts", url: "/finance/payouts", icon: Wallet },
+    { title: "Invoices & Billing", url: "/finance/invoices", icon: ScrollText },
+    { title: "Tax & Compliance", icon: ShieldCheck, url: "/finance/tax-compliance" },
+    { title: "Reports & Analytics", url: "/finance/reports", icon: PieChart },
+    { title: "Settings", url: "/finance/settings", icon: Settings },
   ],
   secondaryNav: [],
 };

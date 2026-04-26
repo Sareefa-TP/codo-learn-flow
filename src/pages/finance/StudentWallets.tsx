@@ -1,5 +1,11 @@
 import { Wallet, Users, CircleDollarSign, AlertCircle, X, ArrowUpRight, ArrowDownLeft } from "lucide-react";
 import PageSearch from "@/components/shared/PageSearch";
+import FinanceLayout from "@/components/finance/FinanceLayout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState, useMemo } from "react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -238,7 +244,7 @@ const StudentWallets = () => {
 
     return (
         <>
-            <DashboardLayout>
+            <FinanceLayout>
                 <div className="animate-fade-in space-y-6 max-w-7xl mx-auto pb-10">
 
                     {/* ── Header ── */}
@@ -409,7 +415,7 @@ const StudentWallets = () => {
                     </Card>
 
                 </div>
-            </DashboardLayout>
+            </FinanceLayout>
 
             {/* ── Transaction Modal ── */}
             {isModalOpen && <WalletTransactionModal student={selectedStudent} onClose={closeModal} />}

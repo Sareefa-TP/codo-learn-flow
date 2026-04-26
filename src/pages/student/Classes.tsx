@@ -55,7 +55,7 @@ const liveSessionsData: Record<number, any[]> = {
     {
       id: 101,
       title: "React State Management & Hooks",
-      status: "Live Now",
+      status: "Active",
       date: "13 March 2026",
       time: "2:00 PM – 3:30 PM",
       tutor: "Arjun Mehta",
@@ -118,14 +118,14 @@ const StudentClasses = () => {
     s.status.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const sessionsLive = filteredSessions.filter(s => s.status === "Live Now");
+  const sessionsLive = filteredSessions.filter(s => s.status === "Active");
   const sessionsUpcoming = filteredSessions.filter(s => s.status === "Upcoming");
   const sessionsPast = filteredSessions.filter(s => s.status === "Completed");
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "Live Now":
-        return <Badge className="bg-destructive hover:bg-destructive animate-pulse text-white border-0">Live Now</Badge>;
+      case "Active":
+        return <Badge className="bg-destructive hover:bg-destructive animate-pulse text-white border-0">Active</Badge>;
       case "Upcoming":
         return <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20">Upcoming</Badge>;
       case "Completed":
@@ -269,7 +269,7 @@ const StudentClasses = () => {
                     <section className="space-y-4">
                       <div className="flex items-center gap-3">
                         <div className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
-                        <h2 className="text-lg font-bold text-foreground uppercase tracking-wider">Live Now</h2>
+                        <h2 className="text-lg font-bold text-foreground uppercase tracking-wider">Active</h2>
                       </div>
                       <div className="grid gap-4">
                         {sessionsLive.map((session) => (

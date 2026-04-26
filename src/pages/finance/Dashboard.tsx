@@ -1,578 +1,354 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import DashboardLayout from "@/components/DashboardLayout";
+import { useState, useMemo } from "react";
+import FinanceLayout from "@/components/finance/FinanceLayout";
+import { 
+  kpiData, 
+  revenueTrendData, 
+  revenueByCourseData, 
+  agingBuckets, 
+  actionItems, 
+  recentTransactions 
+} from "@/data/financeMock";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  TrendingUp,
-  TrendingDown,
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { 
+  ArrowUpRight, 
+  ArrowDownRight, 
+  ChevronRight, 
+  Download, 
+  Plus, 
+  DollarSign, 
+  FileText, 
+  TrendingUp, 
+  RotateCcw,
   Wallet,
-  AlertCircle,
-  CreditCard,
-  ArrowDownToLine,
-  CheckCircle2,
-  BarChart2,
-  IndianRupee,
-  Sparkles,
+  ShieldCheck,
+  ArrowRight
 } from "lucide-react";
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer, 
+  Cell,
+  Legend
+} from "recharts";
+import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-
-interface MonthData {
-  label: string;
-  revenue: number;
-  earnings: number;
-  totalProfit: number;
-  pendingTopups: number;
-  pendingPayoutAmount: number;
-  unpaidEarningsCount: number;
-  walletBalance: number;
-  walletTopups: number;
-  payoutCompleted: number;
-  topupRows: TopupRow[];
-  earningsRows: EarningsRow[];
-}
-
-interface TopupRow {
-  id: number;
-  student: string;
-  batch: string;
-  amount: string;
-  date: string;
-  status: "Pending" | "Approved" | "Rejected";
-}
-
-interface EarningsRow {
-  id: number;
-  recipient: string;
-  role: string;
-  amount: string;
-  month: string;
-  status: "Unpaid" | "Paid" | "Processing";
-}
-
-interface KpiCard {
-  label: string;
-  value: string;
-  sub: string;
-  trend?: string;
-  trendUp?: boolean;
-  icon: React.ElementType;
-  iconBg: string;
-  iconColor: string;
-  valueColor?: string;
-  href?: string;            // optional navigation target
-}
-
-// ─── Mock Data (per month) ────────────────────────────────────────────────────
-
-const monthlyData: Record<string, MonthData> = {
-  "2026-03": {
-    label: "March 2026",
-    revenue: 1_35_000,
-    earnings: 95_000,
-    totalProfit: 8_42_500,
-    pendingTopups: 8,
-    pendingPayoutAmount: 1_15_000,
-    unpaidEarningsCount: 12,
-    walletBalance: 2_48_500,
-    walletTopups: 33_500,
-    payoutCompleted: 75_000,
-    topupRows: [
-      { id: 1, student: "Aisha Khan", batch: "Batch Alpha", amount: "₹5,000", date: "01 Mar 2026", status: "Pending" },
-      { id: 2, student: "Rohan Verma", batch: "Batch Beta", amount: "₹10,000", date: "01 Mar 2026", status: "Approved" },
-      { id: 3, student: "Priya Sharma", batch: "Batch Alpha", amount: "₹7,500", date: "28 Feb 2026", status: "Pending" },
-      { id: 4, student: "Arjun Nair", batch: "Batch Gamma", amount: "₹3,000", date: "27 Feb 2026", status: "Rejected" },
-      { id: 5, student: "Farah Sheikh", batch: "Batch Gamma", amount: "₹8,000", date: "26 Feb 2026", status: "Approved" },
-    ],
-    earningsRows: [
-      { id: 1, recipient: "Meera Nair", role: "Tutor", amount: "₹35,000", month: "Mar 2026", status: "Unpaid" },
-      { id: 2, recipient: "Suresh Kumar", role: "Mentor", amount: "₹28,000", month: "Mar 2026", status: "Paid" },
-      { id: 3, recipient: "Divya Menon", role: "Intern", amount: "₹12,000", month: "Mar 2026", status: "Processing" },
-      { id: 4, recipient: "Kiran Reddy", role: "Tutor", amount: "₹40,000", month: "Mar 2026", status: "Unpaid" },
-      { id: 5, recipient: "Ananya Singh", role: "Mentor", amount: "₹30,000", month: "Mar 2026", status: "Paid" },
-    ],
-  },
-  "2026-02": {
-    label: "February 2026",
-    revenue: 1_20_000,
-    earnings: 88_000,
-    totalProfit: 8_02_500,
-    pendingTopups: 5,
-    pendingPayoutAmount: 90_000,
-    unpaidEarningsCount: 8,
-    walletBalance: 2_15_000,
-    walletTopups: 28_000,
-    payoutCompleted: 62_000,
-    topupRows: [
-      { id: 1, student: "Neha Gupta", batch: "Batch Beta", amount: "₹6,000", date: "12 Feb 2026", status: "Approved" },
-      { id: 2, student: "Karan Mehta", batch: "Batch Gamma", amount: "₹4,500", date: "10 Feb 2026", status: "Pending" },
-      { id: 3, student: "Siddharth Rao", batch: "Batch Gamma", amount: "₹9,000", date: "08 Feb 2026", status: "Approved" },
-      { id: 4, student: "Mohammed Salim", batch: "Batch Alpha", amount: "₹3,500", date: "05 Feb 2026", status: "Rejected" },
-      { id: 5, student: "Divya Menon", batch: "Batch Beta", amount: "₹7,000", date: "02 Feb 2026", status: "Pending" },
-    ],
-    earningsRows: [
-      { id: 1, recipient: "Ravi Shankar", role: "Tutor", amount: "₹32,000", month: "Feb 2026", status: "Paid" },
-      { id: 2, recipient: "Lakshmi Rao", role: "Mentor", amount: "₹25,000", month: "Feb 2026", status: "Unpaid" },
-      { id: 3, recipient: "Rahul Das", role: "Intern", amount: "₹10,000", month: "Feb 2026", status: "Processing" },
-      { id: 4, recipient: "Sunita Verma", role: "Tutor", amount: "₹38,000", month: "Feb 2026", status: "Paid" },
-      { id: 5, recipient: "Amit Kapoor", role: "Mentor", amount: "₹27,000", month: "Feb 2026", status: "Unpaid" },
-    ],
-  },
-  "2026-01": {
-    label: "January 2026",
-    revenue: 1_10_000,
-    earnings: 80_000,
-    totalProfit: 7_62_500,
-    pendingTopups: 3,
-    pendingPayoutAmount: 72_000,
-    unpaidEarningsCount: 6,
-    walletBalance: 1_90_000,
-    walletTopups: 22_000,
-    payoutCompleted: 58_000,
-    topupRows: [
-      { id: 1, student: "Aisha Khan", batch: "Batch Alpha", amount: "₹5,000", date: "20 Jan 2026", status: "Approved" },
-      { id: 2, student: "Rohan Verma", batch: "Batch Beta", amount: "₹8,000", date: "18 Jan 2026", status: "Approved" },
-      { id: 3, student: "Priya Sharma", batch: "Batch Alpha", amount: "₹4,000", date: "15 Jan 2026", status: "Pending" },
-      { id: 4, student: "Farah Sheikh", batch: "Batch Gamma", amount: "₹5,000", date: "10 Jan 2026", status: "Approved" },
-      { id: 5, student: "Karan Mehta", batch: "Batch Gamma", amount: "₹3,000", date: "07 Jan 2026", status: "Rejected" },
-    ],
-    earningsRows: [
-      { id: 1, recipient: "Meera Nair", role: "Tutor", amount: "₹30,000", month: "Jan 2026", status: "Paid" },
-      { id: 2, recipient: "Suresh Kumar", role: "Mentor", amount: "₹24,000", month: "Jan 2026", status: "Paid" },
-      { id: 3, recipient: "Kiran Reddy", role: "Tutor", amount: "₹36,000", month: "Jan 2026", status: "Paid" },
-      { id: 4, recipient: "Divya Menon", role: "Intern", amount: "₹10,000", month: "Jan 2026", status: "Paid" },
-      { id: 5, recipient: "Ananya Singh", role: "Mentor", amount: "₹26,000", month: "Jan 2026", status: "Processing" },
-    ],
-  },
-};
-
-const MONTHS = [
-  { key: "2026-03", label: "March 2026" },
-  { key: "2026-02", label: "February 2026" },
-  { key: "2026-01", label: "January 2026" },
-];
-
-const chartBars: Record<string, { label: string; revenue: number; earnings: number }[]> = {
-  "2026-03": [
-    { label: "Oct", revenue: 63, earnings: 44 },
-    { label: "Nov", revenue: 70, earnings: 52 },
-    { label: "Dec", revenue: 78, earnings: 58 },
-    { label: "Jan", revenue: 66, earnings: 48 },
-    { label: "Feb", revenue: 82, earnings: 60 },
-    { label: "Mar", revenue: 90, earnings: 66 },
-  ],
-  "2026-02": [
-    { label: "Sep", revenue: 55, earnings: 38 },
-    { label: "Oct", revenue: 63, earnings: 44 },
-    { label: "Nov", revenue: 70, earnings: 52 },
-    { label: "Dec", revenue: 78, earnings: 58 },
-    { label: "Jan", revenue: 66, earnings: 48 },
-    { label: "Feb", revenue: 82, earnings: 60 },
-  ],
-  "2026-01": [
-    { label: "Aug", revenue: 48, earnings: 35 },
-    { label: "Sep", revenue: 55, earnings: 38 },
-    { label: "Oct", revenue: 63, earnings: 44 },
-    { label: "Nov", revenue: 70, earnings: 52 },
-    { label: "Dec", revenue: 78, earnings: 58 },
-    { label: "Jan", revenue: 66, earnings: 48 },
-  ],
-};
-
-// ─── Badge maps ───────────────────────────────────────────────────────────────
-
-const topupBadge: Record<TopupRow["status"], string> = {
-  Pending: "bg-amber-500/10 text-amber-600 border-amber-500/20",
-  Approved: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-  Rejected: "bg-destructive/10 text-destructive border-destructive/20",
-};
-
-const earningsBadge: Record<EarningsRow["status"], string> = {
-  Unpaid: "bg-destructive/10 text-destructive border-destructive/20",
-  Processing: "bg-amber-500/10 text-amber-600 border-amber-500/20",
-  Paid: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-};
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-const fmt = (n: number) => `₹${n.toLocaleString("en-IN")}`;
-
-const SectionHeading = ({ title, sub }: { title: string; sub?: string }) => (
-  <div className="mb-4">
-    <h2 className="text-lg font-semibold text-foreground">{title}</h2>
-    {sub && <p className="text-sm text-muted-foreground mt-0.5">{sub}</p>}
-  </div>
-);
-
-const StatCard = ({ card, onClick }: { card: KpiCard; onClick?: () => void }) => {
-  const Icon = card.icon;
-  return (
-    <Card
-      onClick={onClick}
-      className={`border-border/50 shadow-sm rounded-xl transition-all duration-200 ${onClick ? "cursor-pointer hover:shadow-lg hover:scale-[1.02]" : ""
-        }`}
-    >
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">{card.label}</CardTitle>
-        <div className={`w-9 h-9 rounded-full flex items-center justify-center ${card.iconBg}`}>
-          <Icon className={`w-4 h-4 ${card.iconColor}`} />
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className={`text-3xl font-bold ${card.valueColor ?? "text-foreground"}`}>
-          {card.value}
-        </div>
-        {card.trend && (
-          <div className="flex items-center gap-1 mt-1">
-            {card.trendUp
-              ? <TrendingUp className="w-3 h-3 text-emerald-600" />
-              : <TrendingDown className="w-3 h-3 text-destructive" />}
-            <span className={`text-xs font-medium ${card.trendUp ? "text-emerald-600" : "text-destructive"}`}>
-              {card.trend}
-            </span>
-          </div>
-        )}
-        <p className="text-xs text-muted-foreground mt-1">{card.sub}</p>
-      </CardContent>
-    </Card>
-  );
-};
-
-// ─── Main Component ───────────────────────────────────────────────────────────
-
-const FinanceDashboard = () => {
+const Dashboard = () => {
   const navigate = useNavigate();
-  const [selectedMonth, setSelectedMonth] = useState("2026-03");
-  const d = monthlyData[selectedMonth];
-  const profit = d.revenue - d.earnings;
-
-  // Section 1 – Financial Health
-  const healthCards: KpiCard[] = [
-    {
-      label: "This Month Revenue",
-      value: fmt(d.revenue),
-      sub: `Total fees collected in ${d.label}`,
-      trend: "+9% vs last month",
-      trendUp: true,
-      icon: IndianRupee,
-      iconBg: "bg-emerald-100/60",
-      iconColor: "text-emerald-600",
-      valueColor: "text-emerald-600",
-      href: "/finance/reports/revenue",
-    },
-    {
-      label: "This Month Earnings",
-      value: fmt(d.earnings),
-      sub: "Tutor + Mentor + Intern",
-      trend: "+5% vs last month",
-      trendUp: true,
-      icon: BarChart2,
-      iconBg: "bg-violet-100/60",
-      iconColor: "text-violet-600",
-      href: "/finance/reports/expense",
-    },
-    {
-      label: "This Month Profit",
-      value: fmt(profit),
-      sub: "Revenue minus Earnings",
-      trend: profit > 0 ? "Positive margin" : "Negative",
-      trendUp: profit > 0,
-      icon: TrendingUp,
-      iconBg: "bg-blue-100/60",
-      iconColor: "text-blue-600",
-      valueColor: profit > 0 ? "text-emerald-600" : "text-destructive",
-      href: "/finance/reports/profit",
-    },
-    {
-      label: "Total Profit (All Time)",
-      value: fmt(d.totalProfit),
-      sub: "Cumulative net profit",
-      icon: Sparkles,
-      iconBg: "bg-amber-100/60",
-      iconColor: "text-amber-600",
-      valueColor: "text-amber-600",
-      href: "/finance/reports/overview",
-    },
-  ];
-
-  // Section 2 – Operational Alerts
-  const alertCards: KpiCard[] = [
-    {
-      label: "Pending Top-up Requests",
-      value: String(d.pendingTopups),
-      sub: "Awaiting admin approval",
-      icon: CreditCard,
-      iconBg: "bg-amber-100/60",
-      iconColor: "text-amber-600",
-      valueColor: "text-amber-600",
-      href: "/finance/wallets/topup",
-    },
-    {
-      label: "Pending Payout Amount",
-      value: fmt(d.pendingPayoutAmount),
-      sub: "Scheduled disbursements",
-      icon: ArrowDownToLine,
-      iconBg: "bg-destructive/10",
-      iconColor: "text-destructive",
-      valueColor: "text-destructive",
-      href: "/finance/payouts/pending",
-    },
-    {
-      label: "Unpaid Earnings Count",
-      value: String(d.unpaidEarningsCount),
-      sub: "Tutors, mentors & interns",
-      icon: AlertCircle,
-      iconBg: "bg-orange-100/60",
-      iconColor: "text-orange-600",
-      valueColor: "text-orange-600",
-      href: "/finance/payouts/unpaid",
-    },
-    {
-      label: "Total Wallet Balance (Liability)",
-      value: fmt(d.walletBalance),
-      sub: "Across all student wallets",
-      icon: Wallet,
-      iconBg: "bg-indigo-100/60",
-      iconColor: "text-indigo-600",
-      href: "/finance/wallets/students",
-    },
-  ];
-
-  // Section 3
-  const flowCards: KpiCard[] = [
-    {
-      label: "Wallet Top-ups",
-      value: fmt(d.walletTopups),
-      sub: "Student wallet credits",
-      icon: Wallet,
-      iconBg: "bg-blue-100/60",
-      iconColor: "text-blue-600",
-    },
-    {
-      label: "Course Revenue",
-      value: fmt(d.revenue),
-      sub: "From active batches",
-      icon: IndianRupee,
-      iconBg: "bg-emerald-100/60",
-      iconColor: "text-emerald-600",
-      valueColor: "text-emerald-600",
-    },
-    {
-      label: "Earnings Generated",
-      value: fmt(d.earnings),
-      sub: "Tutor + Mentor + Intern",
-      icon: BarChart2,
-      iconBg: "bg-violet-100/60",
-      iconColor: "text-violet-600",
-    },
-    {
-      label: "Payout Completed",
-      value: fmt(d.payoutCompleted),
-      sub: "Successfully disbursed",
-      icon: CheckCircle2,
-      iconBg: "bg-emerald-100/60",
-      iconColor: "text-emerald-600",
-      valueColor: "text-emerald-600",
-    },
-  ];
-
-  const bars = chartBars[selectedMonth];
+  const today = new Date().toLocaleDateString('en-GB', { 
+    weekday: 'long', 
+    day: 'numeric', 
+    month: 'long', 
+    year: 'numeric' 
+  });
 
   return (
-    <DashboardLayout>
-      <div className="animate-fade-in space-y-10 max-w-7xl mx-auto pb-10">
-
-        {/* ── Header ── */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-foreground">
-              Finance Dashboard
+    <FinanceLayout>
+      <div className="animate-fade-in space-y-10 pb-20">
+        
+        {/* 1. Welcome Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="space-y-2">
+            <p className="text-sm font-bold text-primary uppercase tracking-[0.2em]">{today}</p>
+            <h1 className="text-4xl lg:text-5xl font-black tracking-tight text-foreground">
+              Hello, Alex <span className="text-muted-foreground/30 font-light">👋</span>
             </h1>
-            <p className="text-muted-foreground mt-1">
-              Financial health, operational alerts, and monthly activity overview.
-            </p>
+            <div className="flex items-center gap-3 text-sm font-medium text-muted-foreground">
+              <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> 12 pending payouts</span>
+              <span className="w-1 h-1 rounded-full bg-border" />
+              <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-rose-500" /> 4 refunds to process</span>
+              <span className="w-1 h-1 rounded-full bg-border" />
+              <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-blue-500" /> 8 unreconciled entries</span>
+            </div>
           </div>
-          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger className="w-[180px] bg-background">
-              <SelectValue placeholder="Select Month" />
-            </SelectTrigger>
-            <SelectContent>
-              {MONTHS.map(m => (
-                <SelectItem key={m.key} value={m.key}>{m.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </div>
 
-        {/* ── Section 1: Financial Health ── */}
-        <section>
-          <SectionHeading title="Financial Health" sub={`Revenue, earnings and profit — ${d.label}`} />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-            {healthCards.map(c => <StatCard key={c.label} card={c} onClick={c.href ? () => navigate(c.href!) : undefined} />)}
-          </div>
-        </section>
-
-        {/* ── Section 2: Operational Alerts ── */}
-        <section>
-          <SectionHeading title="Operational Alerts" sub="Items requiring immediate action." />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-            {alertCards.map(c => <StatCard key={c.label} card={c} onClick={c.href ? () => navigate(c.href!) : undefined} />)}
-          </div>
-        </section>
-
-        {/* ── Section 3: Monthly Flow Movement ── */}
-        <section>
-          <SectionHeading title="Monthly Flow Movement" sub={`Cash movement breakdown — ${d.label}`} />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-            {flowCards.map(c => <StatCard key={c.label} card={c} />)}
-          </div>
-        </section>
-
-        {/* ── Section 4: Chart Placeholder ── */}
-        <section>
-          <SectionHeading
-            title="Revenue vs Earnings (Monthly Trend)"
-            sub={`Last 6 months ending ${d.label} — placeholder view.`}
-          />
-          <Card className="border-border/50 shadow-sm rounded-xl">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base font-semibold">
-                Revenue vs Earnings — {bars[0].label} to {bars[5].label}
-              </CardTitle>
-              <CardDescription>
-                Representative bars. Integrate Recharts or Chart.js for live data.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-end gap-3 h-44 px-2 pt-4">
-                {bars.map(bar => (
-                  <div key={bar.label} className="flex-1 flex flex-col items-center gap-1">
-                    <div className="w-full flex items-end gap-0.5 h-32">
-                      <div
-                        className="flex-1 bg-emerald-500/25 rounded-t border border-emerald-500/30 transition-all duration-500"
-                        style={{ height: `${bar.revenue}%` }}
-                      />
-                      <div
-                        className="flex-1 bg-violet-500/20 rounded-t border border-violet-500/25 transition-all duration-500"
-                        style={{ height: `${bar.earnings}%` }}
-                      />
+        {/* 2. KPI Grid (8 metrics) */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+          {kpiData.map((kpi) => (
+            <Card key={kpi.id} className="rounded-3xl border-border/40 bg-white shadow-sm hover:shadow-md transition-all group">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className={cn(
+                    "p-2.5 rounded-2xl border transition-colors",
+                    kpi.alert === 'red' ? "bg-rose-50 border-rose-100 text-rose-600" :
+                    kpi.alert === 'amber' ? "bg-amber-50 border-amber-100 text-amber-600" :
+                    "bg-primary/5 border-primary/10 text-primary"
+                  )}>
+                    <kpi.icon className="w-5 h-5" />
+                  </div>
+                  {kpi.trend && (
+                    <div className={cn(
+                      "flex items-center gap-1 text-[10px] font-black px-2 py-1 rounded-lg border",
+                      kpi.trendUp ? "text-emerald-600 bg-emerald-50 border-emerald-100" : "text-rose-600 bg-rose-50 border-rose-100"
+                    )}>
+                      {kpi.trendUp ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                      {kpi.trend}
                     </div>
-                    <span className="text-xs text-muted-foreground">{bar.label}</span>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{kpi.label}</p>
+                  <h3 className="text-2xl font-black tracking-tight text-foreground group-hover:text-primary transition-colors">{kpi.value}</h3>
+                  <p className="text-[11px] font-medium text-muted-foreground">{kpi.sub}</p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Main Content Grid (8/12 and 4/12) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          
+          {/* Left Column — Analytics (8/12) */}
+          <div className="lg:col-span-8 space-y-10">
+            
+            {/* A. Revenue — Target vs Actual */}
+            <Card className="rounded-[2.5rem] border-border/40 shadow-sm overflow-hidden bg-white">
+              <CardHeader className="px-8 pt-8 pb-4 flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-xl font-black tracking-tight">Revenue Performance</CardTitle>
+                  <CardDescription className="text-xs font-medium uppercase tracking-wider mt-1">Target vs Actual · Last 12 Months</CardDescription>
+                </div>
+                <Button 
+                  onClick={() => navigate("/finance/reports")}
+                  variant="ghost" 
+                  className="text-xs font-bold text-primary hover:bg-primary/5 rounded-xl gap-2"
+                >
+                  Open Report <ArrowUpRight className="w-4 h-4" />
+                </Button>
+              </CardHeader>
+              <CardContent className="px-6 pb-8">
+                <div className="h-[380px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={revenueTrendData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                      <XAxis 
+                        dataKey="month" 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fontSize: 10, fontWeight: 900, fill: '#888' }}
+                        dy={15}
+                      />
+                      <YAxis 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fontSize: 10, fontWeight: 900, fill: '#888' }}
+                        tickFormatter={(val) => `₹${val/1000}k`}
+                      />
+                      <Tooltip 
+                        cursor={{ fill: 'rgba(0,0,0,0.02)' }}
+                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', padding: '12px' }}
+                      />
+                      <Legend verticalAlign="top" align="right" iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', paddingBottom: '20px' }} />
+                      <Bar name="Target" dataKey="target" fill="#f1f5f9" radius={[6, 6, 0, 0]} barSize={20} />
+                      <Bar name="Actual" dataKey="actual" radius={[6, 6, 0, 0]} barSize={20}>
+                        {revenueTrendData.map((entry, index) => (
+                          <Cell 
+                            key={`cell-${index}`} 
+                            fill={entry.status === 'beat' ? 'hsl(var(--primary))' : '#fbbf24'} 
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+              {/* B. Revenue by Course */}
+              <Card className="rounded-[2.5rem] border-border/40 shadow-sm bg-white">
+                <CardHeader className="px-8 pt-8 pb-4">
+                  <CardTitle className="text-xl font-black tracking-tight">Revenue by Course</CardTitle>
+                  <CardDescription className="text-xs font-medium uppercase tracking-wider">Top performing programs this month</CardDescription>
+                </CardHeader>
+                <CardContent className="px-8 pb-8 space-y-6">
+                  {revenueByCourseData.map((course) => (
+                    <div key={course.name} className="space-y-2 group cursor-pointer" onClick={() => navigate("/finance/revenue")}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-xl bg-muted/5 group-hover:bg-primary/5 transition-colors">
+                            <course.icon className="w-4 h-4 text-muted-foreground group-hover:text-primary" />
+                          </div>
+                          <p className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">{course.name}</p>
+                        </div>
+                        <span className="text-sm font-black text-foreground">₹{(course.revenue/1000).toFixed(0)}k</span>
+                      </div>
+                      <Progress value={course.percentage} className="h-1.5 bg-muted/30" />
+                      <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                        <span>{course.students} Students</span>
+                        <span>Avg. ₹{(course.avgFee/1000).toFixed(1)}k</span>
+                      </div>
+                    </div>
+                  ))}
+                  <Button variant="outline" className="w-full mt-2 rounded-xl h-12 font-black text-[10px] uppercase tracking-widest border-border/60 hover:bg-primary hover:text-white hover:border-primary transition-all">
+                    View All Categories
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* C. Outstanding Dues — Aging Buckets */}
+              <Card className="rounded-[2.5rem] border-border/40 shadow-sm bg-white">
+                <CardHeader className="px-8 pt-8 pb-4">
+                  <CardTitle className="text-xl font-black tracking-tight">Outstanding Dues</CardTitle>
+                  <CardDescription className="text-xs font-medium uppercase tracking-wider">Aging analysis of unpaid invoices</CardDescription>
+                </CardHeader>
+                <CardContent className="px-8 pb-8 space-y-6">
+                  {agingBuckets.map((bucket) => (
+                    <div key={bucket.label} className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-black uppercase tracking-widest text-muted-foreground">{bucket.label}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-black text-foreground">{bucket.amount}</span>
+                          <span className="text-[10px] font-bold text-muted-foreground">({bucket.count} inv.)</span>
+                        </div>
+                      </div>
+                      <div className="relative h-2.5 w-full bg-muted/20 rounded-full overflow-hidden shadow-inner">
+                        <div 
+                          className={cn("absolute inset-y-0 left-0 transition-all duration-1000 ease-out", bucket.color)} 
+                          style={{ width: `${bucket.percentage}%` }} 
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  <Button 
+                    onClick={() => navigate("/finance/invoices")}
+                    variant="outline" 
+                    className="w-full mt-2 rounded-xl h-12 font-black text-[10px] uppercase tracking-widest border-border/60 hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all"
+                  >
+                    Manage Receivables
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Right Column — Action Center (4/12) */}
+          <div className="lg:col-span-4 space-y-10">
+            
+            {/* A. Action Items (Dark Themed) */}
+            <Card className="rounded-[2.5rem] border-none bg-slate-950 shadow-2xl overflow-hidden relative group">
+              <div className="absolute top-0 right-0 p-8 opacity-20 group-hover:opacity-40 transition-opacity">
+                <TrendingUp className="w-32 h-32 text-primary" strokeWidth={0.5} />
+              </div>
+              <CardHeader className="p-8 pb-4 relative">
+                <CardTitle className="text-xl font-black tracking-tight text-white">Action Items</CardTitle>
+                <CardDescription className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Immediate attention required</CardDescription>
+              </CardHeader>
+              <CardContent className="p-8 pt-4 space-y-4 relative">
+                {actionItems.map((item) => (
+                  <div 
+                    key={item.id}
+                    onClick={() => navigate(item.href)}
+                    className="flex items-center gap-4 p-5 rounded-2xl border border-white/5 bg-white/5 hover:bg-white/10 hover:border-white/10 transition-all cursor-pointer group/item"
+                  >
+                    <div className={cn(
+                      "p-3 rounded-xl border transition-transform group-hover/item:scale-110",
+                      item.color === 'red' ? "bg-rose-500/10 border-rose-500/20 text-rose-500" :
+                      item.color === 'amber' ? "bg-amber-500/10 border-amber-500/20 text-amber-500" :
+                      "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
+                    )}>
+                      <item.icon className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-bold text-slate-200 group-hover/item:text-white">{item.title}</p>
+                      <p className="text-[10px] font-medium text-slate-500">{item.meta}</p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-600 group-hover/item:text-white transition-transform group-hover/item:translate-x-1" />
                   </div>
                 ))}
-                <div className="ml-4 flex flex-col gap-2 justify-center pb-5">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground whitespace-nowrap">
-                    <span className="w-3 h-3 rounded-sm bg-emerald-500/30 border border-emerald-500/40 inline-block shrink-0" />
-                    Revenue
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground whitespace-nowrap">
-                    <span className="w-3 h-3 rounded-sm bg-violet-500/25 border border-violet-500/30 inline-block shrink-0" />
-                    Earnings
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
-
-        {/* ── Section 5: Recent Activity ── */}
-        <section>
-          <SectionHeading
-            title="Recent Activity"
-            sub={`Latest top-up requests and earnings — ${d.label}`}
-          />
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-
-            {/* Top-up Requests Table */}
-            <Card className="border-border/50 shadow-sm rounded-xl">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base font-semibold">Recent Top-up Requests</CardTitle>
-                <CardDescription>5 most recent wallet top-up submissions</CardDescription>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-border/50 bg-muted/30">
-                        <th className="text-left px-5 py-2.5 font-medium text-muted-foreground">Student</th>
-                        <th className="text-left px-3 py-2.5 font-medium text-muted-foreground">Batch</th>
-                        <th className="text-right px-3 py-2.5 font-medium text-muted-foreground">Amount</th>
-                        <th className="text-left px-3 py-2.5 font-medium text-muted-foreground">Date</th>
-                        <th className="text-left px-3 pr-5 py-2.5 font-medium text-muted-foreground">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {d.topupRows.map(row => (
-                        <tr key={row.id} className="border-b border-border/30 last:border-0 hover:bg-muted/20 transition-colors">
-                          <td className="px-5 py-3 font-medium">{row.student}</td>
-                          <td className="px-3 py-3 text-muted-foreground">{row.batch}</td>
-                          <td className="px-3 py-3 text-right font-semibold">{row.amount}</td>
-                          <td className="px-3 py-3 text-muted-foreground whitespace-nowrap">{row.date}</td>
-                          <td className="px-3 pr-5 py-3">
-                            <Badge className={`shadow-none border text-xs ${topupBadge[row.status]}`}>
-                              {row.status}
-                            </Badge>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
               </CardContent>
             </Card>
 
-            {/* Earnings Table */}
-            <Card className="border-border/50 shadow-sm rounded-xl">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base font-semibold">Recent Earnings Generated</CardTitle>
-                <CardDescription>Latest tutor, mentor & intern earnings</CardDescription>
+            {/* B. Quick Actions (6-button grid) */}
+            <div className="grid grid-cols-2 gap-4">
+              <QuickActionButton icon={Plus} label="Manual Payment" onClick={() => navigate("/finance/payments")} />
+              <QuickActionButton icon={DollarSign} label="Process Payout" onClick={() => navigate("/finance/payouts")} />
+              <QuickActionButton icon={FileText} label="Generate Invoice" onClick={() => navigate("/finance/invoices")} />
+              <QuickActionButton icon={Download} label="Monthly Report" onClick={() => {}} isDownload />
+              <QuickActionButton icon={ShieldCheck} label="GST Summary" onClick={() => navigate("/finance/tax")} />
+              <QuickActionButton icon={RotateCcw} label="Process Refund" onClick={() => navigate("/finance/refunds")} />
+            </div>
+
+            {/* C. Recent Transactions Feed */}
+            <Card className="rounded-[2.5rem] border-border/40 shadow-sm bg-white overflow-hidden">
+              <CardHeader className="px-8 pt-8 pb-4 flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-xl font-black tracking-tight">Live Feed</CardTitle>
+                  <CardDescription className="text-xs font-medium uppercase tracking-wider">Recent transactions</CardDescription>
+                </div>
+                <Button 
+                  onClick={() => navigate("/finance/transactions")}
+                  variant="ghost" 
+                  className="text-xs font-bold text-primary hover:bg-primary/5 px-2"
+                >
+                  See All
+                </Button>
               </CardHeader>
-              <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-border/50 bg-muted/30">
-                        <th className="text-left px-5 py-2.5 font-medium text-muted-foreground">Recipient</th>
-                        <th className="text-left px-3 py-2.5 font-medium text-muted-foreground">Role</th>
-                        <th className="text-right px-3 py-2.5 font-medium text-muted-foreground">Amount</th>
-                        <th className="text-left px-3 py-2.5 font-medium text-muted-foreground">Month</th>
-                        <th className="text-left px-3 pr-5 py-2.5 font-medium text-muted-foreground">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {d.earningsRows.map(row => (
-                        <tr key={row.id} className="border-b border-border/30 last:border-0 hover:bg-muted/20 transition-colors">
-                          <td className="px-5 py-3 font-medium">{row.recipient}</td>
-                          <td className="px-3 py-3 text-muted-foreground">{row.role}</td>
-                          <td className="px-3 py-3 text-right font-semibold">{row.amount}</td>
-                          <td className="px-3 py-3 text-muted-foreground whitespace-nowrap">{row.month}</td>
-                          <td className="px-3 pr-5 py-3">
-                            <Badge className={`shadow-none border text-xs ${earningsBadge[row.status]}`}>
-                              {row.status}
-                            </Badge>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+              <CardContent className="px-4 pb-8 h-[460px] overflow-auto">
+                <div className="space-y-1">
+                  {recentTransactions.map((txn) => (
+                    <div 
+                      key={txn.id}
+                      onClick={() => navigate("/finance/transactions")}
+                      className="flex items-center gap-4 p-4 rounded-2xl hover:bg-muted/5 transition-all cursor-pointer group/txn"
+                    >
+                      <div className={cn(
+                        "p-2.5 rounded-xl border transition-colors",
+                        txn.direction === 'in' ? "bg-emerald-50 border-emerald-100 text-emerald-600" : "bg-rose-50 border-rose-100 text-rose-600"
+                      )}>
+                        {txn.direction === 'in' ? <ArrowDownRight className="w-4 h-4" /> : <ArrowUpRight className="w-4 h-4" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-bold text-foreground truncate group-hover/txn:text-primary">{txn.user}</p>
+                          <span className={cn(
+                            "text-sm font-black",
+                            txn.direction === 'in' ? "text-emerald-600" : "text-rose-600"
+                          )}>
+                            {txn.direction === 'in' ? '+' : '-'}₹{txn.amount.toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">{txn.type} · {txn.time}</p>
+                          <Badge variant="ghost" className="text-[9px] font-black uppercase tracking-tighter p-0 h-auto">
+                            {txn.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
 
           </div>
-        </section>
-
+        </div>
       </div>
-    </DashboardLayout>
+    </FinanceLayout>
   );
 };
 
-export default FinanceDashboard;
+const QuickActionButton = ({ icon: Icon, label, onClick, isDownload = false }: any) => (
+  <button 
+    onClick={onClick}
+    className="flex flex-col items-center justify-center gap-3 p-6 rounded-[2rem] border border-border/40 bg-white shadow-sm hover:shadow-lg hover:border-primary/40 hover:bg-primary/5 transition-all group text-center h-40"
+  >
+    <div className="p-3 rounded-2xl bg-muted/5 group-hover:bg-primary/10 text-muted-foreground group-hover:text-primary transition-colors">
+      <Icon className="w-6 h-6" />
+    </div>
+    <span className="text-[10px] font-black uppercase tracking-widest leading-relaxed text-muted-foreground group-hover:text-foreground">
+      {label}
+    </span>
+  </button>
+);
+
+export default Dashboard;

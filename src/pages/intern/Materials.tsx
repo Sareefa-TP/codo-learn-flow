@@ -346,27 +346,39 @@ const Materials = () => {
         />
 
         {/* Filter Tabs */}
-        <div className="flex items-center gap-1.5 bg-muted/50 p-1 rounded-xl w-fit border border-border/40 flex-wrap">
-          {filterTabs.map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveFilter(tab)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                activeFilter === tab
-                ? "bg-background shadow-sm text-foreground border border-border/50"
-                : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {tab}
-              <span className={`text-[10px] px-1.5 py-0 rounded-full font-semibold ${
-                activeFilter === tab
-                ? "bg-primary/10 text-primary"
-                : "bg-muted text-muted-foreground"
-              }`}>
-                {counts[tab]}
-              </span>
-            </button>
-          ))}
+        <div className="rounded-2xl bg-white border border-slate-100 shadow-sm overflow-hidden w-full">
+          <div className="grid grid-cols-2 md:grid-cols-4 w-full">
+            {filterTabs.map(tab => {
+              const isActive = activeFilter === tab;
+              return (
+                <button
+                  key={tab}
+                  onClick={() => setActiveFilter(tab)}
+                  className={cn(
+                    "flex items-center justify-center gap-2.5 py-4 transition-all duration-300 outline-none group border-r last:border-r-0 border-slate-50 relative",
+                    isActive 
+                      ? "bg-primary/[0.03] text-primary" 
+                      : "text-slate-400 hover:text-slate-600 hover:bg-slate-50/50"
+                  )}
+                >
+                  {isActive && (
+                    <div className="absolute bottom-0 left-0 w-full h-1 bg-primary animate-in fade-in slide-in-from-bottom-1 duration-300" />
+                  )}
+                  <span className="text-xs font-black uppercase tracking-widest whitespace-nowrap">
+                    {tab}
+                  </span>
+                  <div className={cn(
+                    "flex items-center justify-center min-w-[20px] h-5 rounded-full text-[9px] font-black px-1.5 transition-colors",
+                    isActive 
+                      ? "bg-primary text-white shadow-sm" 
+                      : "bg-slate-100 text-slate-400 group-hover:bg-slate-200"
+                  )}>
+                    {counts[tab]}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Recorded Player (appears when a video is selected) */}

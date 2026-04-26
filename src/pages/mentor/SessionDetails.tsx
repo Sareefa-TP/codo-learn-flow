@@ -90,7 +90,7 @@ const MentorSessionDetails = () => {
           return (
             <Badge className="bg-red-500 hover:bg-red-600 text-white border-none animate-pulse flex items-center gap-1 px-3 py-1">
               <span className="w-1.5 h-1.5 rounded-full bg-white mr-1" />
-              Live Now
+              Active
             </Badge>
           );
         case "upcoming":

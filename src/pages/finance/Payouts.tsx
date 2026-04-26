@@ -1,289 +1,313 @@
-import { useMemo, useState } from "react";
-import DashboardLayout from "@/components/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { useState, useMemo } from "react";
+import FinanceLayout from "@/components/finance/FinanceLayout";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { Search, IndianRupee, ReceiptText, GraduationCap, Users } from "lucide-react";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Wallet,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  Building2,
+  Users,
+  GraduationCap,
+  Briefcase,
+  ChevronRight,
+  Filter,
+  Search,
+  ArrowDownRight,
+  TrendingDown,
+  Info,
+  DollarSign,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// ─── Types & Mock Data ────────────────────────────────────────────────────────
 
-type Role = "Tutor" | "Mentor" | "Intern";
-type RoleFilter = "all" | Role;
-type MonthFilter = "all" | "January 2026" | "February 2026" | "March 2026";
-
-interface Payout {
-    id: number;
-    paymentDate: string;
-    month: string;
-    name: string;
-    role: Role;
-    batch: string;
-    amount: number;
-    method: "Bank" | "UPI";
-    referenceId: string;
-    paidBy: string;
+interface PayoutRequest {
+  id: string;
+  recipient: { name: string; id: string; role: "Tutor" | "Mentor" | "Intern" };
+  amount: number;
+  taxDeducted: number; // TDS
+  netAmount: number;
+  period: string;
+  requestDate: string;
+  status: "Requested" | "Approved" | "Processing" | "Disbursed" | "Rejected";
+  approvalChain: { role: string; status: "Pending" | "Approved" }[];
 }
 
-// ─── Mock Data ────────────────────────────────────────────────────────────────
-
-const mockPayouts: Payout[] = [
-    { id: 1, paymentDate: "05 Mar 2026", month: "February 2026", name: "Meera Nair", role: "Tutor", batch: "Batch Alpha – Jan 2026", amount: 30000, method: "Bank", referenceId: "TXN-2026-001", paidBy: "Admin" },
-    { id: 2, paymentDate: "05 Mar 2026", month: "February 2026", name: "Suresh Kumar", role: "Tutor", batch: "Batch Beta – Feb 2026", amount: 27000, method: "Bank", referenceId: "TXN-2026-002", paidBy: "Admin" },
-    { id: 3, paymentDate: "05 Mar 2026", month: "February 2026", name: "Ravi Shankar", role: "Tutor", batch: "Batch Gamma – Mar 2026", amount: 36000, method: "Bank", referenceId: "TXN-2026-003", paidBy: "Admin" },
-    { id: 4, paymentDate: "05 Mar 2026", month: "February 2026", name: "Anjali Desai", role: "Mentor", batch: "Batch Alpha – Jan 2026", amount: 9600, method: "UPI", referenceId: "TXN-2026-004", paidBy: "Admin" },
-    { id: 5, paymentDate: "05 Mar 2026", month: "February 2026", name: "Vikram Pillai", role: "Mentor", batch: "Batch Beta – Feb 2026", amount: 9600, method: "UPI", referenceId: "TXN-2026-005", paidBy: "Admin" },
-    { id: 6, paymentDate: "05 Mar 2026", month: "February 2026", name: "Karan Mehta", role: "Intern", batch: "Batch Gamma – Mar 2026", amount: 8000, method: "UPI", referenceId: "TXN-2026-006", paidBy: "Admin" },
-    { id: 7, paymentDate: "05 Mar 2026", month: "February 2026", name: "Divya Menon", role: "Intern", batch: "Batch Alpha – Jan 2026", amount: 8000, method: "UPI", referenceId: "TXN-2026-007", paidBy: "Admin" },
-    { id: 8, paymentDate: "03 Feb 2026", month: "January 2026", name: "Meera Nair", role: "Tutor", batch: "Batch Alpha – Jan 2026", amount: 30000, method: "Bank", referenceId: "TXN-2026-008", paidBy: "Admin" },
-    { id: 9, paymentDate: "03 Feb 2026", month: "January 2026", name: "Suresh Kumar", role: "Tutor", batch: "Batch Beta – Feb 2026", amount: 30000, method: "Bank", referenceId: "TXN-2026-009", paidBy: "Admin" },
-    { id: 10, paymentDate: "03 Feb 2026", month: "January 2026", name: "Anjali Desai", role: "Mentor", batch: "Batch Beta – Feb 2026", amount: 8000, method: "UPI", referenceId: "TXN-2026-010", paidBy: "Admin" },
-    { id: 11, paymentDate: "03 Feb 2026", month: "January 2026", name: "Karan Mehta", role: "Intern", batch: "Batch Alpha – Jan 2026", amount: 8000, method: "UPI", referenceId: "TXN-2026-011", paidBy: "Admin" },
-    { id: 12, paymentDate: "03 Feb 2026", month: "January 2026", name: "Pooja Nair", role: "Intern", batch: "Batch Gamma – Mar 2026", amount: 8000, method: "UPI", referenceId: "TXN-2026-012", paidBy: "Admin" },
+const mockPayouts: PayoutRequest[] = [
+  { 
+    id: "PAY-001", 
+    recipient: { name: "Meera Nair", id: "TUT-102", role: "Tutor" }, 
+    amount: 35000, 
+    taxDeducted: 3500, 
+    netAmount: 31500, 
+    period: "Apr 2026", 
+    requestDate: "24 Apr 2026", 
+    status: "Processing",
+    approvalChain: [
+      { role: "Coordinator", status: "Approved" },
+      { role: "Admin", status: "Approved" },
+    ]
+  },
+  { 
+    id: "PAY-002", 
+    recipient: { name: "Suresh Kumar", id: "MEN-045", role: "Mentor" }, 
+    amount: 28000, 
+    taxDeducted: 2800, 
+    netAmount: 25200, 
+    period: "Apr 2026", 
+    requestDate: "23 Apr 2026", 
+    status: "Approved",
+    approvalChain: [
+      { role: "Coordinator", status: "Approved" },
+      { role: "Admin", status: "Approved" },
+    ]
+  },
+  { 
+    id: "PAY-003", 
+    recipient: { name: "Divya Menon", id: "INT-881", role: "Intern" }, 
+    amount: 12000, 
+    taxDeducted: 0, 
+    netAmount: 12000, 
+    period: "Apr 2026", 
+    requestDate: "22 Apr 2026", 
+    status: "Requested",
+    approvalChain: [
+      { role: "Coordinator", status: "Pending" },
+    ]
+  },
+  { 
+    id: "PAY-004", 
+    recipient: { name: "Ravi Shankar", id: "TUT-099", role: "Tutor" }, 
+    amount: 42000, 
+    taxDeducted: 4200, 
+    netAmount: 37800, 
+    period: "Mar 2026", 
+    requestDate: "05 Apr 2026", 
+    status: "Disbursed",
+    approvalChain: [
+      { role: "Coordinator", status: "Approved" },
+      { role: "Admin", status: "Approved" },
+    ]
+  },
 ];
 
-const MONTHS: MonthFilter[] = ["January 2026", "February 2026", "March 2026"];
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-const fmt = (n: number) => `₹${n.toLocaleString("en-IN")}`;
-
-const roleColor: Record<Role, string> = {
-    Tutor: "text-blue-600",
-    Mentor: "text-purple-600",
-    Intern: "text-green-600",
+const roleIcons = {
+  Tutor: GraduationCap,
+  Mentor: Users,
+  Intern: Briefcase,
 };
 
-// ─── KPI Card ─────────────────────────────────────────────────────────────────
+const statusColors = {
+  "Requested": "bg-blue-50 text-blue-600 border-blue-200",
+  "Approved": "bg-indigo-50 text-indigo-600 border-indigo-200",
+  "Processing": "bg-amber-50 text-amber-600 border-amber-200",
+  "Disbursed": "bg-emerald-50 text-emerald-600 border-emerald-200",
+  "Rejected": "bg-rose-50 text-rose-600 border-rose-200",
+};
 
-interface KpiProps {
-    label: string;
-    value: string;
-    sub?: string;
-    icon: React.ElementType;
-    iconBg: string;
-    iconColor: string;
-    valueColor?: string;
-}
-
-const KpiCard = ({ label, value, sub, icon: Icon, iconBg, iconColor, valueColor }: KpiProps) => (
-    <Card className="border-border/50 shadow-sm rounded-xl">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">{label}</CardTitle>
-            <div className={`w-9 h-9 rounded-full flex items-center justify-center ${iconBg}`}>
-                <Icon className={`w-4 h-4 ${iconColor}`} />
-            </div>
-        </CardHeader>
-        <CardContent>
-            <div className={`text-3xl font-bold ${valueColor ?? "text-foreground"}`}>{value}</div>
-            {sub && <p className="text-xs text-muted-foreground mt-1">{sub}</p>}
-        </CardContent>
-    </Card>
-);
-
-// ─── Main Component ───────────────────────────────────────────────────────────
+// ─── Component ───────────────────────────────────────────────────────────────
 
 const Payouts = () => {
-    const [search, setSearch] = useState("");
-    const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
-    const [monthFilter, setMonthFilter] = useState<MonthFilter | "all">("all");
+  return (
+    <FinanceLayout>
+      <div className="animate-fade-in space-y-8 max-w-[1440px] mx-auto pb-20">
+        
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-1">
+            <h1 className="text-2xl lg:text-3xl font-black tracking-tight text-foreground flex items-center gap-3">
+              <Wallet className="w-8 h-8 text-primary" />
+              Payout Management
+            </h1>
+            <p className="text-sm font-medium text-muted-foreground">
+              Earnings disbursement queue for Tutors, Mentors and Interns.
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <Button variant="outline" className="h-11 rounded-xl font-bold text-xs uppercase tracking-widest border-border/60">
+              Commission Rules
+            </Button>
+            <Button className="h-11 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold text-xs uppercase tracking-widest px-6 shadow-xl shadow-primary/20">
+              Bulk Disburse
+            </Button>
+          </div>
+        </div>
 
-    // Filtered rows
-    const filtered = useMemo(() => {
-        const q = search.toLowerCase();
-        return mockPayouts.filter(p => {
-            const matchSearch = !q || p.name.toLowerCase().includes(q);
-            const matchRole = roleFilter === "all" || p.role === roleFilter;
-            const matchMonth = monthFilter === "all" || p.month === monthFilter;
-            return matchSearch && matchRole && matchMonth;
-        });
-    }, [search, roleFilter, monthFilter]);
-
-    // KPI — full dataset
-    const totalAmount = mockPayouts.reduce((s, p) => s + p.amount, 0);
-    const totalCount = mockPayouts.length;
-    const tutorCount = mockPayouts.filter(p => p.role === "Tutor").length;
-    const mentorInternCount = mockPayouts.filter(p => p.role === "Mentor" || p.role === "Intern").length;
-
-    const hasFilter = search.trim() !== "" || roleFilter !== "all" || monthFilter !== "all";
-    const reset = () => { setSearch(""); setRoleFilter("all"); setMonthFilter("all"); };
-
-    return (
-        <DashboardLayout>
-            <div className="animate-fade-in space-y-6 max-w-7xl mx-auto pb-10">
-
-                {/* ── Header ── */}
-                <div>
-                    <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-foreground">
-                        Payout History
-                    </h1>
-                    <p className="text-muted-foreground mt-1">
-                        Completed payouts for tutors, mentors, and interns.
-                    </p>
-                </div>
-
-                {/* ── KPI Cards ── */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-                    <KpiCard
-                        label="Total Paid Amount"
-                        value={fmt(totalAmount)}
-                        sub={`Across ${totalCount} records`}
-                        icon={IndianRupee}
-                        iconBg="bg-emerald-100/60"
-                        iconColor="text-emerald-600"
-                        valueColor="text-emerald-600"
-                    />
-                    <KpiCard
-                        label="Total Payout Records"
-                        value={String(totalCount)}
-                        sub="All disbursements"
-                        icon={ReceiptText}
-                        iconBg="bg-blue-100/60"
-                        iconColor="text-blue-600"
-                    />
-                    <KpiCard
-                        label="Tutors Paid"
-                        value={String(tutorCount)}
-                        sub="Tutor payout records"
-                        icon={GraduationCap}
-                        iconBg="bg-indigo-100/60"
-                        iconColor="text-indigo-600"
-                    />
-                    <KpiCard
-                        label="Mentors & Interns Paid"
-                        value={String(mentorInternCount)}
-                        sub="Combined payout records"
-                        icon={Users}
-                        iconBg="bg-violet-100/60"
-                        iconColor="text-violet-600"
-                    />
-                </div>
-
-                {/* ── Table Card ── */}
-                <Card className="border-border/50 shadow-sm rounded-xl">
-                    <CardHeader className="pb-4">
-                        <div className="flex flex-col gap-4">
-
-                            {/* Title + Reset */}
-                            <div className="flex items-center justify-between">
-                                <CardTitle className="text-base font-semibold">
-                                    Payout Records
-                                    <span className="ml-2 text-sm font-normal text-muted-foreground">
-                                        ({filtered.length} of {mockPayouts.length})
-                                    </span>
-                                </CardTitle>
-                                {hasFilter && (
-                                    <button
-                                        onClick={reset}
-                                        className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
-                                    >
-                                        Reset Filters
-                                    </button>
-                                )}
-                            </div>
-
-                            {/* Filter Bar */}
-                            <div className="flex flex-col sm:flex-row gap-3">
-                                {/* Search */}
-                                <div className="relative flex-1 max-w-xs">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                                    <Input
-                                        placeholder="Search by name..."
-                                        value={search}
-                                        onChange={e => setSearch(e.target.value)}
-                                        className="pl-9 bg-background"
-                                    />
-                                </div>
-
-                                {/* Role */}
-                                <Select value={roleFilter} onValueChange={v => setRoleFilter(v as RoleFilter)}>
-                                    <SelectTrigger className="w-full sm:w-[150px] bg-background">
-                                        <SelectValue placeholder="All Roles" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All Roles</SelectItem>
-                                        <SelectItem value="Tutor">Tutor</SelectItem>
-                                        <SelectItem value="Mentor">Mentor</SelectItem>
-                                        <SelectItem value="Intern">Intern</SelectItem>
-                                    </SelectContent>
-                                </Select>
-
-                                {/* Month */}
-                                <Select value={monthFilter} onValueChange={v => setMonthFilter(v as MonthFilter | "all")}>
-                                    <SelectTrigger className="w-full sm:w-[170px] bg-background">
-                                        <SelectValue placeholder="All Months" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All Months</SelectItem>
-                                        {MONTHS.map(m => (
-                                            <SelectItem key={m} value={m}>{m}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
-                    </CardHeader>
-
-                    <CardContent className="p-0">
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-sm">
-                                <thead>
-                                    <tr className="border-b border-border/50 bg-muted/30">
-                                        <th className="text-left px-5 py-3 font-medium text-muted-foreground">Payment Date</th>
-                                        <th className="text-left px-4 py-3 font-medium text-muted-foreground">Name</th>
-                                        <th className="text-left px-4 py-3 font-medium text-muted-foreground">Role</th>
-                                        <th className="text-left px-4 py-3 font-medium text-muted-foreground">Batch</th>
-                                        <th className="text-right px-4 py-3 font-medium text-muted-foreground">Amount</th>
-                                        <th className="text-left px-4 py-3 font-medium text-muted-foreground">Method</th>
-                                        <th className="text-left px-4 py-3 font-medium text-muted-foreground">Reference ID</th>
-                                        <th className="text-left px-4 pr-5 py-3 font-medium text-muted-foreground">Paid By</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filtered.length === 0 ? (
-                                        <tr>
-                                            <td colSpan={8} className="text-center py-12 text-muted-foreground">
-                                                No payout records match the current filters.
-                                            </td>
-                                        </tr>
-                                    ) : (
-                                        filtered.map(p => (
-                                            <tr
-                                                key={p.id}
-                                                className="border-b border-border/30 last:border-0 hover:bg-muted/20 transition-colors"
-                                            >
-                                                <td className="px-5 py-3 text-muted-foreground whitespace-nowrap">{p.paymentDate}</td>
-                                                <td className="px-4 py-3 font-medium">{p.name}</td>
-                                                <td className={`px-4 py-3 font-medium ${roleColor[p.role]}`}>{p.role}</td>
-                                                <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{p.batch}</td>
-                                                <td className="px-4 py-3 text-right font-semibold text-emerald-600">{fmt(p.amount)}</td>
-                                                <td className="px-4 py-3">
-                                                    <span className={`inline-flex items-center text-xs font-medium px-2 py-0.5 rounded-full border ${p.method === "Bank"
-                                                            ? "bg-blue-500/10 text-blue-600 border-blue-500/20"
-                                                            : "bg-violet-500/10 text-violet-600 border-violet-500/20"
-                                                        }`}>
-                                                        {p.method}
-                                                    </span>
-                                                </td>
-                                                <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{p.referenceId}</td>
-                                                <td className="px-4 pr-5 py-3 text-muted-foreground">{p.paidBy}</td>
-                                            </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    </CardContent>
-                </Card>
-
+        {/* Payout Stats */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <Card className="rounded-[2rem] border-border/60 bg-card shadow-sm p-8 flex flex-col justify-between">
+            <div className="space-y-4">
+              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Payout Liquidity</p>
+              <h2 className="text-3xl font-black tracking-tight">₹12.4L</h2>
+              <div className="space-y-2">
+                 <div className="flex justify-between text-[10px] font-black uppercase">
+                    <span>Approved & Ready</span>
+                    <span>₹4.2L</span>
+                 </div>
+                 <Progress value={65} className="h-2 bg-primary/10" />
+              </div>
             </div>
-        </DashboardLayout>
-    );
+          </Card>
+          
+          <Card className="rounded-[2rem] border-border/60 bg-card shadow-sm p-8">
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-6">Request Queue</p>
+            <div className="grid grid-cols-2 gap-4">
+               <div className="space-y-1">
+                  <p className="text-2xl font-black">12</p>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">Awaiting Approval</p>
+               </div>
+               <div className="space-y-1">
+                  <p className="text-2xl font-black">4</p>
+                  <p className="text-[10px] font-bold text-amber-600 uppercase tracking-tighter">In Process</p>
+               </div>
+            </div>
+          </Card>
+
+          <Card className="rounded-[2rem] border-border/60 bg-card shadow-sm p-8">
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-6">TDS Summary (Month)</p>
+            <div className="flex items-center gap-4">
+               <div className="p-3 rounded-2xl bg-indigo-50 text-indigo-600">
+                  <TrendingDown className="w-6 h-6" />
+               </div>
+               <div>
+                  <h3 className="text-xl font-black tracking-tight">₹42,000</h3>
+                  <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">Withheld for Compliance</p>
+               </div>
+            </div>
+          </Card>
+
+          <Card className="rounded-[2rem] border-border/60 bg-card shadow-sm p-8">
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-6">Settlement Avg.</p>
+            <div className="flex items-center gap-4">
+               <div className="p-3 rounded-2xl bg-emerald-50 text-emerald-600">
+                  <Clock className="w-6 h-6" />
+               </div>
+               <div>
+                  <h3 className="text-xl font-black tracking-tight">1.2 Days</h3>
+                  <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">Time to disburse</p>
+               </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Payout Queue */}
+        <Card className="rounded-[2rem] border-border/60 bg-card shadow-sm overflow-hidden">
+          <CardHeader className="p-8 border-b border-border/40 bg-muted/5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+              <div className="space-y-1">
+                <CardTitle className="text-xl font-black tracking-tight text-foreground">Payout Queue</CardTitle>
+                <CardDescription className="text-xs font-medium uppercase tracking-wider">Approval pipeline and disbursement control</CardDescription>
+              </div>
+              <div className="flex items-center gap-3">
+                 <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input placeholder="Search recipients..." className="h-10 w-64 rounded-xl border-border/60 pl-10" />
+                 </div>
+                 <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl">
+                    <Filter className="w-4 h-4" />
+                 </Button>
+              </div>
+            </div>
+          </CardHeader>
+
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader className="bg-muted/10 border-b border-border/40">
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="w-[180px] pl-8 py-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Request ID</TableHead>
+                  <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Recipient & Role</TableHead>
+                  <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Gross Amount</TableHead>
+                  <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">TDS (10%)</TableHead>
+                  <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Net Payable</TableHead>
+                  <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Approval Path</TableHead>
+                  <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Status</TableHead>
+                  <TableHead className="pr-8 text-right"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {mockPayouts.map((payout) => {
+                  const RoleIcon = roleIcons[payout.recipient.role as keyof typeof roleIcons];
+                  return (
+                    <TableRow key={payout.id} className="hover:bg-muted/5 transition-colors border-b border-border/40 last:border-0 group">
+                      <TableCell className="pl-8 py-6">
+                        <span className="text-sm font-black text-foreground group-hover:text-primary transition-colors">{payout.id}</span>
+                        <p className="text-[10px] font-medium text-muted-foreground mt-0.5">{payout.requestDate}</p>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-xl bg-primary/5 text-primary">
+                            <RoleIcon className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-foreground">{payout.recipient.name}</p>
+                            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">{payout.recipient.role}</p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm font-bold text-foreground">₹{payout.amount.toLocaleString()}</span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-xs font-bold text-rose-600">-₹{payout.taxDeducted.toLocaleString()}</span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm font-black text-foreground">₹{payout.netAmount.toLocaleString()}</span>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                           {payout.approvalChain.map((step, idx) => (
+                             <div key={idx} className="flex items-center gap-1.5">
+                                <Badge className={cn(
+                                   "rounded-full p-1",
+                                   step.status === "Approved" ? "bg-emerald-50 text-emerald-600 border-emerald-200" : "bg-muted text-muted-foreground border-border/60"
+                                )}>
+                                   <CheckCircle2 className="w-3 h-3" />
+                                </Badge>
+                                {idx < payout.approvalChain.length - 1 && <ArrowDownRight className="w-3 h-3 text-muted-foreground/30 rotate-[-45deg]" />}
+                             </div>
+                           ))}
+                           <Info className="w-3.5 h-3.5 text-muted-foreground ml-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={cn("rounded-lg border font-black text-[9px] uppercase tracking-tighter px-2.5 py-0.5 shadow-none", statusColors[payout.status as keyof typeof statusColors])}>
+                          {payout.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="pr-8 text-right">
+                        <Button 
+                          className={cn(
+                            "h-9 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shadow-lg",
+                            payout.status === "Approved" ? "bg-primary hover:bg-primary/90 text-white shadow-primary/20" : "bg-muted text-muted-foreground cursor-not-allowed shadow-none"
+                          )}
+                        >
+                          {payout.status === "Approved" ? "Disburse Funds" : "Details"}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        </Card>
+
+      </div>
+    </FinanceLayout>
+  );
 };
 
 export default Payouts;

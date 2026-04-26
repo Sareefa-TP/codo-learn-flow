@@ -1,14 +1,14 @@
-import DashboardLayout from "@/components/DashboardLayout";
+import FinanceLayout from "@/components/finance/FinanceLayout";
 import PageTemplate from "@/components/PageTemplate";
 
 const FinanceStipends = () => {
   return (
-    <DashboardLayout>
+    <FinanceLayout>
       <PageTemplate 
         title="Intern Stipends" 
         description="Process and track intern stipend payments"
       />
-    </DashboardLayout>
+    </FinanceLayout>
   );
 };
 

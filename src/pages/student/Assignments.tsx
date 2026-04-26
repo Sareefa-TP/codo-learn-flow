@@ -19,7 +19,8 @@ import {
     Clock,
     FileText,
     ArrowLeft,
-    Play
+    Play,
+    Search
 } from "lucide-react";
 import PageSearch from "@/components/shared/PageSearch";
 import { cn } from "@/lib/utils";

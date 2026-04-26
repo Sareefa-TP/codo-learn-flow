@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import DashboardLayout from "@/components/DashboardLayout";
+import FinanceLayout from "@/components/finance/FinanceLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -136,7 +136,7 @@ const FinanceReports = () => {
     const netProfit = totalRevenue - totalPayout;
 
     return (
-        <DashboardLayout>
+        <FinanceLayout>
             <div className="animate-fade-in space-y-7 max-w-7xl mx-auto pb-10">
 
                 {/* ── Header ── */}
@@ -356,7 +356,7 @@ const FinanceReports = () => {
                 </Card>
 
             </div>
-        </DashboardLayout>
+        </FinanceLayout>
     );
 };
 

@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import DashboardLayout from "@/components/DashboardLayout";
+import FinanceLayout from "@/components/finance/FinanceLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     Select,
@@ -114,7 +114,7 @@ const MentorEarnings = () => {
     const reset = () => { setSearch(""); setBatchFilter("all"); setStatusFilter("all"); };
 
     return (
-        <DashboardLayout>
+        <FinanceLayout>
             <div className="animate-fade-in space-y-6 max-w-7xl mx-auto pb-10">
 
                 {/* ── Header ── */}
@@ -274,7 +274,7 @@ const MentorEarnings = () => {
                 </Card>
 
             </div>
-        </DashboardLayout>
+        </FinanceLayout>
     );
 };
 

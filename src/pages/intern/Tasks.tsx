@@ -9,6 +9,7 @@ import {
   Calendar, Eye, Upload,
 } from "lucide-react";
 import PageSearch from "@/components/shared/PageSearch";
+import { cn } from "@/lib/utils";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -129,52 +130,7 @@ const filterTabs: FilterTab[] = ["All", "Pending", "Submitted", "Completed", "Ov
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-interface SummaryCardProps {
-  label: string;
-  value: number;
-  icon: React.ElementType;
-  iconBg: string;
-  iconColor: string;
-  valueColor?: string;
-  isActive?: boolean;
-  onClick?: () => void;
-}
 
-const SummaryCard = ({ label, value, icon: Icon, iconBg, iconColor, valueColor, isActive, onClick }: SummaryCardProps) => (
-  <div
-    onClick={onClick}
-    className={`rounded-xl transition-all duration-200 ${
-      onClick ? "cursor-pointer" : ""
-    } ${
-      isActive
-        ? "ring-2 ring-emerald-500 ring-offset-1 shadow-lg scale-[1.02]"
-        : onClick ? "hover:shadow-md hover:scale-[1.01]" : ""
-    }`}
-  >
-    <Card className="border-border/50 shadow-sm rounded-xl select-none h-full">
-      <CardContent className="pt-5 pb-4">
-        <div className="flex items-center gap-3">
-          <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${iconBg}`}>
-            <Icon className={`w-5 h-5 ${iconColor}`} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className={`text-2xl font-bold leading-tight transition-colors ${
-              isActive ? "text-emerald-600" : (valueColor ?? "text-foreground")
-            }`}>{value}</p>
-            <p className={`text-xs mt-0.5 transition-colors ${
-              isActive ? "text-emerald-600/80 font-semibold" : "text-muted-foreground"
-            }`}>{label}</p>
-          </div>
-          {isActive && (
-            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-500/10 px-2 py-1 rounded-full border border-emerald-500/30 flex-shrink-0">
-              Active
-            </span>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  </div>
-);
 
 interface TaskCardProps {
   task: Task;
@@ -301,74 +257,46 @@ const InternTasks = () => {
           onSearch={setSearchQuery}
         />
 
-        {/* ── Summary Cards ── */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <SummaryCard
-            label="Total Tasks"
-            value={total}
-            icon={ClipboardList}
-            iconBg="bg-violet-500/10"
-            iconColor="text-violet-600"
-            valueColor="text-violet-600"
-            isActive={activeFilter === "All"}
-            onClick={() => setActiveFilter(prev => prev === "All" ? null : "All")}
-          />
-          <SummaryCard
-            label="Pending"
-            value={pending}
-            icon={Clock}
-            iconBg="bg-muted"
-            iconColor="text-muted-foreground"
-            isActive={activeFilter === "Pending"}
-            onClick={() => setActiveFilter(prev => prev === "Pending" ? null : "Pending")}
-          />
-          <SummaryCard
-            label="Submitted"
-            value={submitted}
-            icon={Loader2}
-            iconBg="bg-blue-500/10"
-            iconColor="text-blue-600"
-            valueColor="text-blue-600"
-            isActive={activeFilter === "Submitted"}
-            onClick={() => setActiveFilter(prev => prev === "Submitted" ? null : "Submitted")}
-          />
-          <SummaryCard
-            label="Completed"
-            value={completed}
-            icon={CheckCircle2}
-            iconBg="bg-emerald-500/10"
-            iconColor="text-emerald-600"
-            valueColor="text-emerald-600"
-            isActive={activeFilter === "Completed"}
-            onClick={() => setActiveFilter(prev => prev === "Completed" ? null : "Completed")}
-          />
-        </div>
 
-        {/* ── Filter Tabs ── */}
-        <div className="flex items-center gap-1.5 bg-muted/50 p-1 rounded-xl w-fit border border-border/40 flex-wrap">
-          {filterTabs.map(tab => {
-            const count =
-              tab === "All" ? total :
-                tab === "Pending" ? pending :
-                  tab === "Submitted" ? submitted :
-                    tab === "Completed" ? completed : overdue;
-            return (
-              <button
-                key={tab}
-                onClick={() => setActiveFilter(tab)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${activeFilter === tab
-                  ? "bg-background shadow-sm text-foreground border border-border/50"
-                  : "text-muted-foreground hover:text-foreground"
-                  }`}
-              >
-                {tab}
-                <span className={`text-[10px] px-1.5 py-0 rounded-full font-semibold ${activeFilter === tab
-                  ? "bg-primary/10 text-primary"
-                  : "bg-muted text-muted-foreground"
-                  }`}>{count}</span>
-              </button>
-            );
-          })}
+        {/* Filter Tabs */}
+        <div className="rounded-2xl bg-white border border-slate-100 shadow-sm overflow-hidden w-full">
+          <div className="grid grid-cols-2 md:grid-cols-5 w-full">
+            {filterTabs.map(tab => {
+              const isActive = activeFilter === tab;
+              const count =
+                tab === "All" ? total :
+                  tab === "Pending" ? pending :
+                    tab === "Submitted" ? submitted :
+                      tab === "Completed" ? completed : overdue;
+              return (
+                <button
+                  key={tab}
+                  onClick={() => setActiveFilter(tab)}
+                  className={cn(
+                    "flex items-center justify-center gap-2.5 py-4 transition-all duration-300 outline-none group border-r last:border-r-0 border-slate-50 relative",
+                    isActive 
+                      ? "bg-primary/[0.03] text-primary" 
+                      : "text-slate-400 hover:text-slate-600 hover:bg-slate-50/50"
+                  )}
+                >
+                  {isActive && (
+                    <div className="absolute bottom-0 left-0 w-full h-1 bg-primary animate-in fade-in slide-in-from-bottom-1 duration-300" />
+                  )}
+                  <span className="text-xs font-black uppercase tracking-widest whitespace-nowrap">
+                    {tab}
+                  </span>
+                  <div className={cn(
+                    "flex items-center justify-center min-w-[20px] h-5 rounded-full text-[9px] font-black px-1.5 transition-colors",
+                    isActive 
+                      ? "bg-primary text-white shadow-sm" 
+                      : "bg-slate-100 text-slate-400 group-hover:bg-slate-200"
+                  )}>
+                    {count}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* ── Task Grid ── */}

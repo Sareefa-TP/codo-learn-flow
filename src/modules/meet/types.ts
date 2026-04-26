@@ -21,4 +21,4 @@ export interface MeetRegularSession {
   meetLink: string;
 }
 
-export type MeetTabId = "live" | "upcoming" | "recordings" | "regular";
+export type MeetTabId = "live" | "upcoming" | "recordings" | "regular" | "completed";

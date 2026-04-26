@@ -123,7 +123,7 @@ function meetStatusBadgeClasses(status: string) {
 }
 
 function meetStatusLabel(status: string) {
-  if (status === "Live") return "Live Now";
+  if (status === "Live") return "Active";
   return status;
 }
 
@@ -299,7 +299,7 @@ const AdminMeetList = () => {
                   <SelectContent className="rounded-xl border-none shadow-xl">
                     <SelectItem value="all">All Status</SelectItem>
                     <SelectItem value="Upcoming">Upcoming</SelectItem>
-                    <SelectItem value="Live">Live Now</SelectItem>
+                    <SelectItem value="Live">Active</SelectItem>
                     <SelectItem value="Completed">Completed</SelectItem>
                     <SelectItem value="Cancelled">Cancelled</SelectItem>
                   </SelectContent>

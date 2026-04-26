@@ -4,7 +4,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Video, Calendar, Clock, PlayCircle, User, Info, RefreshCw, X, Radio } from "lucide-react";
+import { Video, Calendar, Clock, PlayCircle, User, Info, RefreshCw, X, Radio, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
 import {
@@ -22,7 +22,7 @@ import type { MeetRegularSession, MeetSession, MeetTabId } from "@/modules/meet/
 import PageSearch from "@/components/shared/PageSearch";
 
 const STATUS_UI: Record<MeetSession["status"], { label: string; className: string }> = {
-  live: { label: "Live Now", className: "bg-red-500/10 text-red-600 border-red-500/20" },
+  live: { label: "Active", className: "bg-red-500/10 text-red-600 border-red-500/20" },
   upcoming: { label: "Upcoming", className: "bg-amber-500/10 text-amber-600 border-amber-500/20" },
   completed: { label: "Recording", className: "bg-slate-500/10 text-slate-600 border-slate-500/20" },
 };
@@ -62,14 +62,15 @@ const MeetTabs = ({
   counts: Record<MeetTabId, number>;
 }) => {
   const tabs: Array<{ id: MeetTabId; label: string; icon: any }> = [
-    { id: "live", label: "Live Now", icon: Radio },
+    { id: "live", label: "Active", icon: Radio },
     { id: "upcoming", label: "Upcoming", icon: Calendar },
+    { id: "completed", label: "Completed", icon: CheckCircle2 },
     { id: "recordings", label: "Recordings", icon: PlayCircle },
     { id: "regular", label: "Regular", icon: RefreshCw },
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5 bg-white p-1.5 rounded-full w-full flex-wrap shadow-sm border border-border/40 mb-2">
+    <div className="grid grid-cols-2 md:grid-cols-5 gap-1.5 bg-white p-1.5 rounded-full w-full flex-wrap shadow-sm border border-border/40 mb-2">
       {tabs.map((t) => {
         const isActive = activeTab === t.id;
         const count = counts[t.id];
@@ -456,7 +457,7 @@ export function MeetPage({
     navigate(`${basePath}/${value}`);
   };
 
-  const { liveSessions, upcomingSessions, completedSessions, regularSessions } = useMemo(() => {
+  const { liveSessions, upcomingSessions, completedSessions, recordingSessions, regularSessions } = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     const matches = (haystack: Array<string | undefined | null>) =>
       q.length === 0 || haystack.some((v) => (v ?? "").toLowerCase().includes(q));
@@ -470,15 +471,17 @@ export function MeetPage({
     const completed = sessionsState.filter((s) =>
       s.status === "completed" && matches([s.title, s.mentor, (s as any).topic]),
     );
+    const recordings = completed.filter(s => !!s.recordingLink);
     const regular = fixedSessions.filter((s) => matches([s.title, s.mentor, s.schedule]));
 
-    return { liveSessions: live, upcomingSessions: upcoming, completedSessions: completed, regularSessions: regular };
+    return { liveSessions: live, upcomingSessions: upcoming, completedSessions: completed, recordingSessions: recordings, regularSessions: regular };
   }, [sessionsState, fixedSessions, searchQuery]);
 
   const counts: Record<MeetTabId, number> = {
     live: liveSessions.length,
     upcoming: upcomingSessions.length,
-    recordings: completedSessions.length,
+    completed: completedSessions.length,
+    recordings: recordingSessions.length,
     regular: regularSessions.length,
   };
 
@@ -517,8 +520,9 @@ export function MeetPage({
                 <div>
                   <CardTitle className="text-base sm:text-lg">Sessions</CardTitle>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {activeTab === "live" && "Join sessions that are live right now."}
+                    {activeTab === "live" && "Join sessions that are active right now."}
                     {activeTab === "upcoming" && "Upcoming sessions scheduled by your mentor."}
+                    {activeTab === "completed" && "History of your previous sessions."}
                     {activeTab === "recordings" && "Replay completed sessions anytime."}
                     {activeTab === "regular" && "Recurring sessions you can join regularly."}
                   </p>
@@ -526,7 +530,8 @@ export function MeetPage({
                 <Badge variant="secondary" className="rounded-full tabular-nums">
                   {activeTab === "live" && liveSessions.length}
                   {activeTab === "upcoming" && upcomingSessions.length}
-                  {activeTab === "recordings" && completedSessions.length}
+                  {activeTab === "completed" && completedSessions.length}
+                  {activeTab === "recordings" && recordingSessions.length}
                   {activeTab === "regular" && fixedSessions.length}
                 </Badge>
               </div>
@@ -539,7 +544,7 @@ export function MeetPage({
                     liveSessions.map((s) => <SessionRow key={s.id} session={s} demoRecordingMp4={demoRecordingMp4} />)
                   ) : (
                     <div className="p-6">
-                      <EmptyState message={enableSearch && searchQuery.trim() ? "No meetings found" : "No sessions are live right now"} />
+                      <EmptyState message={enableSearch && searchQuery.trim() ? "No meetings found" : "No sessions are active right now"} />
                     </div>
                   ))}
 
@@ -552,12 +557,21 @@ export function MeetPage({
                     </div>
                   ))}
 
-                {activeTab === "recordings" &&
+                {activeTab === "completed" &&
                   (completedSessions.length > 0 ? (
                     completedSessions.map((s) => <SessionRow key={s.id} session={s} demoRecordingMp4={demoRecordingMp4} />)
                   ) : (
                     <div className="p-6">
-                      <EmptyState message={enableSearch && searchQuery.trim() ? "No meetings found" : "No recordings found"} />
+                      <EmptyState message={enableSearch && searchQuery.trim() ? "No meetings found" : "No completed sessions found"} />
+                    </div>
+                  ))}
+
+                {activeTab === "recordings" &&
+                  (recordingSessions.length > 0 ? (
+                    recordingSessions.map((s) => <SessionRow key={s.id} session={s} demoRecordingMp4={demoRecordingMp4} />)
+                  ) : (
+                    <div className="p-6">
+                      <EmptyState message={enableSearch && searchQuery.trim() ? "No meetings found" : "No recordings available"} />
                     </div>
                   ))}
 

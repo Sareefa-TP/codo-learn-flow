@@ -15,7 +15,9 @@ import {
   XCircle,
   X,
   DollarSign,
-  FileText
+  FileText,
+  Briefcase,
+  Search
 } from "lucide-react";
 import PageSearch from "@/components/shared/PageSearch";
 import { cn } from "@/lib/utils";
@@ -413,36 +415,41 @@ const PlacementUpdates = () => {
             onSearch={setSearchQuery}
           />
 
-          {/* Filter Bar (Match Tasks UI) */}
-          <div className="flex items-center gap-2 p-1.5 bg-muted/40 border border-border/40 rounded-2xl w-fit overflow-x-auto max-w-full no-scrollbar shadow-inner mt-2">
-            {filters.map(filter => {
-              const isActive = activeTab === filter;
-              const count = getCount(filter);
-              
-              return (
-                <button
-                  key={filter}
-                  onClick={() => setActiveTab(filter)}
-                  className={cn(
-                    "flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 whitespace-nowrap",
-                    isActive 
-                      ? "bg-background text-primary shadow-md scale-[1.02]" 
-                      : "text-muted-foreground hover:bg-muted/80"
-                  )}
-                >
-                  {filter}
-                  <Badge 
-                    variant="secondary" 
+          {/* Filter Tabs (Standardized 12-column Grid) */}
+          <div className="rounded-2xl bg-white border border-slate-100 shadow-sm overflow-hidden w-full">
+            <div className="grid grid-cols-2 md:grid-cols-4 w-full">
+              {filters.map(filter => {
+                const isActive = activeTab === filter;
+                const count = getCount(filter);
+                return (
+                  <button
+                    key={filter}
+                    onClick={() => setActiveTab(filter)}
                     className={cn(
-                      "px-2 py-0 min-w-[22px] h-5 justify-center font-bold text-[10px] rounded-md transition-all duration-300",
-                      isActive ? "bg-primary/10 text-primary border-primary/20" : "bg-muted/50 text-muted-foreground/60"
+                      "flex items-center justify-center gap-2.5 py-4 transition-all duration-300 outline-none group border-r last:border-r-0 border-slate-50 relative",
+                      isActive 
+                        ? "bg-primary/[0.03] text-primary" 
+                        : "text-slate-400 hover:text-slate-600 hover:bg-slate-50/50"
                     )}
                   >
-                    {count}
-                  </Badge>
-                </button>
-              );
-            })}
+                    {isActive && (
+                      <div className="absolute bottom-0 left-0 w-full h-1 bg-primary animate-in fade-in slide-in-from-bottom-1 duration-300" />
+                    )}
+                    <span className="text-xs font-black uppercase tracking-widest whitespace-nowrap">
+                      {filter}
+                    </span>
+                    <div className={cn(
+                      "flex items-center justify-center min-w-[20px] h-5 rounded-full text-[9px] font-black px-1.5 transition-colors",
+                      isActive 
+                        ? "bg-primary text-white shadow-sm" 
+                        : "bg-slate-100 text-slate-400 group-hover:bg-slate-200"
+                    )}>
+                      {count}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 

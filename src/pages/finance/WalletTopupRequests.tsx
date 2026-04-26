@@ -1,5 +1,5 @@
 import { useState } from "react";
-import DashboardLayout from "@/components/DashboardLayout";
+import FinanceLayout from "@/components/finance/FinanceLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -165,7 +165,7 @@ const WalletTopupRequests = () => {
     const rejectedCount = requests.filter(r => r.status === "Rejected").length;
 
     return (
-        <DashboardLayout>
+        <FinanceLayout>
             <div className="animate-fade-in space-y-6 max-w-7xl mx-auto pb-10">
 
                 {/* ── Header ── */}
@@ -332,7 +332,7 @@ const WalletTopupRequests = () => {
                 studentName={previewRow?.student ?? ""}
                 onClose={() => setPreviewRow(null)}
             />
-        </DashboardLayout>
+        </FinanceLayout>
     );
 };
 

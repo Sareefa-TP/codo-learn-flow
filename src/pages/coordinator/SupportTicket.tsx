@@ -219,29 +219,39 @@ const CoordinatorSupportTicket = () => {
 
         {/* Filters Section */}
         <div className="space-y-6">
-          <div className="flex items-center gap-2 bg-muted/30 p-1.5 rounded-2xl w-fit border border-border/40 flex-wrap shadow-sm">
-            {filterTabs.map(tab => (
-              <button
-                key={tab.label}
-                onClick={() => setActiveFilter(tab.label)}
-                className={cn(
-                  "flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all relative",
-                  activeFilter === tab.label
-                    ? "bg-background shadow-md text-foreground border border-border/50 ring-1 ring-black/5"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                )}
-              >
-                {tab.label}
-                <span className={cn(
-                  "text-[10px] px-2 py-0.5 rounded-full font-black min-w-[20px]",
-                  activeFilter === tab.label
-                    ? "bg-primary/10 text-primary"
-                    : "bg-muted text-muted-foreground"
-                )}>
-                  {tab.count}
-                </span>
-              </button>
-            ))}
+          <div className="rounded-2xl bg-white border border-slate-100 shadow-sm overflow-hidden w-full">
+            <div className="grid grid-cols-2 md:grid-cols-4 w-full">
+              {filterTabs.map(tab => {
+                const isActive = activeFilter === tab.label;
+                return (
+                  <button
+                    key={tab.label}
+                    onClick={() => setActiveFilter(tab.label)}
+                    className={cn(
+                      "flex items-center justify-center gap-2.5 py-4 transition-all duration-300 outline-none group border-r last:border-r-0 border-slate-50 relative",
+                      isActive 
+                        ? "bg-primary/[0.03] text-primary" 
+                        : "text-slate-400 hover:text-slate-600 hover:bg-slate-50/50"
+                    )}
+                  >
+                    {isActive && (
+                      <div className="absolute bottom-0 left-0 w-full h-1 bg-primary animate-in fade-in slide-in-from-bottom-1 duration-300" />
+                    )}
+                    <span className="text-xs font-black uppercase tracking-widest whitespace-nowrap">
+                      {tab.label}
+                    </span>
+                    <div className={cn(
+                      "flex items-center justify-center min-w-[20px] h-5 rounded-full text-[9px] font-black px-1.5 transition-colors",
+                      isActive 
+                        ? "bg-primary text-white shadow-sm" 
+                        : "bg-slate-100 text-slate-400 group-hover:bg-slate-200"
+                    )}>
+                      {tab.count}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Ticket List */}

@@ -1,14 +1,14 @@
-import DashboardLayout from "@/components/DashboardLayout";
+import FinanceLayout from "@/components/finance/FinanceLayout";
 import PageTemplate from "@/components/PageTemplate";
 
 const FinanceReports = () => {
   return (
-    <DashboardLayout>
+    <FinanceLayout>
       <PageTemplate 
         title="Financial Reports" 
         description="Generate and view comprehensive financial reports"
       />
-    </DashboardLayout>
+    </FinanceLayout>
   );
 };
 
