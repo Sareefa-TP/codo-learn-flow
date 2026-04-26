@@ -142,6 +142,8 @@ const StudentMeet = () => {
       initialSessions={initialSessions}
       fixedSessions={fixedSessions}
       demoRecordingMp4={DEMO_RECORDING_MP4}
+      enableSearch
+      searchPlaceholder="Search meetings..."
     />
   );
 };

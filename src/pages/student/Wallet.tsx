@@ -23,7 +23,6 @@ import {
   Clock,
   AlertCircle,
   FileText,
-  ArrowLeft,
   ChevronRight,
   BookOpen,
   Layout,
@@ -34,6 +33,18 @@ import CourseCard from "@/components/student/CourseCard";
 import { Wallet as WalletIcon } from "lucide-react";
 import PageSearch from "@/components/shared/PageSearch";
 import { toast } from "sonner";
+import { PageHeader, PageSection } from "@/components/shared/PageScaffold";
+import BackButton from "@/components/shared/BackButton";
+import { studentData } from "@/data/studentData";
+import { downloadInvoicePdf } from "@/lib/pdf/invoicePdf";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 // Types
 interface Message {
@@ -97,10 +108,14 @@ const COURSES_FINANCE: Record<string, CourseFinance> = {
       { id: 2, name: "Installment 1", amount: 15000, status: "Paid", date: "15 Feb 2026" },
       { id: 3, name: "Installment 2", amount: 10000, status: "Paid", date: "15 Mar 2026" },
       { id: 4, name: "Installment 3", amount: 15000, status: "Due", date: "15 Apr 2026" },
+      { id: 5, name: "Installment 4", amount: 0, status: "Upcoming", date: "15 May 2026" },
     ],
     nextPayment: { amount: 15000, dueDate: "15 Apr 2026", isOverdue: false },
     paymentHistory: [
+      { invoiceId: "INV-2026-0402", date: "02 Apr 2026", description: "Late Fee Waiver Credit", amount: 500, method: "Wallet Credit", txnId: "TXN-991245673", status: "Paid" },
+      { invoiceId: "INV-2026-0328", date: "28 Mar 2026", description: "Installment 3 Attempt", amount: 15000, method: "Debit Card", txnId: "TXN-910238445", status: "Pending" },
       { invoiceId: "INV-2026-0315", date: "15 Mar 2026", description: "Installment 2 - Full Stack Web Dev", amount: 10000, method: "Credit Card", txnId: "TXN-892341908", status: "Paid" },
+      { invoiceId: "INV-2026-0308", date: "08 Mar 2026", description: "Gateway Retry Charge", amount: 10000, method: "UPI", txnId: "TXN-882110477", status: "Failed" },
       { invoiceId: "INV-2026-0215", date: "15 Feb 2026", description: "Installment 1 - Full Stack Web Dev", amount: 15000, method: "UPI", txnId: "TXN-762145902", status: "Paid" },
       { invoiceId: "INV-2026-0115", date: "15 Jan 2026", description: "Enrollment Payment", amount: 20000, method: "Net Banking", txnId: "TXN-651908234", status: "Paid" },
     ]
@@ -119,9 +134,13 @@ const COURSES_FINANCE: Record<string, CourseFinance> = {
       { id: 1, name: "Enrollment Payment", amount: 35000, status: "Paid", date: "01 Feb 2026" },
       { id: 2, name: "Installment 1", amount: 25000, status: "Due", date: "01 May 2026" },
       { id: 3, name: "Installment 2", amount: 25000, status: "Upcoming", date: "01 Aug 2026" },
+      { id: 4, name: "Certification Fee", amount: 0, status: "Upcoming", date: "15 Aug 2026" },
     ],
     nextPayment: { amount: 25000, dueDate: "01 May 2026", isOverdue: false },
     paymentHistory: [
+      { invoiceId: "INV-DS2026-04", date: "20 Apr 2026", description: "Installment 1 Attempt", amount: 25000, method: "Net Banking", txnId: "TXN-990776451", status: "Pending" },
+      { invoiceId: "INV-DS2026-03", date: "12 Apr 2026", description: "Bank Reconciliation Retry", amount: 25000, method: "Credit Card", txnId: "TXN-985422700", status: "Failed" },
+      { invoiceId: "INV-DS2026-02", date: "05 Mar 2026", description: "Platform Service Credit", amount: 1200, method: "Wallet Credit", txnId: "TXN-973154860", status: "Paid" },
       { invoiceId: "INV-DS2026-01", date: "01 Feb 2026", description: "Enrollment Fee - Data Science", amount: 35000, method: "UPI", txnId: "TXN-998877665", status: "Paid" },
     ]
   }
@@ -164,6 +183,12 @@ const StudentWallet = () => {
   const [couponApplied, setCouponApplied] = useState(false);
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+  const [paymentDescription, setPaymentDescription] = useState("");
+  const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null);
+  const [isSubmittingPaymentProof, setIsSubmittingPaymentProof] = useState(false);
+  const [isPendingVerification, setIsPendingVerification] = useState(false);
+  const [verificationSubmittedAt, setVerificationSubmittedAt] = useState("");
 
   const coupons: Array<{ code: string; type: "percentage" | "fixed"; value: number }> = [
     { code: "WELCOME10", type: "percentage", value: 10 },
@@ -187,7 +212,65 @@ const StudentWallet = () => {
     setMessage("");
     setErrorMessage("");
     setCouponCode("");
+    setIsPaymentDialogOpen(false);
+    setPaymentDescription("");
+    setPaymentScreenshot(null);
+    setIsSubmittingPaymentProof(false);
+    setIsPendingVerification(false);
+    setVerificationSubmittedAt("");
   }, [courseData?.id, courseData?.nextPayment.amount]);
+
+  const handleSubmitPaymentProof = () => {
+    if (!courseData || isSubmittingPaymentProof) return;
+    if (!paymentDescription.trim()) {
+      toast.error("Please add a payment description.");
+      return;
+    }
+    if (!paymentScreenshot) {
+      toast.error("Please upload your payment screenshot.");
+      return;
+    }
+
+    setIsSubmittingPaymentProof(true);
+
+    setTimeout(() => {
+      const submittedAt = new Date().toLocaleString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
+      const pendingEntry: Transaction = {
+        invoiceId: `INV-VERIFY-${Date.now().toString().slice(-6)}`,
+        date: submittedAt.split(",")[0],
+        description: `Payment Proof Submitted - ${paymentDescription.trim()}`,
+        amount: finalAmount,
+        method: "Manual Verification",
+        txnId: `TXN-VERIFY-${Date.now().toString().slice(-8)}`,
+        status: "Pending",
+      };
+
+      setCourseData((prev) =>
+        prev
+          ? {
+              ...prev,
+              paymentHistory: [pendingEntry, ...prev.paymentHistory],
+            }
+          : prev,
+      );
+
+      setVerificationSubmittedAt(submittedAt);
+      setIsPendingVerification(true);
+      setIsPaymentDialogOpen(false);
+      setIsSubmittingPaymentProof(false);
+      setPaymentDescription("");
+      setPaymentScreenshot(null);
+
+      toast.success("Payment proof sent to Admin & Finance. Status: Pending Verification.");
+    }, 900);
+  };
 
   const applyCoupon = () => {
     if (couponApplied) return;
@@ -240,22 +323,17 @@ const StudentWallet = () => {
 
   const renderCourseList = () => (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-6xl mx-auto px-4 md:px-6 lg:px-8">
-      {/* Header Section */}
-      <div className="space-y-2">
-        <h1 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight">
-          Wallet & Payments
-        </h1>
-        <p className="text-muted-foreground text-sm font-medium">
-          Select a course to view your financial detailed breakdown and clear dues.
-        </p>
-      </div>
-
-      {/* Search Bar - Exactly matching My Courses page */}
-      <PageSearch
-        placeholder="Search courses by name or category..."
-        onSearch={setSearchQuery}
-        className="mb-10"
+      <PageHeader
+        title="Wallet & Payments"
+        description="Select a course to view your financial detailed breakdown and clear dues."
       />
+      <div className="mb-6">
+        <PageSearch
+          placeholder="Search courses by name or category..."
+          onSearch={setSearchQuery}
+          className="mb-0"
+        />
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredCourses.map((course) => (
@@ -289,38 +367,30 @@ const StudentWallet = () => {
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6 lg:space-y-8 max-w-6xl mx-auto px-4 md:px-6 lg:px-8 pb-10">
         {/* Navigation & Header */}
         <div className="space-y-4">
-          <Button variant="outline" size="sm" onClick={() => navigate("/student/payments")} className="gap-2 group">
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            Back to Courses
-          </Button>
+          <BackButton label="Back to Courses" onClick={() => navigate("/student/payments")} />
 
-          <div className="mb-0 bg-primary/5 rounded-2xl border border-primary/10 p-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="space-y-1">
-                <h1 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight">
-                  {courseData.courseName}
-                </h1>
-                <p className="text-muted-foreground text-sm font-medium">
-                  Financial ID: <span className="text-primary pr-2">WAL-{courseData.id.toUpperCase()}</span>
-                  • Last update: Just now
-                </p>
-              </div>
-            </div>
-          </div>
+          <PageSection className="mb-0 bg-primary/5 p-4">
+            <PageHeader
+              title={courseData.courseName}
+              description={`Financial ID: WAL-${courseData.id.toUpperCase()} • Last update: Just now`}
+              className="mb-0"
+            />
+          </PageSection>
         </div>
 
         {/* 1️⃣ Metric Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <MetricCard title="Total Course Fee" amount={courseData.totalFee} icon={WalletIcon} />
           <MetricCard title="Total Paid" amount={courseData.totalPaid} icon={CheckCircle2} />
           <MetricCard title="Remaining Balance" amount={courseData.balance} icon={Clock} />
           <MetricCard title="Wallet Balance" amount={courseData.walletBalance} icon={IndianRupee} />
           <MetricCard title="Payment Completion" amount={courseData.completion} icon={CreditCard} isPercentage />
+          <MetricCard title="Next Payment Due" amount={courseData.nextPayment.amount} icon={AlertCircle} />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
           {/* 2️⃣ Timeline */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2">
             <Card className="shadow-sm">
               <CardHeader className="pb-4">
                 <CardTitle className="text-lg font-bold flex items-center gap-2">
@@ -374,19 +444,17 @@ const StudentWallet = () => {
           </div>
 
           {/* 3️⃣ Pay Now Sticky */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 h-full">
             {courseData.balance > 0 && (
-              <Card className="border-warning/30 bg-warning/5 shadow-sm sticky top-24">
-                <CardContent className="p-6">
+              <Card className="h-full border-warning/30 bg-warning/5 shadow-sm">
+                <CardContent className="flex h-full flex-col p-6">
                   <div className="flex items-start gap-4 mb-4">
                     <div className="w-12 h-12 rounded-xl bg-warning/20 flex items-center justify-center shrink-0">
                       <AlertCircle className="w-6 h-6 text-warning" />
                     </div>
                     <div>
                       <h3 className="text-lg font-bold text-warning-foreground">Next Payment Due</h3>
-                      <p className="text-xs text-muted-foreground font-medium mt-1">
-                        Please clear your due installment before the deadline.
-                      </p>
+
                     </div>
                   </div>
 
@@ -407,7 +475,7 @@ const StudentWallet = () => {
                   <div className="space-y-3 mb-4">
                     <div className="flex items-center gap-2">
                       <Input
-                        placeholder="Enter coupon code"
+                        placeholder="Coupon Code"
                         value={couponCode}
                         disabled={couponApplied}
                         onChange={(e) => {
@@ -434,7 +502,7 @@ const StudentWallet = () => {
                           className="h-11 rounded-xl font-bold"
                           onClick={applyCoupon}
                         >
-                          Apply Coupon
+                          Apply
                         </Button>
                       )}
                     </div>
@@ -485,10 +553,26 @@ const StudentWallet = () => {
                     </div>
                   </div>
 
-                  <Button className="w-full h-12 text-md font-bold shadow-md hover:shadow-lg transition-all gap-2 rounded-xl">
+                  <div className="mt-auto pt-2">
+                    {isPendingVerification ? (
+                      <div className="rounded-xl border border-warning/30 bg-warning/10 p-3 text-center">
+                        <p className="text-xs font-bold uppercase tracking-wide text-warning">
+                          Pending Verification
+                        </p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Submitted to Admin & Finance on {verificationSubmittedAt}
+                        </p>
+                      </div>
+                    ) : null}
+                    <Button
+                      className="w-full h-12 text-md font-bold shadow-md hover:shadow-lg transition-all gap-2 rounded-xl mt-3"
+                      disabled={isPendingVerification}
+                      onClick={() => setIsPaymentDialogOpen(true)}
+                    >
                     <CreditCard className="w-5 h-5" />
-                    Pay Now
-                  </Button>
+                    {isPendingVerification ? "Awaiting Verification" : "Pay Now"}
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             )}
@@ -504,7 +588,82 @@ const StudentWallet = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            <ScrollArea className="w-full">
+            <div className="divide-y divide-border/60 md:hidden">
+              {courseData.paymentHistory.map((payment) => (
+                <div key={payment.invoiceId} className="space-y-3 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Invoice ID</p>
+                      <p className="mt-1 font-mono text-xs text-muted-foreground">{payment.invoiceId}</p>
+                    </div>
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        "text-[10px] font-bold px-1.5 h-5",
+                        payment.status === "Paid"
+                          ? "bg-primary/10 text-primary border-primary/20"
+                          : payment.status === "Pending"
+                            ? "bg-warning/10 text-warning border-warning/20"
+                            : "bg-destructive/10 text-destructive border-destructive/20",
+                      )}
+                    >
+                      {payment.status}
+                    </Badge>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Date</p>
+                      <p className="mt-1 text-sm font-semibold">{payment.date}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Amount</p>
+                      <p className="mt-1 inline-flex items-center text-sm font-bold">
+                        <IndianRupee className="w-3.5 h-3.5" />
+                        {payment.amount.toLocaleString("en-IN")}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Description</p>
+                    <p className="mt-1 text-sm font-semibold text-foreground">{payment.description}</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-3">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Method</p>
+                      <p className="mt-1 text-xs font-medium text-muted-foreground">{payment.method}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Transaction ID</p>
+                      <code className="mt-1 inline-block rounded border bg-muted px-2 py-1 font-mono text-[10px] text-muted-foreground">
+                        {payment.txnId}
+                      </code>
+                    </div>
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    className="w-full rounded-xl"
+                    onClick={() => {
+                      downloadInvoicePdf({
+                        studentName: studentData.profile.name,
+                        courseName: courseData.courseName,
+                        category: courseData.category,
+                        transaction: payment,
+                      });
+                      toast.success(`Invoice ${payment.invoiceId} downloaded`);
+                    }}
+                  >
+                    <Download className="mr-2 w-4 h-4" />
+                    Download Invoice
+                  </Button>
+                </div>
+              ))}
+            </div>
+
+            <ScrollArea className="hidden w-full md:block">
               <Table>
                 <TableHeader className="bg-muted/50">
                   <TableRow>
@@ -549,7 +708,20 @@ const StudentWallet = () => {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right pr-6">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:text-primary hover:bg-primary/5">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-primary hover:text-primary hover:bg-primary/5"
+                          onClick={() => {
+                            downloadInvoicePdf({
+                              studentName: studentData.profile.name,
+                              courseName: courseData.courseName,
+                              category: courseData.category,
+                              transaction: payment,
+                            });
+                            toast.success(`Invoice ${payment.invoiceId} downloaded`);
+                          }}
+                        >
                           <Download className="w-4 h-4" />
                         </Button>
                       </TableCell>
@@ -560,6 +732,61 @@ const StudentWallet = () => {
             </ScrollArea>
           </CardContent>
         </Card>
+
+        <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
+          <DialogContent className="max-w-lg rounded-2xl">
+            <DialogHeader>
+              <DialogTitle>Submit Payment for Verification</DialogTitle>
+              <DialogDescription>
+                Share transaction details and screenshot. This request will be sent to Admin & Finance for verification.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div className="rounded-xl border border-border/70 bg-muted/20 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Amount to verify</p>
+                <p className="mt-1 text-2xl font-bold text-foreground">₹{finalAmount.toLocaleString("en-IN")}</p>
+                <p className="text-xs text-muted-foreground mt-1">Due date: {courseData?.nextPayment.dueDate}</p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-foreground">Payment Description</label>
+                <Input
+                  placeholder="Example: UPI transfer via GPay, Ref ID 2345..."
+                  value={paymentDescription}
+                  onChange={(e) => setPaymentDescription(e.target.value)}
+                  className="h-11 rounded-xl"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-foreground">Upload Payment Screenshot</label>
+                <Input
+                  type="file"
+                  accept=".png,.jpg,.jpeg,.webp,.pdf"
+                  onChange={(e) => setPaymentScreenshot(e.target.files?.[0] || null)}
+                  className="h-11 rounded-xl"
+                />
+                {paymentScreenshot ? (
+                  <p className="text-xs text-muted-foreground">Selected: {paymentScreenshot.name}</p>
+                ) : null}
+              </div>
+            </div>
+
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button
+                variant="outline"
+                onClick={() => setIsPaymentDialogOpen(false)}
+                disabled={isSubmittingPaymentProof}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleSubmitPaymentProof} disabled={isSubmittingPaymentProof}>
+                {isSubmittingPaymentProof ? "Sending..." : "Send for Verification"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     );
   };

@@ -18,8 +18,6 @@ import {
   Clock,
   MoreVertical,
   X,
-  Eye,
-  ChevronDown
 } from "lucide-react";
 import { 
   Dialog, 
@@ -34,6 +32,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PageSearch from "@/components/shared/PageSearch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface FeedbackEntry {
   id: string;
@@ -47,30 +46,76 @@ interface FeedbackEntry {
 
 const mockFeedback: FeedbackEntry[] = [
   {
-    id: "1",
-    type: "from_tutor",
-    author: "Dr. Sarah Johnson",
-    rating: 5,
-    message: "Excellent progress in the React module! Your understanding of hooks is impressive.",
-    date: "2024-03-25",
-    status: "Read"
-  },
-  {
-    id: "2",
-    type: "from_mentor",
-    author: "Michael Chen",
-    rating: 4,
-    message: "Good work on the recent project. Focus more on state management best practices.",
-    date: "2024-03-24",
-    status: "Read"
-  },
-  {
-    id: "3",
+    id: "f001",
     type: "to_tutor",
     author: "You",
     rating: 5,
     message: "The explanation of Redux was very clear. Thank you!",
-    date: "2024-03-20"
+    date: "2026-03-20",
+    status: "Read"
+  },
+  {
+    id: "f002",
+    type: "to_tutor",
+    author: "You",
+    rating: 4,
+    message: "Great class pace in React module 2. More real-world API examples would help even more.",
+    date: "2026-03-17",
+    status: "Read"
+  },
+  {
+    id: "f003",
+    type: "to_mentor",
+    author: "You",
+    rating: 5,
+    message: "Your career guidance session helped me prepare my portfolio with confidence.",
+    date: "2026-03-16",
+    status: "Pending"
+  },
+  {
+    id: "f004",
+    type: "to_mentor",
+    author: "You",
+    rating: 3,
+    message: "Please share a checklist for internship interview preparation.",
+    date: "2026-03-12",
+    status: "Read"
+  },
+  {
+    id: "f005",
+    type: "from_tutor",
+    author: "Dr. Sarah Johnson",
+    rating: 5,
+    message: "Excellent progress in the React module! Your understanding of hooks is impressive.",
+    date: "2026-03-25",
+    status: "Read"
+  },
+  {
+    id: "f006",
+    type: "from_mentor",
+    author: "Michael Chen",
+    rating: 4,
+    message: "Good work on the recent project. Focus more on state management best practices.",
+    date: "2026-03-24",
+    status: "Read"
+  },
+  {
+    id: "f007",
+    type: "from_tutor",
+    author: "Prof. Emma Lewis",
+    rating: 3,
+    message: "Attendance is improving. Please submit assignments before deadline to maintain momentum.",
+    date: "2026-03-19",
+    status: "Pending"
+  },
+  {
+    id: "f008",
+    type: "from_mentor",
+    author: "Arjun Malhotra",
+    rating: 5,
+    message: "Fantastic growth in communication and presentation. Keep sharing your weekly wins.",
+    date: "2026-03-11",
+    status: "Read"
   }
 ];
 
@@ -86,6 +131,9 @@ const StudentFeedback = () => {
   const [message, setMessage] = useState("");
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedFeedback, setSelectedFeedback] = useState<FeedbackEntry | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editRating, setEditRating] = useState(5);
+  const [editMessage, setEditMessage] = useState("");
 
   const tabMapping: Record<string, FeedbackEntry["type"]> = {
     "my-teacher": "to_tutor",
@@ -117,13 +165,45 @@ const StudentFeedback = () => {
     };
 
     setEntries([newEntry, ...entries]);
-    setEntries([newEntry, ...entries]);
     setIsModalOpen(false);
     setMessage("");
     setRating(5);
     setSelectedCourse("");
     setSelectedTutor("");
     toast.success(`Feedback sent successfully`);
+  };
+
+  const openFeedbackDetails = (entry: FeedbackEntry) => {
+    setSelectedFeedback(entry);
+    setEditRating(entry.rating || 5);
+    setEditMessage(entry.message);
+    setIsEditMode(false);
+    setIsViewModalOpen(true);
+  };
+
+  const handleSaveFeedbackEdit = () => {
+    if (!selectedFeedback || !editMessage.trim()) {
+      toast.error("Please enter feedback message");
+      return;
+    }
+
+    const updated = entries.map((entry) =>
+      entry.id === selectedFeedback.id
+        ? {
+            ...entry,
+            rating: editRating,
+            message: editMessage.trim(),
+            date: new Date().toISOString().split("T")[0],
+            status: "Pending",
+          }
+        : entry,
+    );
+
+    const updatedSelected = updated.find((entry) => entry.id === selectedFeedback.id) || null;
+    setEntries(updated);
+    setSelectedFeedback(updatedSelected);
+    setIsEditMode(false);
+    toast.success("Feedback updated successfully");
   };
 
   return (
@@ -143,12 +223,12 @@ const StudentFeedback = () => {
           <PageSearch
             placeholder="Search feedback..."
             onSearch={setSearchQuery}
-            className="mb-10"
+            className="mb-6 sm:mb-10"
           />
 
           {/* Tab-based Navigation (Updated to match design) */}
           <div className="bg-white p-1.5 rounded-full border border-border/40 mb-8 w-full shadow-sm">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-1">
+            <div className="no-scrollbar flex justify-start gap-1 overflow-x-auto md:grid md:grid-cols-4 md:overflow-visible">
               {[
                 { id: "my-teacher", label: "My Teacher" },
                 { id: "my-mentor", label: "My Mentor" },
@@ -159,10 +239,10 @@ const StudentFeedback = () => {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={cn(
-                    "px-4 py-3 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 text-center flex items-center justify-center h-full",
-                    activeTab === tab.id 
-                      ? "bg-[#28B485] text-white shadow-lg shadow-[#28B485]/20" 
-                      : "text-[#94A3B8] hover:bg-slate-50 hover:text-[#64748B]"
+                    "min-w-max shrink-0 px-4 py-3 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 text-center flex items-center justify-center h-full md:min-w-0 md:shrink",
+                    activeTab === tab.id
+                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
                   )}
                 >
                   <span className="truncate">{tab.label}</span>
@@ -173,26 +253,35 @@ const StudentFeedback = () => {
 
           {/* Content Area */}
           <div className="bg-card rounded-[2.5rem] border border-border/40 shadow-xl shadow-slate-200/50 min-h-[500px] overflow-hidden flex flex-col">
-            <div className="p-8 pb-4 flex items-center justify-between border-b border-border/20 bg-muted/5">
-              <div>
-                <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2 capitalize">
+            <div className="p-4 sm:p-8 sm:pb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border/20 bg-muted/5">
+              <div className="min-w-0">
+                <div className="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2 capitalize leading-tight">
                   <History className="w-5 h-5 text-primary" />
                   {activeTab.replace(/-/g, ' ')} Feedbacks
-                </h2>
+                </div>
                 <p className="text-xs text-muted-foreground font-medium mt-1">
                   Total {filteredEntries.length} Records Found
                 </p>
               </div>
-              <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground">
-                <MoreVertical className="w-5 h-5" />
-              </Button>
+              {activeTab.startsWith("my-") ? (
+                <Button
+                  onClick={() => setIsModalOpen(true)}
+                  className="w-full sm:w-auto rounded-xl px-4 h-10 font-semibold"
+                >
+                  Create Ticket
+                </Button>
+              ) : null}
             </div>
 
-            <CardContent className="p-8 flex-1">
+            <CardContent className="p-4 sm:p-8 flex-1">
               {filteredEntries.length > 0 ? (
                 <div className="flex flex-col gap-4">
                   {filteredEntries.map((entry) => (
-                    <Card key={entry.id} className="border-border/40 bg-slate-50/30 hover:bg-white hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-500 rounded-3xl overflow-hidden group">
+                    <Card
+                      key={entry.id}
+                      className="cursor-pointer border-border/40 bg-slate-50/30 transition-all duration-500 hover:border-primary/20 hover:bg-white hover:shadow-xl hover:shadow-primary/5 group rounded-3xl overflow-hidden"
+                      onClick={() => openFeedbackDetails(entry)}
+                    >
                       <CardContent className="p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-6">
                         {/* Left: Author */}
                         <div className="flex items-center gap-3 w-48 shrink-0">
@@ -220,30 +309,11 @@ const StudentFeedback = () => {
                           </div>
                         </div>
 
-                        {/* Right: Date & Actions */}
+                        {/* Right: Date */}
                         <div className="flex items-center gap-4 shrink-0 justify-between md:justify-end w-full md:w-auto">
                           <Badge variant="outline" className="rounded-lg text-[10px] border-border/60 font-bold uppercase py-1 px-3 whitespace-nowrap bg-background shadow-sm">
                             {entry.date}
                           </Badge>
-                          
-                          <div className="flex items-center gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-9 text-xs px-4 gap-2 rounded-lg border-border/60 hover:border-primary/40 hover:bg-primary/5 transition-all"
-                              onClick={() => {
-                                setSelectedFeedback(entry);
-                                setIsViewModalOpen(true);
-                              }}
-                            >
-                              <Eye className="w-4 h-4 text-primary" />
-                              <span className="hidden sm:inline">View</span>
-                            </Button>
-                            
-                            <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground hover:bg-muted shrink-0 transition-colors">
-                              <MoreVertical className="w-5 h-5" />
-                            </Button>
-                          </div>
                         </div>
                       </CardContent>
                     </Card>
@@ -276,28 +346,18 @@ const StudentFeedback = () => {
             </CardContent>
           </div>
 
-          {/* Floating Action Button */}
-          {activeTab.startsWith("my-") && (
-            <Button 
-              onClick={() => setIsModalOpen(true)}
-              className="fixed bottom-10 right-10 w-16 h-16 rounded-full bg-primary hover:bg-primary/90 text-white shadow-2xl shadow-primary/30 z-50 hover:scale-110 active:scale-95 transition-all group overflow-hidden"
-            >
-              <Plus className="w-8 h-8 group-hover:rotate-90 transition-transform duration-500" />
-            </Button>
-          )}
-
         </div>
       </DashboardLayout>
 
       {/* Add Feedback Modal (Standardized exactly to Weekly Report) */}
     {isModalOpen && (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+      <div className="fixed inset-0 z-[100] flex items-start sm:items-center justify-center bg-black/40 backdrop-blur-sm p-3 sm:p-4 animate-in fade-in duration-200">
         <div 
-          className="bg-background border border-border/50 rounded-2xl shadow-2xl w-full max-w-2xl min-h-[600px] max-h-[90vh] flex flex-col animate-in fade-in zoom-in duration-200"
+          className="bg-background border border-border/50 rounded-2xl shadow-2xl w-full max-w-2xl min-h-0 max-h-[92vh] sm:max-h-[90vh] flex flex-col animate-in fade-in zoom-in duration-200"
           onClick={e => e.stopPropagation()}
         >
           {/* Header (Cloned from Weekly Report) */}
-          <div className="flex items-center justify-between p-6 border-b border-border/50 bg-muted/5">
+          <div className="flex items-start justify-between gap-3 p-4 sm:p-6 border-b border-border/50 bg-muted/5">
             <div>
               <h2 className="text-xl font-bold tracking-tight">Add Feedback</h2>
               <p className="text-sm text-muted-foreground mt-1">
@@ -313,7 +373,7 @@ const StudentFeedback = () => {
           </div>
 
           {/* Body (Cloned from Weekly Report) */}
-          <form className="flex-1 overflow-y-auto p-6 space-y-6">
+          <form className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
             {/* Context Box (Gray-ish background like Month/Week) */}
             <div className="space-y-4 p-4 rounded-xl bg-muted/30 border border-border/40">
               {/* Overall Rating */}
@@ -345,19 +405,16 @@ const StudentFeedback = () => {
                 <Label className="text-sm font-semibold text-foreground">
                   Select Course <span className="text-red-500">*</span>
                 </Label>
-                <div className="relative">
-                  <select
-                    value={selectedCourse}
-                    onChange={(e) => setSelectedCourse(e.target.value)}
-                    className="w-full h-10 rounded-xl border border-border/50 bg-background px-3 py-2 text-sm font-medium appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/40 pr-10"
-                  >
-                    <option value="" disabled>Select a course</option>
-                    <option value="fullstack">Full Stack Development</option>
-                    <option value="datascience">Data Science</option>
-                    <option value="uiux">UI/UX Design</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                </div>
+                <Select value={selectedCourse} onValueChange={setSelectedCourse}>
+                  <SelectTrigger className="h-10 rounded-xl border-border/50 bg-background text-sm font-medium">
+                    <SelectValue placeholder="Select a course" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl">
+                    <SelectItem value="fullstack">Full Stack Development</SelectItem>
+                    <SelectItem value="datascience">Data Science</SelectItem>
+                    <SelectItem value="uiux">UI/UX Design</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Select Tutor */}
@@ -365,19 +422,16 @@ const StudentFeedback = () => {
                 <Label className="text-sm font-semibold text-foreground">
                   Select Tutor <span className="text-red-500">*</span>
                 </Label>
-                <div className="relative">
-                  <select
-                    value={selectedTutor}
-                    onChange={(e) => setSelectedTutor(e.target.value)}
-                    className="w-full h-10 rounded-xl border border-border/50 bg-background px-3 py-2 text-sm font-medium appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/40 pr-10"
-                  >
-                    <option value="" disabled>Select a tutor</option>
-                    <option value="robert">Robert Fox</option>
-                    <option value="jane">Jane Cooper</option>
-                    <option value="guy">Guy Hawkins</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                </div>
+                <Select value={selectedTutor} onValueChange={setSelectedTutor}>
+                  <SelectTrigger className="h-10 rounded-xl border-border/50 bg-background text-sm font-medium">
+                    <SelectValue placeholder="Select a tutor" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl">
+                    <SelectItem value="robert">Robert Fox</SelectItem>
+                    <SelectItem value="jane">Jane Cooper</SelectItem>
+                    <SelectItem value="guy">Guy Hawkins</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
@@ -388,7 +442,7 @@ const StudentFeedback = () => {
               </Label>
               <Textarea 
                 placeholder="Share your experience with us..."
-                className="min-h-[280px] rounded-xl border-border/50 bg-background focus:ring-2 focus:ring-primary/40 p-4 text-sm font-medium resize-none placeholder:text-muted-foreground/40"
+                className="min-h-[220px] sm:min-h-[280px] rounded-xl border-border/50 bg-background focus:ring-2 focus:ring-primary/40 p-4 text-sm font-medium resize-none placeholder:text-muted-foreground/40"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
               />
@@ -396,18 +450,18 @@ const StudentFeedback = () => {
           </form>
 
           {/* Footer (Cloned from Weekly Report) */}
-          <div className="p-6 border-t border-border/50 bg-muted/5 flex items-center justify-end gap-3 mt-auto">
+          <div className="p-4 sm:p-6 border-t border-border/50 bg-muted/5 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2 sm:gap-3 mt-auto">
             <Button 
               variant="outline" 
               onClick={() => setIsModalOpen(false)}
-              className="rounded-xl px-6 h-10 font-semibold"
+              className="w-full sm:w-auto rounded-xl px-6 h-10 font-semibold"
             >
               Cancel
             </Button>
             <Button 
               onClick={handleSubmit}
               disabled={!message.trim() || rating === 0 || !selectedCourse || !selectedTutor}
-              className="rounded-xl px-6 h-10 font-semibold bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/10 transition-all"
+              className="w-full sm:w-auto rounded-xl px-6 h-10 font-semibold bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/10 transition-all"
             >
               Submit Feedback
             </Button>
@@ -418,13 +472,13 @@ const StudentFeedback = () => {
     
     {/* View Feedback Modal (Standardized exactly to Weekly Report) */}
     {isViewModalOpen && selectedFeedback && (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+      <div className="fixed inset-0 z-[100] flex items-start sm:items-center justify-center bg-black/40 backdrop-blur-sm p-3 sm:p-4 animate-in fade-in duration-200">
         <div 
-          className="bg-background border border-border/50 rounded-2xl shadow-2xl w-full max-w-2xl min-h-[600px] max-h-[90vh] flex flex-col animate-in fade-in zoom-in duration-200"
+          className="bg-background border border-border/50 rounded-2xl shadow-2xl w-full max-w-2xl min-h-0 max-h-[92vh] sm:max-h-[90vh] flex flex-col animate-in fade-in zoom-in duration-200"
           onClick={e => e.stopPropagation()}
         >
           {/* Header (Cloned from Weekly Report) */}
-          <div className="flex items-center justify-between p-6 border-b border-border/50 bg-muted/5">
+          <div className="flex items-start justify-between gap-3 p-4 sm:p-6 border-b border-border/50 bg-muted/5">
             <div>
               <h2 className="text-xl font-bold tracking-tight">Feedback Details</h2>
               <p className="text-sm text-muted-foreground mt-1">
@@ -440,10 +494,10 @@ const StudentFeedback = () => {
           </div>
 
           {/* Body (Cloned from Weekly Report) */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
             {/* Meta Context Box (Gray-ish background like Month/Week) */}
             <div className="space-y-4 p-4 rounded-xl bg-muted/30 border border-border/40">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Author</p>
                   <div className="flex items-center gap-2">
@@ -461,20 +515,40 @@ const StudentFeedback = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-2 border-t border-border/20">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-border/20">
                 <div className="space-y-1">
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Rating</p>
-                  <div className="flex gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star 
-                        key={i} 
-                        className={cn(
-                          "w-4 h-4", 
-                          i < (selectedFeedback.rating || 0) ? "fill-yellow-400 text-yellow-400" : "text-muted/20"
-                        )} 
-                      />
-                    ))}
-                  </div>
+                  {isEditMode ? (
+                    <div className="grid grid-cols-5 gap-2">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setEditRating(star)}
+                          className={cn(
+                            "h-8 rounded-lg border transition-all",
+                            editRating >= star
+                              ? "border-primary bg-primary/10 text-primary"
+                              : "border-border/40 bg-background text-muted-foreground hover:border-primary/40"
+                          )}
+                        >
+                          <Star className={cn("mx-auto h-4 w-4", editRating >= star && "fill-primary")} />
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={cn(
+                            "w-4 h-4",
+                            i < (selectedFeedback.rating || 0) ? "fill-yellow-400 text-yellow-400" : "text-muted/20"
+                          )}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-1">
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Date</p>
@@ -486,24 +560,57 @@ const StudentFeedback = () => {
             {/* Message Content Section */}
             <div className="space-y-2">
               <Label className="text-sm font-semibold text-foreground">Feedback Message</Label>
-              <div className="relative p-6 rounded-xl border border-border/40 bg-background min-h-[250px] shadow-sm">
-                <span className="absolute left-4 top-2 text-6xl text-primary/5 font-serif leading-none select-none">"</span>
-                <p className="text-sm text-foreground/80 leading-relaxed italic relative z-10 whitespace-pre-wrap">
-                  {selectedFeedback.message}
-                </p>
-                <span className="absolute right-4 bottom-2 text-6xl text-primary/5 font-serif leading-none select-none rotate-180">"</span>
-              </div>
+              {isEditMode ? (
+                <Textarea
+                  value={editMessage}
+                  onChange={(e) => setEditMessage(e.target.value)}
+                  className="min-h-[250px] rounded-xl border-border/40 bg-background p-4 text-sm"
+                  placeholder="Update your feedback..."
+                />
+              ) : (
+                <div className="relative p-4 sm:p-6 rounded-xl border border-border/40 bg-background min-h-[180px] sm:min-h-[250px] shadow-sm">
+                  <span className="absolute left-4 top-2 text-6xl text-primary/5 font-serif leading-none select-none">"</span>
+                  <p className="text-sm text-foreground/80 leading-relaxed italic relative z-10 whitespace-pre-wrap">
+                    {selectedFeedback.message}
+                  </p>
+                  <span className="absolute right-4 bottom-2 text-6xl text-primary/5 font-serif leading-none select-none rotate-180">"</span>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Footer (Cloned from Weekly Report) */}
-          <div className="p-6 border-t border-border/50 bg-muted/5 flex items-center justify-end mt-auto">
-            <Button 
-              onClick={() => setIsViewModalOpen(false)}
-              className="rounded-xl px-8 h-10 font-bold bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/10 transition-all active:scale-95"
-            >
-              Close Details
-            </Button>
+          <div className="p-4 sm:p-6 border-t border-border/50 bg-muted/5 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2 sm:gap-3 mt-auto">
+            {selectedFeedback.author === "You" ? (
+              isEditMode ? (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setIsEditMode(false);
+                      setEditMessage(selectedFeedback.message);
+                      setEditRating(selectedFeedback.rating || 5);
+                    }}
+                    className="rounded-xl px-6 h-10 font-semibold"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleSaveFeedbackEdit}
+                    className="rounded-xl px-6 h-10 font-semibold bg-primary hover:bg-primary/90 text-white"
+                  >
+                    Save Changes
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  onClick={() => setIsEditMode(true)}
+                  className="rounded-xl px-6 h-10 font-semibold bg-primary hover:bg-primary/90 text-white"
+                >
+                  Edit Feedback
+                </Button>
+              )
+            ) : null}
           </div>
         </div>
       </div>

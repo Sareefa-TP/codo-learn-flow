@@ -20,7 +20,7 @@ const certificateData = {
   internName: "Alex Johnson",
   internshipTitle: "Full Stack Development Internship",
   duration: "January 2026 – March 2026 (3 Months)",
-  issuedBy: "Codo Academy",
+  issuedBy: "CODO Academy",
   issueDate: "April 01, 2026",
   certificateId: "CODO-CERT-2026-0042",
 };

@@ -13,7 +13,8 @@ import {
     ShieldQuestion,
     LifeBuoy,
     Download,
-    X
+    X,
+    Eye
 } from "lucide-react";
 import PageSearch from "@/components/shared/PageSearch";
 import { toast } from "sonner";
@@ -30,6 +31,18 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 // Types
 type TicketStatus = "Open" | "In Progress" | "Resolved" | "Closed";
@@ -52,8 +65,15 @@ interface Ticket {
     priority: TicketPriority;
     status: TicketStatus;
     date: string;
+    closedAt?: string;
     lastUpdate: string;
     messages: Message[];
+}
+
+interface AttachmentPreview {
+    url: string;
+    name: string;
+    isImage: boolean;
 }
 
 // Mock Data
@@ -100,6 +120,7 @@ const TutorSupportTicket = () => {
     const [replyText, setReplyText] = useState("");
     const [replyFile, setReplyFile] = useState<File | null>(null);
     const [isSending, setIsSending] = useState(false);
+    const [previewAttachment, setPreviewAttachment] = useState<AttachmentPreview | null>(null);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const replyFileInputRef = useRef<HTMLInputElement>(null);
@@ -238,9 +259,43 @@ const TutorSupportTicket = () => {
         }, 800);
     };
 
+    const handleCloseTicket = () => {
+        if (!selectedTicket || selectedTicket.status === "Closed") return;
+
+        const updatedTicket = {
+            ...selectedTicket,
+            status: "Closed" as TicketStatus,
+            closedAt: new Date().toLocaleString('en-GB', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+            }),
+            lastUpdate: "Just now",
+        };
+
+        setTickets(tickets.map(t => t.id === selectedTicket.id ? updatedTicket : t));
+        setSelectedTicket(updatedTicket);
+        toast.success(`Ticket ${selectedTicket.id} has been closed.`);
+    };
+
     const handleDownload = (url: string, filename: string) => {
         toast.info(`Downloading ${filename}...`);
         console.log(`Downloading from ${url}`);
+    };
+
+    const handleViewAttachment = (url: string, filename: string) => {
+        setPreviewAttachment({
+            url,
+            name: filename,
+            isImage: isImageAttachment(filename),
+        });
+    };
+
+    const isImageAttachment = (filename?: string) => {
+        if (!filename) return false;
+        return /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(filename);
     };
 
     return (
@@ -262,6 +317,40 @@ const TutorSupportTicket = () => {
                                 <Plus className="w-4 h-4" />
                                 Raise New Ticket
                             </Button>
+                        )}
+                        {view === "details" && selectedTicket && (
+                            selectedTicket.status === "Closed" ? (
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    className="h-10 rounded-xl px-4 font-semibold"
+                                    disabled
+                                >
+                                    Ticket Closed
+                                </Button>
+                            ) : (
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button type="button" className="h-10 rounded-xl px-4 font-semibold">
+                                            Close Ticket
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent className="rounded-2xl">
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Close this ticket?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                You can reopen it later only through support. Are you sure you want to close {selectedTicket.id}?
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                            <AlertDialogAction className="rounded-xl" onClick={handleCloseTicket}>
+                                                Yes, close ticket
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            )
                         )}
                     </div>
                 </div>
@@ -494,6 +583,12 @@ const TutorSupportTicket = () => {
                                                 <Clock className="w-4 h-4" />
                                                 Raised on {selectedTicket.date}
                                             </span>
+                                            {selectedTicket.status === "Closed" && selectedTicket.closedAt ? (
+                                                <span className="flex items-center gap-1.5 font-semibold text-foreground">
+                                                    <CheckCircle2 className="w-4 h-4 text-primary" />
+                                                    Closed on {selectedTicket.closedAt}
+                                                </span>
+                                            ) : null}
                                         </div>
                                     </div>
                                 </div>
@@ -515,28 +610,55 @@ const TutorSupportTicket = () => {
                                                 {msg.text}
                                                 {msg.attachment_url && (
                                                     <div className={cn(
-                                                        "mt-3 p-3 rounded-lg border flex items-center gap-3 bg-muted/50 border-border/50 transition-all hover:bg-muted",
+                                                        "mt-3 rounded-lg border border-border/50 bg-muted/50 p-3 transition-all hover:bg-muted",
                                                         msg.sender === "Tutor" ? "bg-white/10 border-white/20 hover:bg-white/20" : "bg-card hover:border-primary/30"
                                                     )}>
-                                                        <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center shrink-0">
-                                                            <Paperclip className="w-4 h-4 text-primary" />
+                                                        {isImageAttachment(msg.attachment_name) ? (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleViewAttachment(msg.attachment_url!, msg.attachment_name || "image")}
+                                                                className="mb-3 block w-full overflow-hidden rounded-lg border border-border/40"
+                                                            >
+                                                                <img
+                                                                    src={msg.attachment_url}
+                                                                    alt={msg.attachment_name || "attachment preview"}
+                                                                    className="h-36 w-full object-cover sm:h-44"
+                                                                />
+                                                            </button>
+                                                        ) : null}
+
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-primary/10">
+                                                                <Paperclip className="h-4 w-4 text-primary" />
+                                                            </div>
+                                                            <div className="min-w-0 flex-1">
+                                                                <p className="mb-0.5 truncate text-xs font-medium">
+                                                                    {msg.attachment_name || "attachment"}
+                                                                </p>
+                                                                <p className="text-[10px] opacity-70">
+                                                                    {isImageAttachment(msg.attachment_name) ? "Image Attachment" : "File Attachment"}
+                                                                </p>
+                                                            </div>
+                                                            <div className="flex items-center gap-1">
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="outline"
+                                                                    className="h-8 rounded-md px-2 text-[10px]"
+                                                                    onClick={() => handleViewAttachment(msg.attachment_url!, msg.attachment_name || "file")}
+                                                                >
+                                                                    <Eye className="mr-1 h-3 w-3" />
+                                                                    View
+                                                                </Button>
+                                                                <Button
+                                                                    size="icon"
+                                                                    variant="ghost"
+                                                                    className="h-8 w-8 hover:bg-primary/20"
+                                                                    onClick={() => handleDownload(msg.attachment_url!, msg.attachment_name || "file")}
+                                                                >
+                                                                    <Download className="h-4 w-4" />
+                                                                </Button>
+                                                            </div>
                                                         </div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <p className="text-xs font-medium truncate mb-0.5">
-                                                                {msg.attachment_name || "attachment"}
-                                                            </p>
-                                                            <p className="text-[10px] opacity-70">
-                                                                File Attachment
-                                                            </p>
-                                                        </div>
-                                                        <Button
-                                                            size="icon"
-                                                            variant="ghost"
-                                                            className="h-8 w-8 hover:bg-primary/20"
-                                                            onClick={() => handleDownload(msg.attachment_url!, msg.attachment_name || "file")}
-                                                        >
-                                                            <Download className="w-4 h-4" />
-                                                        </Button>
                                                     </div>
                                                 )}
                                             </div>
@@ -626,6 +748,51 @@ const TutorSupportTicket = () => {
                         </Card>
                     </div>
                 )}
+
+                <Dialog
+                    open={!!previewAttachment}
+                    onOpenChange={(open) => {
+                        if (!open) setPreviewAttachment(null);
+                    }}
+                >
+                    <DialogContent className="max-w-4xl rounded-2xl">
+                        <DialogHeader>
+                            <DialogTitle className="truncate pr-8">
+                                {previewAttachment?.name || "Attachment Preview"}
+                            </DialogTitle>
+                        </DialogHeader>
+                        {previewAttachment ? (
+                            previewAttachment.isImage ? (
+                                <div className="overflow-hidden rounded-xl border border-border/60 bg-muted/20">
+                                    <img
+                                        src={previewAttachment.url}
+                                        alt={previewAttachment.name}
+                                        className="max-h-[70vh] w-full object-contain"
+                                    />
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    <div className="overflow-hidden rounded-xl border border-border/60">
+                                        <iframe
+                                            src={previewAttachment.url}
+                                            title={previewAttachment.name}
+                                            className="h-[65vh] w-full bg-background"
+                                        />
+                                    </div>
+                                    <div className="flex justify-end">
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => handleDownload(previewAttachment.url, previewAttachment.name)}
+                                        >
+                                            <Download className="mr-2 h-4 w-4" />
+                                            Download
+                                        </Button>
+                                    </div>
+                                </div>
+                            )
+                        ) : null}
+                    </DialogContent>
+                </Dialog>
             </div>
         </DashboardLayout>
     );

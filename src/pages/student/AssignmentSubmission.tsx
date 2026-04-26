@@ -13,8 +13,7 @@ import {
   GraduationCap,
   Calendar
 } from "lucide-react";
-import { useNavigate, useLocation, useParams, Link } from "react-router-dom";
-import { ChevronRight, Home } from "lucide-react";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 
 const StudentAssignmentSubmission = () => {
   const navigate = useNavigate();
@@ -39,34 +38,6 @@ const StudentAssignmentSubmission = () => {
   return (
     <DashboardLayout>
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-6xl mx-auto px-4 md:px-6 lg:px-8 pb-10">
-        {/* Breadcrumb Navigation */}
-        <div className="flex items-center gap-2 mb-6 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 overflow-x-auto whitespace-nowrap pb-2 no-scrollbar">
-          <Link to="/student" className="flex items-center gap-1.5 hover:text-primary transition-colors">
-            <Home className="w-3 h-3" />
-            Dashboard
-          </Link>
-          <ChevronRight className="w-3 h-3 opacity-40" />
-          <Link to="/student/my-course" className="hover:text-primary transition-colors">
-            My Courses
-          </Link>
-          <ChevronRight className="w-3 h-3 opacity-40" />
-          <Link to={`/student/my-course/${courseSlug}`} className="hover:text-primary transition-colors italic">
-            Course
-          </Link>
-          <ChevronRight className="w-3 h-3 opacity-40" />
-          <Link to={`/student/my-course/${courseSlug}/${moduleSlug}`} className="hover:text-primary transition-colors italic">
-            Module
-          </Link>
-          <ChevronRight className="w-3 h-3 opacity-40" />
-          <Link to={`/student/my-course/${courseSlug}/${moduleSlug}/${sessionSlug}`} className="hover:text-primary transition-colors italic">
-            Session
-          </Link>
-          <ChevronRight className="w-3 h-3 opacity-40" />
-          <span className="text-primary font-black whitespace-nowrap">
-            Assignment Submission
-          </span>
-        </div>
-
         {/* Navigation & Header */}
         <div className="flex flex-col gap-6 mb-8">
           <Button 

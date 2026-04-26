@@ -496,24 +496,28 @@ const StudentExams = () => {
         if (!selectedExam) return null;
 
         return (
-            <div className="mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
+            <div className="mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-5 sm:space-y-8">
                 <Button
                     variant="ghost"
-                    className="text-muted-foreground hover:text-foreground pl-0 group font-bold text-xs uppercase tracking-widest"
+                    className="text-muted-foreground hover:text-foreground pl-0 group font-bold text-[11px] uppercase tracking-widest"
                     onClick={() => navigate(`/student/exam/${courseSlug}`)}
                 >
                     <ChevronLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
                     Back to Exams
                 </Button>
 
-                <Card className="border-border/50 bg-card overflow-hidden rounded-[2rem] shadow-2xl shadow-primary/5 mx-auto">
+                <Card className="border-border/50 bg-card overflow-hidden rounded-[1.5rem] sm:rounded-[2rem] shadow-xl sm:shadow-2xl shadow-primary/5 mx-auto">
                     {/* Header */}
-                    <div className="bg-gradient-to-br from-primary/10 via-background to-background p-10 sm:p-12 border-b border-border/40">
-                        <div className="flex flex-col sm:flex-row justify-between items-start gap-8">
-                            <div className="flex-1 space-y-4">
+                    <div className="bg-gradient-to-br from-primary/10 via-background to-background p-5 sm:p-12 border-b border-border/40">
+                        <div className="flex flex-col sm:flex-row justify-between items-start gap-4 sm:gap-8">
+                            <div className="flex-1 space-y-3 sm:space-y-4">
                                 <Badge variant="outline" className="font-black uppercase tracking-widest text-[9px] px-3 border-primary/20 text-primary bg-primary/5">Examination Hub</Badge>
-                                <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight leading-none">{selectedExam.exam_title}</h2>
-                                <p className="text-muted-foreground font-bold text-lg">{selectedExam.course_name} {selectedExam.module_name ? `• ${selectedExam.module_name}` : ''}</p>
+                                <h2 className="text-2xl sm:text-4xl font-black text-foreground tracking-tight leading-[1.05]">
+                                  {selectedExam.exam_title}
+                                </h2>
+                                <p className="text-muted-foreground font-bold text-base sm:text-lg">
+                                  {selectedExam.course_name} {selectedExam.module_name ? `• ${selectedExam.module_name}` : ""}
+                                </p>
                             </div>
                             <div className="shrink-0">
                                 <Badge 
@@ -528,31 +532,31 @@ const StudentExams = () => {
                         </div>
                     </div>
 
-                    <CardContent className="p-10 sm:p-12 space-y-12">
+                    <CardContent className="p-5 sm:p-12 space-y-8 sm:space-y-12">
                         {/* Metrics Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <div className="bg-muted/30 p-6 rounded-2xl border border-border/40 space-y-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                            <div className="bg-muted/30 p-4 sm:p-6 rounded-2xl border border-border/40 space-y-2">
                                 <div className="flex items-center gap-2 text-muted-foreground/60">
                                     <Clock className="w-4 h-4" />
                                     <span className="text-[10px] font-black uppercase tracking-widest">Duration</span>
                                 </div>
                                 <p className="text-2xl font-black text-foreground">{selectedExam.time_limit} Mins</p>
                             </div>
-                            <div className="bg-muted/30 p-6 rounded-2xl border border-border/40 space-y-2">
+                            <div className="bg-muted/30 p-4 sm:p-6 rounded-2xl border border-border/40 space-y-2">
                                 <div className="flex items-center gap-2 text-muted-foreground/60">
                                     <BookOpen className="w-4 h-4" />
                                     <span className="text-[10px] font-black uppercase tracking-widest">Questions</span>
                                 </div>
                                 <p className="text-2xl font-black text-foreground">{selectedExam.total_questions}</p>
                             </div>
-                            <div className="bg-muted/30 p-6 rounded-2xl border border-border/40 space-y-2">
+                            <div className="bg-muted/30 p-4 sm:p-6 rounded-2xl border border-border/40 space-y-2">
                                 <div className="flex items-center gap-2 text-muted-foreground/60">
                                     <GraduationCap className="w-4 h-4" />
                                     <span className="text-[10px] font-black uppercase tracking-widest">Pass Mark</span>
                                 </div>
                                 <p className="text-2xl font-black text-foreground">{selectedExam.pass_mark}%</p>
                             </div>
-                            <div className="bg-muted/30 p-6 rounded-2xl border border-border/40 space-y-2">
+                            <div className="bg-muted/30 p-4 sm:p-6 rounded-2xl border border-border/40 space-y-2">
                                 <div className="flex items-center gap-2 text-muted-foreground/60">
                                     <AlertCircle className="w-4 h-4" />
                                     <span className="text-[10px] font-black uppercase tracking-widest">Attempts</span>
@@ -563,11 +567,11 @@ const StudentExams = () => {
 
                         {/* Instructions Section */}
                         <div className="space-y-6">
-                            <h3 className="text-xl font-bold text-foreground flex items-center gap-3">
+                            <h3 className="text-lg sm:text-xl font-bold text-foreground flex items-center gap-3">
                                 <div className="w-1.5 h-6 bg-primary rounded-full" />
                                 Exam Instructions
                             </h3>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6 bg-muted/20 p-8 rounded-3xl border border-border/40">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 sm:gap-y-6 bg-muted/20 p-4 sm:p-8 rounded-3xl border border-border/40">
                                 <div className="flex gap-4 items-start">
                                     <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 font-bold text-xs shadow-inner">1</div>
                                     <p className="text-sm text-muted-foreground font-medium leading-relaxed">Ensure a stable internet connection. The timer will not pause once started.</p>
@@ -589,10 +593,10 @@ const StudentExams = () => {
 
                         {/* Declaration Section */}
                         <div className="space-y-6">
-                            <div className="p-8 rounded-3xl border-2 border-primary/20 bg-primary/[0.02] space-y-6">
+                            <div className="p-4 sm:p-8 rounded-3xl border-2 border-primary/20 bg-primary/[0.02] space-y-4 sm:space-y-6">
                                 <div className="flex items-center gap-3 text-primary">
                                     <ShieldCheck className="w-6 h-6" />
-                                    <h3 className="text-xl font-bold tracking-tight">Final Declaration</h3>
+                                    <h3 className="text-lg sm:text-xl font-bold tracking-tight">Final Declaration</h3>
                                 </div>
                                 <div className="space-y-4">
                                     <p className="text-sm text-foreground/80 font-bold leading-relaxed italic">
@@ -622,17 +626,17 @@ const StudentExams = () => {
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="pt-4 flex flex-col sm:flex-row gap-4">
+                        <div className="pt-2 sm:pt-4 flex flex-col sm:flex-row gap-3 sm:gap-4">
                             <Button 
                                 variant="outline" 
-                                className="sm:flex-1 h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-xs border-2 hover:bg-muted"
+                                className="sm:flex-1 h-12 sm:h-14 rounded-2xl font-black uppercase tracking-[0.16em] sm:tracking-[0.2em] text-[11px] sm:text-xs border-2 hover:bg-muted"
                                 onClick={() => navigate(`/student/exam/${courseSlug}`)}
                             >
                                 Not Today
                             </Button>
                             <Button 
                                 className={cn(
-                                    "sm:flex-1 h-14 rounded-2xl font-black uppercase tracking-[0.2em] text-xs transition-all duration-500",
+                                    "sm:flex-1 h-12 sm:h-14 rounded-2xl font-black uppercase tracking-[0.16em] sm:tracking-[0.2em] text-[11px] sm:text-xs transition-all duration-500",
                                     isDeclared || selectedExam.status === "Completed" ? "bg-primary shadow-2xl shadow-primary/30" : "bg-muted text-muted-foreground/40_cursor-not-allowed"
                                 )}
                                 disabled={!isDeclared && selectedExam.status !== "Completed"}
@@ -670,21 +674,6 @@ const StudentExams = () => {
             <div className="mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500 flex flex-col lg:flex-row gap-8 pb-10">
                 {/* Left Column: Question Area */}
                 <div className="flex-1 space-y-6">
-                    {/* Top Bar */}
-                    <div className="flex items-center justify-between bg-card p-5 rounded-2xl border border-border/50 shadow-sm backdrop-blur-xl">
-                        <div>
-                            <h2 className="font-bold text-foreground text-lg">{selectedExam.exam_title}</h2>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mt-0.5">Question {currentQuestionIndex + 1} of {selectedExam.total_questions}</p>
-                        </div>
-                        <div className={cn(
-                            "flex items-center gap-2.5 px-5 py-2.5 rounded-xl font-mono text-xl font-black transition-all duration-300",
-                            isLowTime ? "bg-destructive/10 text-destructive animate-pulse border border-destructive/20" : "bg-primary/5 text-primary border border-primary/20"
-                        )}>
-                            <Clock className="w-6 h-6" />
-                            {formatTime(timeLeft)}
-                        </div>
-                    </div>
-
                     {/* Question Card */}
                     <Card className="border-border/50 bg-card shadow-lg shadow-black/[0.02] rounded-3xl overflow-hidden">
                         <CardContent className="p-8 sm:p-12">
@@ -758,7 +747,7 @@ const StudentExams = () => {
                 </div>
 
                 {/* Right Column: Navigator */}
-                <div className="lg:w-80 shrink-0">
+                <div className="lg:w-80 shrink-0 space-y-4">
                     <Card className="border-border/50 bg-card shadow-xl shadow-black/[0.02] rounded-3xl sticky top-6">
                         <CardContent className="p-6">
                             <h3 className="font-bold text-foreground text-base mb-6 border-b border-border/40 pb-4 uppercase tracking-widest text-[11px]">Question Navigator</h3>
@@ -808,6 +797,26 @@ const StudentExams = () => {
                             >
                                 Finish Attempt
                             </Button>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="border-border/50 bg-card shadow-sm rounded-3xl">
+                        <CardContent className="p-5 space-y-4">
+                            <div>
+                                <h2 className="font-bold text-foreground text-base leading-tight">{selectedExam.exam_title}</h2>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mt-1">
+                                    Question {currentQuestionIndex + 1} of {selectedExam.total_questions}
+                                </p>
+                            </div>
+                            <div className={cn(
+                                "flex items-center justify-center gap-2.5 rounded-xl px-4 py-3 font-mono text-2xl font-black transition-all duration-300",
+                                isLowTime
+                                    ? "animate-pulse border border-destructive/20 bg-destructive/10 text-destructive"
+                                    : "border border-primary/20 bg-primary/5 text-primary"
+                            )}>
+                                <Clock className="h-6 w-6" />
+                                {formatTime(timeLeft)}
+                            </div>
                         </CardContent>
                     </Card>
                 </div>
@@ -959,8 +968,8 @@ const StudentExams = () => {
         const percentage = Math.round((score / total) * 100);
 
         return (
-            <div className="mx-auto animate-in fade-in slide-in-from-bottom-6 duration-700 space-y-8 pb-20 mt-4">
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="mx-auto mt-4 animate-in fade-in slide-in-from-bottom-6 duration-700 space-y-6 pb-16 sm:space-y-8 sm:pb-20">
+                <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                     <Button
                         variant="ghost"
                         className="text-muted-foreground hover:text-foreground pl-0 group font-black uppercase tracking-widest text-[10px]"
@@ -970,7 +979,7 @@ const StudentExams = () => {
                         Back to Performance Summary
                     </Button>
                     
-                    <div className="flex items-center gap-6 bg-primary/5 px-8 py-4 rounded-3xl border border-primary/20 shadow-sm">
+                    <div className="flex w-full items-center justify-center gap-4 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3 shadow-sm sm:w-auto sm:gap-6 sm:rounded-3xl sm:px-8 sm:py-4">
                         <div className="text-center">
                             <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest mb-0.5 opacity-60">Accuracy</p>
                             <p className="text-base font-black text-primary tabular-nums">{percentage}%</p>
@@ -983,10 +992,10 @@ const StudentExams = () => {
                     </div>
                 </div>
 
-                <div className="bg-card border-l-[12px] border-l-primary border-y border-r border-border/50 rounded-[2.5rem] p-10 sm:p-12 shadow-xl shadow-black/[0.02]">
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div className="rounded-3xl border-y border-r border-l-[8px] border-l-primary border-border/50 bg-card p-5 shadow-xl shadow-black/[0.02] sm:rounded-[2.5rem] sm:border-l-[12px] sm:p-10 md:p-12">
+                    <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center md:gap-6">
                         <div>
-                            <h2 className="text-xl sm:text-2xl font-black text-foreground mb-3 tracking-tight">{selectedExam.exam_title}</h2>
+                            <h2 className="mb-2 text-lg font-black tracking-tight text-foreground sm:mb-3 sm:text-2xl">{selectedExam.exam_title}</h2>
                             <p className="text-muted-foreground font-bold uppercase tracking-widest text-xs opacity-70 flex items-center gap-2">
                                 <BookOpen className="w-4 h-4" />
                                 {selectedExam.course_name} • Knowledge Review
@@ -994,7 +1003,7 @@ const StudentExams = () => {
                         </div>
                         <Button 
                             variant="outline" 
-                            className="rounded-xl border-border/60 hover:bg-muted font-bold text-xs uppercase tracking-widest"
+                            className="w-full rounded-xl border-border/60 text-xs font-bold uppercase tracking-widest hover:bg-muted md:w-auto"
                             onClick={() => navigate(`/student/exam/${courseSlug}`)}
                         >
                             Exit Review
@@ -1009,7 +1018,7 @@ const StudentExams = () => {
                         <p className="text-muted-foreground/60 text-sm mt-1">This may happen for legacy attempts or quizzes without stored sessions.</p>
                     </div>
                 ) : (
-                    <div className="space-y-12">
+                    <div className="space-y-8 sm:space-y-12">
                     {selectedExam.questions.map((question, qIdx) => {
                         const studentAns = answers[qIdx];
                         const isCorrect = studentAns === question.correct_answer;
@@ -1017,13 +1026,13 @@ const StudentExams = () => {
 
                         return (
                             <Card key={question.id} className={cn(
-                                "border-l-[10px] overflow-hidden rounded-[2.5rem] shadow-md border-y border-r border-border/40 transition-all duration-300",
+                                "overflow-hidden rounded-3xl border-y border-r border-l-[6px] border-border/40 shadow-md transition-all duration-300 sm:rounded-[2.5rem] sm:border-l-[10px]",
                                 isCorrect ? "border-l-green-500 shadow-green-500/[0.03]" : "border-l-destructive shadow-destructive/[0.03]"
                             )}>
-                                <CardContent className="p-10">
-                                    <div className="flex justify-between items-center mb-10">
-                                        <div className="flex items-center gap-3">
-                                            <Badge variant="outline" className="font-black uppercase tracking-widest text-[10px] px-4 py-1.5 border-primary/20 text-primary bg-primary/5">Question {qIdx + 1}</Badge>
+                                <CardContent className="p-5 sm:p-8 lg:p-10">
+                                    <div className="mb-6 flex flex-col items-start justify-between gap-3 sm:mb-10 sm:flex-row sm:items-center">
+                                        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                                            <Badge variant="outline" className="bg-primary/5 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-primary border-primary/20 sm:px-4">Question {qIdx + 1}</Badge>
                                             {isCorrect ? (
                                                 <Badge className="bg-green-500/10 text-green-600 border-none px-4 py-1.5 font-bold text-[10px] uppercase tracking-widest flex items-center gap-1.5">
                                                     <CheckCircle2 className="w-3.5 h-3.5" />
@@ -1038,11 +1047,11 @@ const StudentExams = () => {
                                         </div>
                                     </div>
 
-                                    <h3 className="text-lg font-bold text-foreground mb-12 whitespace-pre-wrap leading-tight tracking-tight">
+                                    <h3 className="mb-8 whitespace-pre-wrap break-words text-base font-bold leading-tight tracking-tight text-foreground sm:mb-12 sm:text-lg">
                                         {question.question_text}
                                     </h3>
 
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
+                                    <div className="mb-8 grid grid-cols-1 gap-4 sm:mb-12 sm:grid-cols-2 sm:gap-6">
                                         {['a', 'b', 'c', 'd'].map((key) => {
                                             const optionKey = `option_${key}` as keyof Question;
                                             const isStudentSelected = studentAns === key;
@@ -1052,7 +1061,7 @@ const StudentExams = () => {
                                                 <div
                                                     key={key}
                                                     className={cn(
-                                                        "p-6 rounded-[1.5rem] border-2 text-sm transition-all duration-500 flex items-center gap-6 font-bold relative group",
+                                                        "group relative flex items-start gap-4 rounded-2xl border-2 p-4 text-sm font-bold transition-all duration-500 sm:items-center sm:gap-6 sm:rounded-[1.5rem] sm:p-6",
                                                         isActuallyCorrect 
                                                             ? "bg-green-500/10 border-green-500/50 text-green-700 ring-4 ring-green-500/5 shadow-inner" 
                                                             : (isStudentSelected && !isCorrect ? "bg-destructive/5 border-destructive/50 text-destructive/80" : "bg-muted/10 border-border/40 text-muted-foreground/50 opacity-60")
@@ -1065,7 +1074,7 @@ const StudentExams = () => {
                                                     )}>
                                                         {letterMap[key]}
                                                     </div>
-                                                    <span className="flex-1 leading-snug">{question[optionKey]}</span>
+                                                    <span className="flex-1 break-words leading-snug">{question[optionKey]}</span>
                                                     {isActuallyCorrect && (
                                                         <div className="absolute -top-3 -right-3">
                                                             <div className="bg-green-500 text-white p-2 rounded-xl shadow-lg animate-in zoom-in duration-500">
@@ -1078,7 +1087,7 @@ const StudentExams = () => {
                                         })}
                                     </div>
 
-                                    <div className="flex flex-wrap gap-12 pt-8 border-t border-border/40">
+                                    <div className="flex flex-col gap-5 border-t border-border/40 pt-6 sm:flex-row sm:flex-wrap sm:gap-12 sm:pt-8">
                                         <div className="space-y-1.5">
                                             <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 flex items-center gap-2">
                                                 <div className={cn("w-1.5 h-1.5 rounded-full", isCorrect ? "bg-green-500" : "bg-destructive")} />
@@ -1105,12 +1114,12 @@ const StudentExams = () => {
                 </div>
             )}
 
-                <div className="pt-16 pb-12 flex flex-col sm:flex-row justify-center gap-6">
-                    <Button variant="outline" size="lg" className="rounded-2xl px-12 h-16 font-black uppercase tracking-[0.2em] text-xs border-2 hover:bg-muted" onClick={() => navigate(`/student/exam/${courseSlug}/${examSlug}/details`)}>
+                <div className="flex flex-col justify-center gap-4 pb-10 pt-10 sm:flex-row sm:gap-6 sm:pb-12 sm:pt-16">
+                    <Button variant="outline" size="lg" className="h-14 rounded-2xl border-2 px-6 text-[10px] font-black uppercase tracking-[0.18em] hover:bg-muted sm:h-16 sm:px-12 sm:text-xs" onClick={() => navigate(`/student/exam/${courseSlug}/${examSlug}/details`)}>
                         <ChevronLeft className="w-4 h-4 mr-2" />
                         Summary
                     </Button>
-                    <Button size="lg" className="rounded-2xl px-16 h-16 font-black uppercase tracking-[0.2em] text-xs shadow-2xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all" onClick={() => navigate(`/student/exam/${courseSlug}`)}>
+                    <Button size="lg" className="h-14 rounded-2xl px-6 text-[10px] font-black uppercase tracking-[0.18em] shadow-2xl shadow-primary/20 transition-all hover:scale-105 active:scale-95 sm:h-16 sm:px-16 sm:text-xs" onClick={() => navigate(`/student/exam/${courseSlug}`)}>
                         Finish Review
                     </Button>
                 </div>
@@ -1121,48 +1130,6 @@ const StudentExams = () => {
     return (
         <DashboardLayout>
             <div className="animate-in fade-in duration-500 max-w-6xl mx-auto px-4 md:px-6 lg:px-8 pb-10">
-                {/* Global Breadcrumbs (only for list/playing views) */}
-                {["list", "detail"].includes(activeView) && (
-                    <div className="flex items-center gap-2.5 mb-8 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 overflow-x-auto whitespace-nowrap pb-2 no-scrollbar">
-                        <Link to="/student" className="flex items-center gap-1.5 hover:text-primary transition-colors">
-                            <Home className="w-3.5 h-3.5" />
-                            Portal
-                        </Link>
-                        <ChevronRight className="w-3.5 h-3.5 opacity-40 shrink-0" />
-                        <Link to="/student/exam" className={cn(
-                            "hover:text-primary transition-colors",
-                            !courseSlug && "text-primary font-black"
-                        )}>
-                            Exams
-                        </Link>
-                        {activeCourse && (
-                            <>
-                                <ChevronRight className="w-3.5 h-3.5 opacity-40 shrink-0" />
-                                <Link 
-                                    to={`/student/exam/${activeCourse.slug}`}
-                                    className={cn(
-                                        "hover:text-primary transition-colors",
-                                        courseSlug && !examSlug && "text-primary"
-                                    )}
-                                >
-                                    {activeCourse.title}
-                                </Link>
-                            </>
-                        )}
-                        {activeExam && (
-                            <>
-                                <ChevronRight className="w-3.5 h-3.5 opacity-40 shrink-0" />
-                                <span className={cn(
-                                    "font-black tracking-[0.1em]",
-                                    examSlug && "text-primary"
-                                )}>
-                                    {activeExam.exam_title}
-                                </span>
-                            </>
-                        )}
-                    </div>
-                )}
-
                 {activeView === "list" && renderListView()}
                 {activeView === "detail" && renderExamDetailView()}
                 {activeView === "playing" && renderPlayingView()}

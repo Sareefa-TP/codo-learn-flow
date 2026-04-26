@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { Gamepad2, RotateCcw, Sparkles, Timer, Trophy } from "lucide-react";
+import { Gamepad2, RotateCcw, Sparkles, Timer, Trophy, CheckCircle2, XCircle, Info } from "lucide-react";
 
 type Difficulty = "easy" | "medium" | "hard";
 type GameState = "idle" | "running" | "finished";
@@ -210,243 +210,243 @@ export default function StudentGame() {
       >
         <div className="grid grid-cols-12 gap-6">
           {/* ── Main Content (Left) ── */}
-        <Card className="col-span-12 lg:col-span-8 border-border/60 bg-card/80 shadow-sm backdrop-blur-sm overflow-hidden flex flex-col">
-          <CardHeader className="border-b border-border/60 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-2xl bg-primary/10 text-primary border border-primary/15 flex items-center justify-center shrink-0 shadow-sm">
-                  <Gamepad2 className="h-6 w-6" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold tracking-tight text-foreground">Quick Math Sprint</h2>
-                  <p className="text-xs font-medium text-muted-foreground mt-0.5">
-                    Answer as many as you can. Wrong answers reset your streak.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <Select
-                  value={difficulty}
-                  onValueChange={(v) => setDifficulty(v as Difficulty)}
-                  disabled={gameState === "running"}
-                >
-                  <SelectTrigger className="w-[140px] rounded-xl bg-background/60 border-border/60 shadow-sm font-bold text-xs uppercase tracking-widest">
-                    <SelectValue placeholder="Difficulty" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl">
-                    <SelectItem value="easy" className="text-xs font-bold">Easy</SelectItem>
-                    <SelectItem value="medium" className="text-xs font-bold">Medium</SelectItem>
-                    <SelectItem value="hard" className="text-xs font-bold">Hard</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                {gameState !== "running" ? (
-                  <Button
-                    onClick={start}
-                    className="rounded-xl px-8 font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary/20"
-                    disabled={isSubmitting}
-                  >
-                    Start Game
-                  </Button>
-                ) : (
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="rounded-xl border-border/60 font-black text-[10px] uppercase tracking-widest px-6"
-                        disabled={isSubmitting}
-                      >
-                        <RotateCcw className="mr-2 h-3.5 w-3.5" />
-                        Restart
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent className="max-w-[400px] rounded-2xl">
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Restart the game?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Your current score and streak will be reset.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          className="rounded-xl"
-                          onClick={start}
-                        >
-                          Restart
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                )}
-              </div>
-            </div>
-          </CardHeader>
-
-          <CardContent className="p-0">
-            <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch min-h-[550px]">
-              
-              {/* Left Column: Timer & Stats */}
-              <div className="lg:col-span-5 p-8 flex flex-col border-r border-border/40">
-                <div className="flex items-center justify-between mb-8">
-                  <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
-                    <Timer className="h-3.5 w-3.5 text-primary" />
-                    Time left
+          <Card className="col-span-12 lg:col-span-8 border-border/60 bg-card/80 shadow-sm backdrop-blur-sm overflow-hidden flex flex-col">
+            <CardHeader className="border-b border-border/60 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-2xl bg-primary/10 text-primary border border-primary/15 flex items-center justify-center shrink-0 shadow-sm">
+                    <Gamepad2 className="h-6 w-6" />
                   </div>
-                  <Badge className={cn(
-                    "rounded-full font-black text-[8px] uppercase px-2 py-0",
-                    gameState === "running" ? "bg-emerald-500 text-white shadow-lg shadow-emerald-200" : "bg-muted text-muted-foreground"
-                  )}>
-                    {gameState === "running" ? "Live" : gameState === "finished" ? "Finished" : "Ready"}
-                  </Badge>
+                  <div>
+                    <CardTitle className="text-xl font-bold tracking-tight text-foreground">Quick Math Sprint</CardTitle>
+                    <p className="text-xs font-medium text-muted-foreground mt-0.5">
+                      Answer as many as you can. Wrong answers reset your streak.
+                    </p>
+                  </div>
                 </div>
 
-                <div className="flex-1 flex items-center justify-center">
-                  <div className="relative">
-                    <CircularProgress
-                      value={timePercent}
-                      size={240}
-                      strokeWidth={16}
-                      className="transition-all duration-1000 ease-linear"
+                <div className="flex items-center gap-3">
+                  <Select
+                    value={difficulty}
+                    onValueChange={(v) => setDifficulty(v as Difficulty)}
+                    disabled={gameState === "running"}
+                  >
+                    <SelectTrigger className="w-[140px] rounded-xl bg-background/60 border-border/60 shadow-sm font-bold text-xs uppercase tracking-widest">
+                      <SelectValue placeholder="Difficulty" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl">
+                      <SelectItem value="easy" className="text-xs font-bold">Easy</SelectItem>
+                      <SelectItem value="medium" className="text-xs font-bold">Medium</SelectItem>
+                      <SelectItem value="hard" className="text-xs font-bold">Hard</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  {gameState !== "running" ? (
+                    <Button
+                      onClick={start}
+                      className="rounded-xl px-8 font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary/20"
+                      disabled={isSubmitting}
                     >
-                      <div className="text-center">
-                        <div className="text-7xl font-black tabular-nums tracking-tighter">
-                          {secondsLeft}
+                      Start Game
+                    </Button>
+                  ) : (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="rounded-xl border-border/60 font-black text-[10px] uppercase tracking-widest px-6"
+                          disabled={isSubmitting}
+                        >
+                          <RotateCcw className="mr-2 h-3.5 w-3.5" />
+                          Restart
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent className="max-w-[400px] rounded-2xl">
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Restart the game?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Your current score and streak will be reset.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            className="rounded-xl"
+                            onClick={start}
+                          >
+                            Restart
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
+                </div>
+              </div>
+            </CardHeader>
+
+            <CardContent className="p-0">
+              <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch min-h-[550px]">
+                
+                {/* Left Column: Timer & Stats */}
+                <div className="lg:col-span-5 p-8 flex flex-col border-r border-border/40">
+                  <div className="flex items-center justify-between mb-8">
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+                      <Timer className="h-3.5 w-3.5 text-primary" />
+                      Time left
+                    </div>
+                    <Badge className={cn(
+                      "rounded-full font-black text-[8px] uppercase px-2 py-0",
+                      gameState === "running" ? "bg-emerald-500 text-white shadow-lg shadow-emerald-200" : "bg-muted text-muted-foreground"
+                    )}>
+                      {gameState === "running" ? "Live" : gameState === "finished" ? "Finished" : "Ready"}
+                    </Badge>
+                  </div>
+
+                  <div className="flex-1 flex items-center justify-center">
+                    <div className="relative">
+                      <CircularProgress
+                        value={timePercent}
+                        size={240}
+                        strokeWidth={16}
+                        className="transition-all duration-1000 ease-linear"
+                      >
+                        <div className="text-center">
+                          <div className="text-7xl font-black tabular-nums tracking-tighter">
+                            {secondsLeft}
+                          </div>
+                          <div className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground mt-1">
+                            seconds
+                          </div>
                         </div>
-                        <div className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground mt-1">
-                          seconds
+                      </CircularProgress>
+                      {gameState === "finished" && (
+                         <div className="absolute inset-0 flex items-center justify-center bg-card/40 backdrop-blur-[2px] rounded-full animate-in fade-in">
+                           <div className="p-3 rounded-2xl bg-white shadow-xl border border-border/50">
+                              <Trophy className="w-8 h-8 text-amber-500 animate-bounce" />
+                           </div>
+                         </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mt-8">
+                    <div className="grid grid-cols-3 gap-3">
+                      {[
+                        { label: "Score", val: score, color: "text-foreground" },
+                        { label: "Streak", val: streak, color: "text-primary" },
+                        { label: "Accuracy", val: `${accuracy}%`, color: "text-foreground" }
+                      ].map((stat) => (
+                        <div key={stat.label} className="rounded-[2rem] border border-border/60 bg-muted/5 p-5 text-center shadow-inner">
+                          <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1.5">{stat.label}</p>
+                          <p className={cn("text-2xl font-black tabular-nums tracking-tight", stat.color)}>{stat.val}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Column: Question & Interaction */}
+                <div className="lg:col-span-7 p-8 flex flex-col bg-muted/5">
+                  <div className="flex items-center justify-between mb-8">
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+                      <Sparkles className="h-3.5 w-3.5 text-primary" />
+                      Current question
+                    </div>
+                    {gameState === "finished" && (
+                      <div className="flex items-center gap-2 text-[10px] font-black uppercase text-emerald-600 font-black tracking-widest">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        Session Complete
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex-1 flex flex-col items-center justify-center">
+                    <div className="text-center">
+                      <p className="text-[11px] font-black uppercase tracking-[0.5em] text-muted-foreground opacity-30 mb-4">Solve the problem</p>
+                      <div className="text-9xl font-black tracking-tighter tabular-nums text-foreground animate-in zoom-in-95 duration-500">
+                        {question.prompt}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-8">
+                    {gameState !== "finished" ? (
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-3">
+                          <Input
+                            ref={inputRef}
+                            inputMode="numeric"
+                            placeholder={gameState === "running" ? "Type your answer…" : "Press Start above"}
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") submitAnswer();
+                            }}
+                            disabled={gameState !== "running" || isSubmitting}
+                            className="h-20 rounded-[2rem] bg-white border-border/60 shadow-md text-3xl font-black tabular-nums text-center focus:ring-primary/20 transition-all focus:scale-[1.02]"
+                          />
+                          <Button
+                            onClick={submitAnswer}
+                            disabled={gameState !== "running" || isSubmitting}
+                            className="h-20 px-12 rounded-[2rem] shadow-xl shadow-primary/20 font-black text-xs uppercase tracking-[0.2em] hover:scale-[1.02] transition-transform"
+                          >
+                            {isSubmitting ? "..." : "Submit"}
+                          </Button>
+                        </div>
+
+                        <div className="h-16 flex items-center justify-center">
+                          {lastResult ? (
+                            <div
+                              className={cn(
+                                "w-full rounded-2xl border px-6 py-4 text-sm font-black flex items-center justify-center gap-4 animate-in fade-in slide-in-from-top-4",
+                                lastResult.correct
+                                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-700"
+                                  : "border-rose-500/30 bg-rose-500/10 text-rose-700",
+                              )}
+                            >
+                              {lastResult.correct ? (
+                                <><CheckCircle2 className="w-5 h-5" /> Perfect! Correct.</>
+                              ) : (
+                                <><XCircle className="w-5 h-5" /> Incorrect. Answer: {lastResult.expected}</>
+                              )}
+                            </div>
+                          ) : (
+                            <p className="text-[11px] font-bold text-muted-foreground/30 uppercase tracking-[0.3em]">Waiting for your move</p>
+                          )}
                         </div>
                       </div>
-                    </CircularProgress>
-                    {gameState === "finished" && (
-                       <div className="absolute inset-0 flex items-center justify-center bg-card/40 backdrop-blur-[2px] rounded-full animate-in fade-in">
-                         <div className="p-3 rounded-2xl bg-white shadow-xl border border-border/50">
-                            <Trophy className="w-8 h-8 text-amber-500 animate-bounce" />
-                         </div>
-                       </div>
+                    ) : (
+                      <div className="rounded-[2.5rem] border border-primary/20 bg-primary/5 p-8 animate-in zoom-in-95">
+                        <div className="flex flex-col sm:flex-row items-center gap-8">
+                          <div className="flex-1 text-center sm:text-left space-y-2">
+                            <h4 className="text-lg font-black tracking-tight text-primary">Session Over!</h4>
+                            <p className="text-xs font-medium text-muted-foreground leading-relaxed">
+                              Great run! You can review your accuracy or change difficulty before your next attempt.
+                            </p>
+                          </div>
+                          <div className="flex flex-col gap-3 shrink-0">
+                            <Button 
+                              className="h-12 px-8 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary/30"
+                              onClick={start}
+                            >
+                              Play Again
+                            </Button>
+                            <Button 
+                              variant="outline"
+                              className="h-12 px-8 rounded-2xl font-black text-[10px] uppercase tracking-widest text-muted-foreground hover:bg-white"
+                              onClick={reset}
+                            >
+                              Back to Ready
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
                     )}
                   </div>
                 </div>
-
-                <div className="mt-8">
-                  <div className="grid grid-cols-3 gap-3">
-                    {[
-                      { label: "Score", val: score, color: "text-foreground" },
-                      { label: "Streak", val: streak, color: "text-primary" },
-                      { label: "Accuracy", val: `${accuracy}%`, color: "text-foreground" }
-                    ].map((stat) => (
-                      <div key={stat.label} className="rounded-[2rem] border border-border/60 bg-muted/5 p-5 text-center shadow-inner">
-                        <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1.5">{stat.label}</p>
-                        <p className={cn("text-2xl font-black tabular-nums tracking-tight", stat.color)}>{stat.val}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
               </div>
-
-              {/* Right Column: Question & Interaction */}
-              <div className="lg:col-span-7 p-8 flex flex-col bg-muted/5">
-                <div className="flex items-center justify-between mb-8">
-                  <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
-                    <Sparkles className="h-3.5 w-3.5 text-primary" />
-                    Current question
-                  </div>
-                  {gameState === "finished" && (
-                    <div className="flex items-center gap-2 text-[10px] font-black uppercase text-emerald-600 font-black tracking-widest">
-                      <CheckCircle2 className="h-3.5 w-3.5" />
-                      Session Complete
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex-1 flex flex-col items-center justify-center">
-                  <div className="text-center">
-                    <p className="text-[11px] font-black uppercase tracking-[0.5em] text-muted-foreground opacity-30 mb-4">Solve the problem</p>
-                    <div className="text-9xl font-black tracking-tighter tabular-nums text-foreground animate-in zoom-in-95 duration-500">
-                      {question.prompt}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-8">
-                  {gameState !== "finished" ? (
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3">
-                        <Input
-                          ref={inputRef}
-                          inputMode="numeric"
-                          placeholder={gameState === "running" ? "Type your answer…" : "Press Start above"}
-                          value={inputValue}
-                          onChange={(e) => setInputValue(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") submitAnswer();
-                          }}
-                          disabled={gameState !== "running" || isSubmitting}
-                          className="h-20 rounded-[2rem] bg-white border-border/60 shadow-md text-3xl font-black tabular-nums text-center focus:ring-primary/20 transition-all focus:scale-[1.02]"
-                        />
-                        <Button
-                          onClick={submitAnswer}
-                          disabled={gameState !== "running" || isSubmitting}
-                          className="h-20 px-12 rounded-[2rem] shadow-xl shadow-primary/20 font-black text-xs uppercase tracking-[0.2em] hover:scale-[1.02] transition-transform"
-                        >
-                          {isSubmitting ? "..." : "Submit"}
-                        </Button>
-                      </div>
-
-                      <div className="h-16 flex items-center justify-center">
-                        {lastResult ? (
-                          <div
-                            className={cn(
-                              "w-full rounded-2xl border px-6 py-4 text-sm font-black flex items-center justify-center gap-4 animate-in fade-in slide-in-from-top-4",
-                              lastResult.correct
-                                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-700"
-                                : "border-rose-500/30 bg-rose-500/10 text-rose-700",
-                            )}
-                          >
-                            {lastResult.correct ? (
-                              <><CheckCircle2 className="w-5 h-5" /> Perfect! Correct.</>
-                            ) : (
-                              <><XCircle className="w-5 h-5" /> Incorrect. Answer: {lastResult.expected}</>
-                            )}
-                          </div>
-                        ) : (
-                          <p className="text-[11px] font-bold text-muted-foreground/30 uppercase tracking-[0.3em]">Waiting for your move</p>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="rounded-[2.5rem] border border-primary/20 bg-primary/5 p-8 animate-in zoom-in-95">
-                      <div className="flex flex-col sm:flex-row items-center gap-8">
-                        <div className="flex-1 text-center sm:text-left space-y-2">
-                          <h4 className="text-lg font-black tracking-tight text-primary">Session Over!</h4>
-                          <p className="text-xs font-medium text-muted-foreground leading-relaxed">
-                            Great run! You can review your accuracy or change difficulty before your next attempt.
-                          </p>
-                        </div>
-                        <div className="flex flex-col gap-3 shrink-0">
-                          <Button 
-                            className="h-12 px-8 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary/30"
-                            onClick={start}
-                          >
-                            Play Again
-                          </Button>
-                          <Button 
-                            variant="ghost"
-                            className="h-12 px-8 rounded-2xl font-black text-[10px] uppercase tracking-widest text-muted-foreground hover:bg-white"
-                            onClick={reset}
-                          >
-                            Back to Ready
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
           {/* ── Sidebar (Right) ── */}
           <div className="col-span-12 lg:col-span-4 space-y-6">
@@ -507,4 +507,3 @@ export default function StudentGame() {
     </DashboardLayout>
   );
 }
-

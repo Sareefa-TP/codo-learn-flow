@@ -121,12 +121,12 @@ const TransactionDetailDrawer = ({ transaction, onClose }: DetailProps) => {
                 <div className="flex items-center justify-between">
                    <div className="space-y-1">
                       <p className="text-[9px] font-bold text-muted-foreground uppercase">From</p>
-                      <p className="text-sm font-black">{isInflow ? transaction.party : "Codo Academy"}</p>
+                      <p className="text-sm font-black">{isInflow ? transaction.party : "CODO Academy"}</p>
                    </div>
                    <ArrowRight className="w-4 h-4 text-muted-foreground opacity-30" />
                    <div className="space-y-1 text-right">
                       <p className="text-[9px] font-bold text-muted-foreground uppercase">To</p>
-                      <p className="text-sm font-black">{isInflow ? "Codo Academy" : transaction.party}</p>
+                      <p className="text-sm font-black">{isInflow ? "CODO Academy" : transaction.party}</p>
                    </div>
                 </div>
                 <div className="pt-4 border-t border-border/40 flex items-center justify-between">

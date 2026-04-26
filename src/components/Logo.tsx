@@ -4,9 +4,10 @@ import { cn } from "@/lib/utils";
 interface LogoProps {
   className?: string;
   size?: "sm" | "md" | "lg";
+  tone?: "auto" | "light" | "dark";
 }
 
-const Logo = ({ className, size = "md" }: LogoProps) => {
+const Logo = ({ className, size = "md", tone = "auto" }: LogoProps) => {
   const [hasImageError, setHasImageError] = useState(false);
 
   const sizeClasses = {
@@ -63,18 +64,38 @@ const Logo = ({ className, size = "md" }: LogoProps) => {
         </>
       ) : (
         <>
-          <img
-            src="/codo-logo-dark.webp"
-            alt="CODO Academy"
-            className={cn("block dark:hidden w-auto object-contain", currentSize.wrapper)}
-            onError={() => setHasImageError(true)}
-          />
-          <img
-            src="/codo-logo-light.webp"
-            alt="CODO Academy"
-            className={cn("hidden dark:block w-auto object-contain", currentSize.wrapper)}
-            onError={() => setHasImageError(true)}
-          />
+          {tone === "light" && (
+            <img
+              src="/codo-logo-light.webp"
+              alt="CODO Academy"
+              className={cn("w-auto object-contain", currentSize.wrapper)}
+              onError={() => setHasImageError(true)}
+            />
+          )}
+          {tone === "dark" && (
+            <img
+              src="/codo-logo-dark.webp"
+              alt="CODO Academy"
+              className={cn("w-auto object-contain", currentSize.wrapper)}
+              onError={() => setHasImageError(true)}
+            />
+          )}
+          {tone === "auto" && (
+            <>
+              <img
+                src="/codo-logo-dark.webp"
+                alt="CODO Academy"
+                className={cn("block dark:hidden w-auto object-contain", currentSize.wrapper)}
+                onError={() => setHasImageError(true)}
+              />
+              <img
+                src="/codo-logo-light.webp"
+                alt="CODO Academy"
+                className={cn("hidden dark:block w-auto object-contain", currentSize.wrapper)}
+                onError={() => setHasImageError(true)}
+              />
+            </>
+          )}
         </>
       )}
     </div>

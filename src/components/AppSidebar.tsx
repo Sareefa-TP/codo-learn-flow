@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Logo from "@/components/Logo";
 import { useRole } from "@/hooks/useRole";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { studentData } from "@/data/studentData";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +30,17 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 // Badge data type
 interface SidebarBadge {
@@ -55,11 +67,11 @@ const getStudentBadges = (): Record<string, SidebarBadge> => ({
 export function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { state, toggleSidebar } = useSidebar();
+  const { state, toggleSidebar, isMobile, setOpenMobile } = useSidebar();
   const isCollapsed = state === "collapsed";
   const { role, navigation, displayInfo } = useRole();
   const navButtonBase =
-    "group/menu-item flex items-center rounded-xl border border-transparent transition-all duration-200 hover:border-sidebar-border/70 hover:bg-sidebar-accent/70 hover:shadow-sm data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground data-[active=true]:border-sidebar-border/80 data-[active=true]:shadow-sm";
+    "group/menu-item flex items-center rounded-xl border border-transparent transition-all duration-300 hover:border-sidebar-border/70 hover:bg-sidebar-accent/70 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground data-[active=true]:border-sidebar-border/80 data-[active=true]:shadow-sm";
 
   // Initialize open groups based on current URL
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
@@ -104,9 +116,21 @@ export function AppSidebar() {
     });
   }, [location.pathname, navigation.mainNav, navigation.baseUrl]);
 
+  // Close the mobile sheet after navigation for smoother UX.
+  useEffect(() => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  }, [isMobile, location.pathname, setOpenMobile]);
+
   const handleLogout = () => {
     sessionStorage.removeItem("selectedRole");
-    navigate("/");
+    navigate("/", { replace: true });
+    window.setTimeout(() => {
+      if (window.location.pathname !== "/") {
+        window.location.assign("/");
+      }
+    }, 0);
   };
 
   // Get badge info for a nav item
@@ -164,27 +188,44 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border/80 bg-sidebar/80 backdrop-blur supports-[backdrop-filter]:bg-sidebar/60">
+    <Sidebar
+      collapsible="icon"
+      className="border-x border-sidebar-border/70 bg-gradient-to-b from-sidebar via-sidebar to-sidebar/95 shadow-[inset_1px_0_0_hsl(var(--sidebar-border)/0.38),inset_-1px_0_0_hsl(var(--sidebar-border)/0.7),0_18px_44px_hsl(160_25%_6%_/_0.22)] backdrop-blur supports-[backdrop-filter]:bg-sidebar/90"
+    >
       {/* Header with logo toggle */}
-      <SidebarHeader className="p-2 border-b border-sidebar-border/70">
+      <SidebarHeader className="border-b border-sidebar-border/70 p-2 md:p-2.5">
         <button
           onClick={toggleSidebar}
           className={cn(
-            "flex items-center justify-center w-full rounded-xl border border-transparent hover:border-sidebar-border/70 hover:bg-sidebar-accent/70 transition-all duration-200 group/logo overflow-hidden h-14 px-2"
+            "group/logo flex w-full items-center justify-center overflow-hidden rounded-xl px-2 transition-all duration-300",
+            isCollapsed ? "h-14 md:h-[3.75rem]" : "h-[5.25rem] md:h-[5.5rem]",
+            !isCollapsed && "border border-sidebar-border/70 bg-transparent",
+            isCollapsed && "border-transparent bg-transparent"
           )}
           title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
         >
           {isCollapsed ? (
-            <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/25 flex items-center justify-center shrink-0 group-hover/logo:scale-105 transition-transform shadow-sm">
-              <img src="/favicon.ico" alt="CODO" className="w-5 h-5 object-contain" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-sidebar-accent/30 transition-transform duration-300 group-hover/logo:scale-105">
+              <img
+                src="/favicon.ico"
+                alt="CODO"
+                className="h-5 w-5 object-contain"
+              />
             </div>
           ) : (
-            <Logo size="md" className="justify-start w-full" />
+            <div className="flex h-full w-full items-center justify-center rounded-2xl bg-transparent px-3 py-2 shadow-soft">
+              <div className="flex w-full max-w-[13.5rem] flex-col items-center justify-center text-center">
+                <Logo tone="light" size="sm" className="w-full justify-center drop-shadow-[0_2px_12px_hsl(145_60%_55%_/_0.18)]" />
+                <p className="mt-1 truncate text-center text-[8.5px] uppercase tracking-[0.12em] text-sidebar-foreground/55 sm:text-[9px]">
+                  CODO AI Innovations
+                </p>
+              </div>
+            </div>
           )}
         </button>
       </SidebarHeader>
 
-      <SidebarContent className={cn(isCollapsed ? "p-1.5" : "p-3")}>
+      <SidebarContent className={cn(isCollapsed ? "p-1.5" : "p-2.5 md:p-3")}>
         {/* Main navigation */}
         <SidebarGroup className={cn(isCollapsed && "px-0")}>
           {role !== "advisor" && (
@@ -193,7 +234,7 @@ export function AppSidebar() {
             </SidebarGroupLabel>
           )}
           <SidebarGroupContent>
-            <SidebarMenu className={cn(isCollapsed ? "gap-2 items-center" : "gap-1.5")}>
+            <SidebarMenu className={cn(isCollapsed ? "gap-2 items-center px-0.5" : "gap-1.5")}>
               {navigation.mainNav.map((item) => {
                 const badgeData = getBadgeForPath(item.url);
 
@@ -208,14 +249,14 @@ export function AppSidebar() {
                         setOpenGroups(prev => ({ ...prev, [item.title]: open }))
                       }
                     >
-                      <SidebarMenuItem className={isCollapsed ? "w-full flex justify-center" : ""}>
+                      <SidebarMenuItem className={isCollapsed ? "flex justify-center" : ""}>
                         <CollapsibleTrigger asChild>
                           <SidebarMenuButton
                             tooltip={item.title}
                             className={cn(
                               navButtonBase,
                               "w-full",
-                              isCollapsed ? "justify-center h-11 w-full p-0 !size-auto" : "gap-3 px-3 py-2.5"
+                              isCollapsed ? "h-10 w-10 justify-center rounded-xl p-0 !size-auto" : "gap-3 px-3 py-2.5"
                             )}
                           >
                             <item.icon className={cn("shrink-0", isCollapsed ? "w-5 h-5" : "w-5 h-5")} />
@@ -238,7 +279,7 @@ export function AppSidebar() {
                                 <SidebarMenuSubButton asChild>
                                   <NavLink
                                     to={child.url}
-                                    className="flex items-center gap-2 px-3 py-2 rounded-lg border border-transparent transition-all duration-200 text-sm hover:bg-sidebar-accent/60 hover:border-sidebar-border/60"
+                                    className="flex items-center gap-2 rounded-lg border border-transparent px-3 py-2 text-sm transition-all duration-300 hover:border-sidebar-border/60 hover:bg-sidebar-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
                                     activeClassName="bg-sidebar-accent text-sidebar-accent-foreground border-sidebar-border/80 shadow-sm font-medium"
                                   >
                                     <child.icon className={cn("shrink-0", isCollapsed ? "w-4 h-4" : "w-4 h-4")} />
@@ -256,13 +297,13 @@ export function AppSidebar() {
 
                 // ── Flat item (no children) — original rendering ─────────
                 return (
-                  <SidebarMenuItem key={item.title} className={isCollapsed ? "w-full flex justify-center" : ""}>
+                  <SidebarMenuItem key={item.title} className={isCollapsed ? "flex justify-center" : ""}>
                     <SidebarMenuButton
                       asChild
                       tooltip={item.title}
                       className={cn(
                         navButtonBase,
-                        isCollapsed && "h-11 w-full p-0 flex items-center justify-center !size-auto"
+                        isCollapsed && "h-10 w-10 rounded-xl p-0 flex items-center justify-center !size-auto"
                       )}
                     >
                       <NavLink
@@ -270,7 +311,7 @@ export function AppSidebar() {
                         end={item.url === navigation.baseUrl}
                         className={cn(
                           "flex items-center rounded-xl transition-all duration-200 group relative",
-                          isCollapsed ? "justify-center h-full w-full p-0" : "gap-3 px-3 py-2.5"
+                          isCollapsed ? "h-full w-full justify-center p-0" : "gap-3 px-3 py-2.5"
                         )}
                         activeClassName="bg-sidebar-accent text-sidebar-accent-foreground border border-sidebar-border/80 shadow-sm font-medium"
                       >
@@ -304,24 +345,24 @@ export function AppSidebar() {
               </SidebarGroupLabel>
             )}
             <SidebarGroupContent>
-              <SidebarMenu className={cn(isCollapsed ? "gap-2 items-center" : "gap-1.5")}>
+              <SidebarMenu className={cn(isCollapsed ? "gap-2 items-center px-0.5" : "gap-1.5")}>
                 {navigation.secondaryNav.map((item) => {
                   const badgeData = getBadgeForPath(item.url);
                   return (
-                    <SidebarMenuItem key={item.title} className={isCollapsed ? "w-full flex justify-center" : ""}>
+                    <SidebarMenuItem key={item.title} className={isCollapsed ? "flex justify-center" : ""}>
                       <SidebarMenuButton
                         asChild
                         tooltip={item.title}
                         className={cn(
                           navButtonBase,
-                          isCollapsed && "h-11 w-full p-0 flex items-center justify-center !size-auto"
+                          isCollapsed && "h-10 w-10 rounded-xl p-0 flex items-center justify-center !size-auto"
                         )}
                       >
                         <NavLink
                           to={item.url}
                           className={cn(
                             "flex items-center rounded-xl transition-all duration-200 relative",
-                            isCollapsed ? "justify-center h-full w-full p-0" : "gap-3 px-3 py-2.5"
+                            isCollapsed ? "h-full w-full justify-center p-0" : "gap-3 px-3 py-2.5"
                           )}
                           activeClassName="bg-sidebar-accent text-sidebar-accent-foreground border border-sidebar-border/80 shadow-sm font-medium"
                         >
@@ -349,19 +390,27 @@ export function AppSidebar() {
       </SidebarContent>
 
       {/* Footer with user info */}
-      <SidebarFooter className="p-3 border-t border-sidebar-border/70">
+      <SidebarFooter
+        className={cn(
+          "border-t border-sidebar-border/70 pb-[max(0.75rem,env(safe-area-inset-bottom))]",
+          isCollapsed ? "p-2" : "p-3"
+        )}
+      >
         <div
           onClick={() => navigate(role === "superadmin" ? "/super-admin/profile" : `/${role}/profile`)}
-          className="flex items-center gap-3 p-2.5 rounded-2xl border border-transparent hover:border-sidebar-border/70 hover:bg-sidebar-accent/70 transition-all duration-200 cursor-pointer group/profile"
+          className={cn(
+            "group/profile flex cursor-pointer items-center rounded-2xl border border-sidebar-border/70 bg-sidebar-accent/70 transition-all duration-200",
+            isCollapsed ? "mx-auto h-10 w-10 justify-center p-0" : "gap-3 p-2.5"
+          )}
         >
           {role === "student" ? (
             <img
               src={studentData.profile.avatar}
               alt="Profile"
-              className="w-10 h-10 rounded-full shrink-0 border border-transparent group-hover/profile:border-primary/30 transition-colors"
+              className="w-10 h-10 rounded-full shrink-0 border border-primary/30 transition-colors"
             />
           ) : (
-            <div className={`w-10 h-10 rounded-full ${displayInfo.color}/10 flex items-center justify-center shrink-0 group-hover/profile:bg-primary/20 transition-colors border border-primary/15`}>
+            <div className={`w-10 h-10 rounded-full ${displayInfo.color}/10 flex items-center justify-center shrink-0 bg-primary/20 transition-colors border border-primary/15`}>
               <span className="text-sm font-semibold text-primary">
                 {displayInfo.label.charAt(0)}
               </span>
@@ -369,23 +418,46 @@ export function AppSidebar() {
           )}
           {!isCollapsed && (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold truncate group-hover/profile:text-primary transition-colors">
+              <p className="text-sm font-semibold truncate text-primary transition-colors">
                 {role === "student" ? studentData.profile.name : "Alex Johnson"}
               </p>
               <p className="text-xs text-muted-foreground truncate">{displayInfo.label}</p>
             </div>
           )}
           {!isCollapsed && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleLogout();
-              }}
-              className="p-2 hover:bg-primary/10 rounded-xl transition-colors text-muted-foreground hover:text-primary border border-transparent hover:border-primary/20"
-              title="Logout"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  className="p-2 hover:bg-primary/10 rounded-xl transition-colors text-muted-foreground hover:text-primary border border-transparent hover:border-primary/20"
+                  title="Logout"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="rounded-2xl">
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Logout from your account?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    You will be signed out and redirected to the login page.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                  <AlertDialogAction asChild>
+                    <Button
+                      type="button"
+                      className="rounded-xl"
+                      onClick={handleLogout}
+                    >
+                      Logout
+                    </Button>
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           )}
         </div>
       </SidebarFooter>

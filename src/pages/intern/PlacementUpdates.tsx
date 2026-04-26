@@ -401,7 +401,7 @@ const PlacementUpdates = () => {
                 Internal Placements
               </h1>
               <p className="text-muted-foreground text-sm mt-0.5 font-medium">
-                Exclusive career opportunities for Codo Academy interns at Codo Agency
+                Exclusive career opportunities for CODO Academy interns at Codo Agency
               </p>
             </div>
           </div>
