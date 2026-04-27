@@ -324,11 +324,10 @@ const coursesData = [
 
 const StudentPackages = () => {
   const navigate = useNavigate();
-  const handleWatchRecording = (recordingUrl: string | undefined | null) => {
-    // Debug (remove later if not needed)
-    console.log("recordingUrl:", recordingUrl);
+  const [viewingVideo, setViewingVideo] = useState<{ title: string; url: string } | null>(null);
+  const handleWatchRecording = (recordingUrl: string | undefined | null, title: string) => {
     if (!recordingUrl || recordingUrl === "#") return;
-    navigate(`/student/video-player?url=${encodeURIComponent(recordingUrl)}`);
+    setViewingVideo({ title, url: recordingUrl });
   };
   const { courseSlug, moduleSlug, sessionSlug } = useParams();
 
@@ -362,6 +361,29 @@ const StudentPackages = () => {
       document.body.style.overflow = prev;
     };
   }, [viewingCourseDetailsId]);
+
+  useEffect(() => {
+    if (!viewingVideo) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [viewingVideo]);
+
+  const toEmbedUrl = (url: string) => {
+    try {
+      const clean = url.trim();
+      if (/\.mp4($|\?)/i.test(clean)) return clean;
+      const vimeoMatch = clean.match(/vimeo\.com\/(\d+)/i);
+      if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+      const ytMatch = clean.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?/]+)/i);
+      if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
+      return clean;
+    } catch {
+      return url;
+    }
+  };
 
   // File Upload State for Inline Submission
   const [dragActive, setDragActive] = useState(false);
@@ -1071,7 +1093,12 @@ const StudentPackages = () => {
                                                         <p className="text-[11px] font-bold text-foreground truncate">{video.title}</p>
                                                         <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest mt-0.5">MP4 • 1080p</p>
                                                       </div>
-                                                      <Button variant="ghost" size="icon" className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-full" onClick={() => window.open(video.link, '_blank')}>
+                                                      <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-full"
+                                                        onClick={() => handleWatchRecording(video.link, video.title)}
+                                                      >
                                                         <Eye className="w-4 h-4" />
                                                       </Button>
                                                     </div>
@@ -1097,7 +1124,7 @@ const StudentPackages = () => {
                                             <Button
                                               variant="outline"
                                               className="border-purple-200 text-purple-700 hover:bg-purple-50 text-xs font-bold px-6 h-9 rounded-full"
-                                              onClick={() => handleWatchRecording(session.recordingLink)}
+                                              onClick={() => handleWatchRecording(session.recordingLink, session.title)}
                                               disabled={!session.recordingLink}
                                             >
                                               {session.recordingLink ? "Watch Recording" : "No Recording Available"}
@@ -1133,6 +1160,45 @@ const StudentPackages = () => {
       </div>
 
       {courseDetailsModal}
+      {viewingVideo &&
+        createPortal(
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 backdrop-blur-sm p-4">
+            <div
+              className="bg-background border border-border/50 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[92vh] flex flex-col animate-in fade-in zoom-in duration-200"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between p-4 sm:p-6 border-b border-border/50 bg-muted/5 flex-shrink-0">
+                <div className="min-w-0">
+                  <h2 className="text-lg sm:text-xl font-bold tracking-tight truncate">{viewingVideo.title}</h2>
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">Recording preview</p>
+                </div>
+                <button
+                  onClick={() => setViewingVideo(null)}
+                  className="p-2 rounded-xl hover:bg-muted transition-colors text-muted-foreground flex-shrink-0"
+                  aria-label="Close"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="flex-1 overflow-auto p-4 sm:p-6">
+                <div className="rounded-2xl border border-border/60 bg-black overflow-hidden shadow-sm">
+                  {/\.mp4($|\?)/i.test(viewingVideo.url) ? (
+                    <video src={viewingVideo.url} controls className="w-full h-auto max-h-[70vh]" />
+                  ) : (
+                    <iframe
+                      src={toEmbedUrl(viewingVideo.url)}
+                      title={viewingVideo.title}
+                      className="w-full h-[68vh] bg-black"
+                      allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                      allowFullScreen
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
     </DashboardLayout>
   );
 };

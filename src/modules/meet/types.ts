@@ -2,6 +2,9 @@ export interface MeetSession {
   id: string;
   title: string;
   mentor: string;
+  tutor?: string;
+  coordinator?: string;
+  advisor?: string;
   date: string;
   time: string;
   startTime: string; // ISO string (used for ordering / reference)

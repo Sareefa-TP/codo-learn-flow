@@ -11,7 +11,11 @@ export default function StudentChat() {
 
   const isParticipantsOpen = location.pathname === "/student/chat/participants";
 
-  const handleSendMessage = (text: string, courseTag?: string) => {
+  const handleSendMessage = (
+    text: string,
+    courseTag?: string,
+    attachment?: { url: string; name: string; type: string },
+  ) => {
     const newMessage = {
       id: Date.now().toString(),
       senderId: "s1", // Student ID from mock
@@ -19,9 +23,27 @@ export default function StudentChat() {
       text,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       courseTag,
+      attachmentUrl: attachment?.url,
+      attachmentName: attachment?.name,
+      attachmentType: attachment?.type,
       isOwn: true,
     };
     setMessages([...messages, newMessage]);
+  };
+
+  const handleSendVoiceMessage = (audioUrl: string, audioDurationSec: number, courseTag?: string) => {
+    const newMessage = {
+      id: Date.now().toString(),
+      senderId: "s1",
+      senderName: "YOU",
+      text: "",
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      courseTag,
+      audioUrl,
+      audioDurationSec,
+      isOwn: true,
+    };
+    setMessages((prev) => [...prev, newMessage]);
   };
 
   const handleDeleteMessage = (messageId: string) => {
@@ -48,6 +70,7 @@ export default function StudentChat() {
           <ChatWindow 
             messages={messages} 
             onSendMessage={handleSendMessage} 
+            onSendVoiceMessage={handleSendVoiceMessage}
             onDeleteMessage={handleDeleteMessage}
             onClearHistory={handleClearHistory}
             isParticipantsOpen={isParticipantsOpen}
