@@ -58,7 +58,7 @@ const webinars: Webinar[] = [
         description: "Learn best practices for designing and deploying microservices in a production environment. We'll discuss containerization, service discovery, and message brokers.",
         abstract: " James will walk through a production-grade architecture using Node.js, Docker, and Kubernetes. This is a must-watch for aspiring DevOps engineers and backend architects.",
         status: "Live",
-        meetingLink: "https://zoom.us/j/123456789",
+        meetingLink: "https://meet.google.com/qwe-rtyu-iop",
         isRegistered: true
     },
     {
@@ -281,7 +281,7 @@ const WebinarDetails = () => {
                                 {webinar.status === "Past" && (
                                     <Button variant="outline" className="w-full h-12 font-bold gap-2 text-base hover:bg-primary/5 hover:text-primary hover:border-primary/30" onClick={handleWatch}>
                                         <MonitorPlay className="w-5 h-5" />
-                                        Watch Recording
+                                        Watch
                                     </Button>
                                 )}
 

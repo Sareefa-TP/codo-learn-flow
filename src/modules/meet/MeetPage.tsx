@@ -1,10 +1,10 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Video, Calendar, Clock, PlayCircle, User, Info, RefreshCw, X, Radio, CheckCircle2 } from "lucide-react";
+import { Video, Calendar, Clock, PlayCircle, User, Info, RefreshCw, X, Radio, CheckCircle2, Play, Pause, Volume2, VolumeX, Maximize, Minimize } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
 import {
@@ -80,14 +80,14 @@ const MeetTabs = ({
             key={t.id}
             onClick={() => onTabChange(t.id)}
             className={cn(
-              "flex min-w-max shrink-0 items-center justify-center gap-2.5 px-4 h-11 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 relative focus:outline-none md:min-w-0 md:w-full md:shrink",
+              "flex min-w-max shrink-0 whitespace-nowrap items-center justify-center gap-2 px-3 h-11 rounded-full text-[10px] md:text-xs font-black uppercase tracking-[0.14em] md:tracking-widest transition-all duration-300 relative focus:outline-none md:min-w-0 md:w-full md:shrink",
               isActive
                 ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
                 : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
             )}
           >
             <Icon className={cn("w-4 h-4", isActive ? "text-primary-foreground" : "text-muted-foreground")} />
-            <span className="flex items-center gap-2">
+            <span className="flex items-center gap-1.5 whitespace-nowrap">
               {t.label}
               {isActive && t.id === "live" && (
                 <span className="flex h-2 w-2 relative">
@@ -99,7 +99,7 @@ const MeetTabs = ({
             {count > 0 && (
               <span
                 className={cn(
-                  "text-[10px] px-2 py-0.5 rounded-full font-black tabular-nums min-w-[24px] text-center ml-0.5",
+                  "text-[10px] px-2 py-0.5 rounded-full font-black tabular-nums min-w-[24px] text-center ml-0.5 shrink-0",
                   isActive ? "bg-primary-foreground/20 text-primary-foreground" : "bg-muted text-muted-foreground",
                 )}
               >
@@ -133,6 +133,7 @@ const SessionRow = ({
             size="sm"
             className="h-9 rounded-xl px-5 text-xs font-bold bg-primary hover:bg-primary/90 shadow-sm"
             disabled={isJoining}
+            onClick={(e) => e.stopPropagation()}
           >
             {isJoining ? "Joining…" : "Join Now"}
           </Button>
@@ -159,37 +160,32 @@ const SessionRow = ({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    ) : (
+    ) : session.status === "completed" ? (
       <Button
         size="sm"
-        variant={session.status === "completed" ? "outline" : "secondary"}
+        variant="outline"
         className={cn(
-          "h-9 rounded-xl px-5 text-xs font-bold w-full sm:w-auto",
-          session.status === "completed" && "hover:border-primary/50 hover:bg-primary/5 hover:text-primary",
+          "h-9 rounded-xl px-5 text-xs font-bold w-full md:w-auto hover:border-primary/50 hover:bg-primary/5 hover:text-primary",
         )}
-        onClick={() => {
-          if (session.status === "completed") {
-            setIsRecordingOpen(true);
-            return;
-          }
-          setIsDetailsOpen(true);
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsRecordingOpen(true);
         }}
         disabled={false}
       >
-        {session.status === "completed" ? (
-          <span className="inline-flex items-center gap-2">
-            <PlayCircle className="w-4 h-4" />
-            Watch
-          </span>
-        ) : (
-          "Details"
-        )}
+        <span className="inline-flex items-center gap-2">
+          <PlayCircle className="w-4 h-4" />
+          Watch
+        </span>
       </Button>
-    );
+    ) : null;
 
   return (
     <>
-      <div className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 hover:bg-muted/20 transition-colors">
+      <div
+        className="flex flex-col gap-3 px-4 py-4 md:flex-row md:items-center md:justify-between md:gap-4 hover:bg-muted/20 transition-colors cursor-pointer"
+        onClick={() => setIsDetailsOpen(true)}
+      >
         <div className="flex min-w-0 items-start gap-3">
           <div
             className={cn(
@@ -258,42 +254,102 @@ const SessionRow = ({
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
+              <div className="flex-1 overflow-y-auto p-6 sm:p-8 custom-scrollbar">
+                {(() => {
+                  const tutorName = session.tutor || session.mentor;
+                  const coordinatorName = session.coordinator || "Team CODO";
+                  const advisorName = session.advisor || "Support Desk";
+                  return (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Title</p>
-                    <div className="text-sm font-semibold leading-relaxed bg-muted/50 rounded-xl px-4 py-3 border border-border/30">
-                      {session.title}
-                    </div>
+                  <div className="md:col-span-2 rounded-2xl border border-primary/20 bg-primary/[0.03] p-4 sm:p-5">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-primary/70 mb-2">Session Title</p>
+                    <p className="text-lg sm:text-xl font-extrabold leading-tight text-foreground">{session.title}</p>
                   </div>
-                  <div className="space-y-2">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Mentor</p>
-                    <div className="text-sm font-semibold leading-relaxed bg-muted/50 rounded-xl px-4 py-3 border border-border/30">
-                      {session.mentor}
+
+                  <div className="rounded-2xl border border-blue-200/70 bg-blue-50/50 p-4 sm:p-5">
+                    <div className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-blue-700/80 mb-2">
+                      <User className="w-3.5 h-3.5" />
+                      Mentor
                     </div>
+                    <p className="text-lg font-bold text-foreground">{session.mentor}</p>
                   </div>
-                  <div className="space-y-2">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Date</p>
-                    <div className="text-sm font-semibold leading-relaxed bg-muted/50 rounded-xl px-4 py-3 border border-border/30">
-                      {session.date}
+
+                  <div className="rounded-2xl border border-cyan-200/70 bg-cyan-50/50 p-4 sm:p-5">
+                    <div className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-cyan-700/80 mb-2">
+                      <User className="w-3.5 h-3.5" />
+                      Tutor
                     </div>
+                    <p className="text-lg font-bold text-foreground">{tutorName}</p>
                   </div>
-                  <div className="space-y-2">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80">Time / Duration</p>
-                    <div className="text-sm font-semibold leading-relaxed bg-muted/50 rounded-xl px-4 py-3 border border-border/30">
-                      {session.time} • {session.duration}
+
+                  <div className="rounded-2xl border border-orange-200/70 bg-orange-50/50 p-4 sm:p-5">
+                    <div className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-orange-700/80 mb-2">
+                      <User className="w-3.5 h-3.5" />
+                      Coordinator
                     </div>
+                    <p className="text-lg font-bold text-foreground">{coordinatorName}</p>
+                  </div>
+
+                  <div className="rounded-2xl border border-teal-200/70 bg-teal-50/50 p-4 sm:p-5">
+                    <div className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-teal-700/80 mb-2">
+                      <User className="w-3.5 h-3.5" />
+                      Advisor
+                    </div>
+                    <p className="text-lg font-bold text-foreground">{advisorName}</p>
+                  </div>
+
+                  <div className="rounded-2xl border border-emerald-200/70 bg-emerald-50/50 p-4 sm:p-5">
+                    <div className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-emerald-700/80 mb-2">
+                      <Info className="w-3.5 h-3.5" />
+                      Status
+                    </div>
+                    <p className="text-lg font-bold text-foreground capitalize">{session.status}</p>
+                  </div>
+
+                  <div className="rounded-2xl border border-amber-200/70 bg-amber-50/50 p-4 sm:p-5">
+                    <div className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-amber-700/80 mb-2">
+                      <Calendar className="w-3.5 h-3.5" />
+                      Date
+                    </div>
+                    <p className="text-lg font-bold text-foreground">{session.date}</p>
+                  </div>
+
+                  <div className="rounded-2xl border border-violet-200/70 bg-violet-50/50 p-4 sm:p-5">
+                    <div className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-violet-700/80 mb-2">
+                      <Clock className="w-3.5 h-3.5" />
+                      Time / Duration
+                    </div>
+                    <p className="text-lg font-bold text-foreground">{session.time} • {session.duration}</p>
+                  </div>
+
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 sm:p-5">
+                    <div className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-600 mb-2">
+                      <Video className="w-3.5 h-3.5" />
+                      Platform
+                    </div>
+                    <p className="text-base sm:text-lg font-bold text-foreground">Google Meet</p>
                   </div>
                 </div>
+                  );
+                })()}
               </div>
 
-              <div className="p-6 border-t border-border/50 bg-muted/5 flex items-center justify-end gap-3 flex-shrink-0">
-                <Button variant="outline" onClick={() => setIsDetailsOpen(false)} className="rounded-xl px-6">
-                  Cancel
-                </Button>
+              <div className="p-6 border-t border-border/50 bg-muted/5 flex items-center justify-center gap-3 flex-wrap flex-shrink-0">
+                {session.recordingLink && (
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsRecordingOpen(true)}
+                    className="rounded-xl px-6 h-11 font-bold hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      <PlayCircle className="w-4 h-4" />
+                      Recording
+                    </span>
+                  </Button>
+                )}
                 <Button
                   onClick={() => window.open(session.meetLink, "_blank")}
-                  className="rounded-xl px-6 bg-primary hover:bg-primary/90"
+                  className="rounded-xl px-8 h-11 bg-primary hover:bg-primary/90 font-bold shadow-lg shadow-primary/20"
                 >
                   Open Link
                 </Button>
@@ -328,7 +384,7 @@ const SessionRow = ({
 
               <div className="flex-1 overflow-auto p-6">
                 <div className="rounded-2xl border border-border/60 bg-black overflow-hidden shadow-sm">
-                  <video src={session.recordingLink ?? demoRecordingMp4} controls className="w-full h-auto max-h-[60vh]" />
+                  <CustomVideoPlayer src={session.recordingLink ?? demoRecordingMp4} />
                 </div>
               </div>
 
@@ -341,11 +397,140 @@ const SessionRow = ({
   );
 };
 
-const RegularSessionRow = ({ session }: { session: MeetRegularSession }) => {
-  const [isJoining, setIsJoining] = useState(false);
+const CustomVideoPlayer = ({ src }: { src: string }) => {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(1);
+
+  const formatTime = (value: number) => {
+    const total = Math.max(0, Math.floor(value));
+    const min = Math.floor(total / 60);
+    const sec = total % 60;
+    return `${min}:${sec.toString().padStart(2, "0")}`;
+  };
+
+  const onTogglePlay = async () => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) {
+      await video.play();
+    } else {
+      video.pause();
+    }
+  };
+
+  const onSeek = (next: number) => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.currentTime = next;
+    setCurrentTime(next);
+  };
+
+  const onToggleMute = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = !video.muted;
+    setIsMuted(video.muted);
+  };
+
+  const onVolume = (next: number) => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.volume = next;
+    video.muted = next === 0;
+    setVolume(next);
+    setIsMuted(video.muted);
+  };
+
+  const onToggleFullscreen = async () => {
+    const el = wrapperRef.current;
+    if (!el) return;
+    if (!document.fullscreenElement) {
+      await el.requestFullscreen();
+      setIsFullscreen(true);
+    } else {
+      await document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  };
+
+  useEffect(() => {
+    const onFull = () => setIsFullscreen(Boolean(document.fullscreenElement));
+    document.addEventListener("fullscreenchange", onFull);
+    return () => document.removeEventListener("fullscreenchange", onFull);
+  }, []);
 
   return (
-    <div className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 hover:bg-muted/20 transition-colors">
+    <div ref={wrapperRef} className="relative bg-black">
+      <video
+        ref={videoRef}
+        src={src}
+        className="w-full h-auto max-h-[60vh]"
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+        onTimeUpdate={() => setCurrentTime(videoRef.current?.currentTime || 0)}
+        onLoadedMetadata={() => {
+          setDuration(videoRef.current?.duration || 0);
+          setVolume(videoRef.current?.volume ?? 1);
+        }}
+        onVolumeChange={() => {
+          setIsMuted(Boolean(videoRef.current?.muted));
+          setVolume(videoRef.current?.volume ?? 1);
+        }}
+      />
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3 sm:p-4">
+        <input
+          type="range"
+          min={0}
+          max={Math.max(duration, 0)}
+          step={0.1}
+          value={currentTime}
+          onChange={(e) => onSeek(Number(e.target.value))}
+          className="w-full accent-white"
+        />
+        <div className="mt-2 flex items-center gap-2 text-white">
+          <Button size="icon" variant="ghost" onClick={onTogglePlay} className="h-8 w-8 rounded-full hover:bg-white/20 text-white">
+            {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
+          </Button>
+          <span className="text-xs tabular-nums min-w-[72px]">{formatTime(currentTime)} / {formatTime(duration)}</span>
+          <Button size="icon" variant="ghost" onClick={onToggleMute} className="h-8 w-8 rounded-full hover:bg-white/20 text-white">
+            {isMuted || volume === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+          </Button>
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.05}
+            value={isMuted ? 0 : volume}
+            onChange={(e) => onVolume(Number(e.target.value))}
+            className="hidden sm:block w-24 accent-white"
+          />
+          <div className="ml-auto">
+            <Button size="icon" variant="ghost" onClick={onToggleFullscreen} className="h-8 w-8 rounded-full hover:bg-white/20 text-white">
+              {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const RegularSessionRow = ({ session }: { session: MeetRegularSession }) => {
+  const [isJoining, setIsJoining] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
+  return (
+    <>
+    <div
+      className="flex flex-col gap-3 px-4 py-4 md:flex-row md:items-center md:justify-between md:gap-4 hover:bg-muted/20 transition-colors cursor-pointer"
+      onClick={() => setIsDetailsOpen(true)}
+    >
       <div className="flex min-w-0 items-start gap-3">
         <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0 bg-muted/40 text-muted-foreground border border-border/50">
           <RefreshCw className="h-5 w-5" />
@@ -368,7 +553,7 @@ const RegularSessionRow = ({ session }: { session: MeetRegularSession }) => {
         </div>
       </div>
 
-      <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:items-center sm:justify-end sm:gap-3">
+      <div className="flex w-full flex-col items-stretch gap-2 md:w-auto md:flex-row md:items-center md:justify-end md:gap-3">
         <span
           className={cn(
             "text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full border w-fit",
@@ -383,8 +568,9 @@ const RegularSessionRow = ({ session }: { session: MeetRegularSession }) => {
             <AlertDialogTrigger asChild>
               <Button
                 size="sm"
-                className="h-9 w-full rounded-xl px-5 text-xs font-bold bg-primary hover:bg-primary/90 shadow-sm sm:w-auto"
+                className="h-9 w-full rounded-xl px-5 text-xs font-bold bg-primary hover:bg-primary/90 shadow-sm md:w-auto"
                 disabled={isJoining}
+                onClick={(e) => e.stopPropagation()}
               >
                 {isJoining ? "Joining…" : "Join Now"}
               </Button>
@@ -412,12 +598,80 @@ const RegularSessionRow = ({ session }: { session: MeetRegularSession }) => {
             </AlertDialogContent>
           </AlertDialog>
         ) : (
-          <Button size="sm" variant="outline" className="h-9 rounded-xl px-5 text-xs font-bold w-full sm:w-auto" disabled>
+          <Button size="sm" variant="outline" className="h-9 rounded-xl px-5 text-xs font-bold w-full md:w-auto" disabled onClick={(e) => e.stopPropagation()}>
             View
           </Button>
         )}
       </div>
     </div>
+    {isDetailsOpen &&
+      createPortal(
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div
+            className="bg-background border border-border/50 rounded-2xl shadow-2xl w-full max-w-[600px] max-h-[90vh] min-h-[500px] sm:min-h-[540px] flex flex-col animate-in fade-in zoom-in duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-6 border-b border-border/50 bg-muted/5 flex-shrink-0">
+              <div>
+                <h2 className="text-xl font-bold tracking-tight">Session Details</h2>
+                <p className="text-sm text-muted-foreground mt-1">Quick overview of this session.</p>
+              </div>
+              <button
+                onClick={() => setIsDetailsOpen(false)}
+                className="p-2 rounded-xl hover:bg-muted transition-colors text-muted-foreground"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-6 sm:p-8 custom-scrollbar">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-2 rounded-2xl border border-primary/20 bg-primary/[0.03] p-4 sm:p-5">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-primary/70 mb-2">Session Title</p>
+                  <p className="text-lg sm:text-xl font-extrabold leading-tight text-foreground">{session.title}</p>
+                </div>
+                <div className="rounded-2xl border border-blue-200/70 bg-blue-50/50 p-4 sm:p-5">
+                  <div className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-blue-700/80 mb-2">
+                    <User className="w-3.5 h-3.5" />
+                    Mentor
+                  </div>
+                  <p className="text-lg font-bold text-foreground">{session.mentor}</p>
+                </div>
+                <div className="rounded-2xl border border-violet-200/70 bg-violet-50/50 p-4 sm:p-5">
+                  <div className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-violet-700/80 mb-2">
+                    <Calendar className="w-3.5 h-3.5" />
+                    Schedule
+                  </div>
+                  <p className="text-lg font-bold text-foreground">{session.schedule}</p>
+                </div>
+                <div className="rounded-2xl border border-amber-200/70 bg-amber-50/50 p-4 sm:p-5">
+                  <div className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-amber-700/80 mb-2">
+                    <Clock className="w-3.5 h-3.5" />
+                    Time
+                  </div>
+                  <p className="text-lg font-bold text-foreground">{session.time}</p>
+                </div>
+                <div className="rounded-2xl border border-emerald-200/70 bg-emerald-50/50 p-4 sm:p-5">
+                  <div className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-emerald-700/80 mb-2">
+                    <Info className="w-3.5 h-3.5" />
+                    Status
+                  </div>
+                  <p className="text-lg font-bold text-foreground">{session.isActive ? "Active" : "Scheduled"}</p>
+                </div>
+              </div>
+            </div>
+            <div className="p-6 border-t border-border/50 bg-muted/5 flex items-center justify-center flex-shrink-0">
+              <Button
+                onClick={() => window.open(session.meetLink, "_blank")}
+                className="rounded-xl px-8 h-11 bg-primary hover:bg-primary/90 font-bold shadow-lg shadow-primary/20"
+              >
+                Open Link
+              </Button>
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )}
+    </>
   );
 };
 

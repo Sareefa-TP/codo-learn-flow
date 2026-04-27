@@ -82,15 +82,15 @@ const CourseCard = ({
       <CardContent className="flex flex-1 flex-col space-y-3.5 p-4 sm:space-y-5 sm:p-5">
         <div className="space-y-1">
           {topLabel && (
-            <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">
+            <p className="mb-1 text-[clamp(0.65rem,0.62rem+0.15vw,0.75rem)] font-bold uppercase tracking-widest text-primary">
               {topLabel}
             </p>
           )}
-          <h3 className="line-clamp-2 min-h-[2.5rem] text-lg font-display leading-tight text-foreground transition-colors group-hover:text-primary sm:min-h-[3rem] sm:text-xl">
+          <h3 className="line-clamp-2 min-h-[2.75rem] text-[clamp(1rem,0.9rem+0.45vw,1.25rem)] font-display leading-tight text-foreground transition-colors group-hover:text-primary sm:min-h-[3rem]">
             {title}
           </h3>
           {duration && (
-            <p className="text-xs text-muted-foreground font-medium flex items-center gap-1.5 pt-1">
+            <p className="flex items-center gap-1.5 pt-1 text-[clamp(0.8125rem,0.78rem+0.2vw,0.9375rem)] font-medium text-muted-foreground">
               <Clock className="w-3.5 h-3.5 text-primary" /> {duration}
             </p>
           )}
@@ -112,12 +112,12 @@ const CourseCard = ({
           </div>
         )}
 
-        <div className="mt-auto flex flex-col-reverse gap-2.5 pt-2.5 sm:flex-row sm:items-center sm:justify-between sm:pt-3">
+        <div className="mt-auto flex flex-col-reverse gap-2.5 pt-2.5 lg:flex-row lg:items-center lg:justify-between sm:pt-3">
           {onDetailsClick && (
             <Button 
               variant="outline"
               size="sm" 
-              className="h-10 w-full justify-center rounded-xl border-border/70 bg-background text-xs font-semibold uppercase tracking-widest text-foreground hover:bg-muted/50 sm:h-9 sm:w-auto sm:justify-center sm:px-3"
+              className="min-h-11 w-full justify-center rounded-xl border-border/70 bg-background px-3 text-xs font-semibold uppercase tracking-widest text-foreground hover:bg-muted/50 lg:min-h-[44px] lg:w-auto"
               onClick={(e) => {
                 e.stopPropagation();
                 onDetailsClick();
@@ -128,7 +128,7 @@ const CourseCard = ({
           )}
           <Button 
             className={cn(
-              "h-10 w-full justify-center gap-2 rounded-xl bg-primary text-xs font-bold shadow-md shadow-primary/20 hover:bg-primary/90 sm:h-11 sm:w-auto sm:min-w-[160px]",
+              "min-h-11 w-full justify-center gap-2 rounded-xl bg-primary px-4 text-xs font-bold shadow-md shadow-primary/20 hover:bg-primary/90 lg:min-h-[44px] lg:w-auto lg:max-w-full",
               actionClassName
             )}
             onClick={(e) => {

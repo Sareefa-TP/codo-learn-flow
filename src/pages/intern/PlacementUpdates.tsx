@@ -45,7 +45,7 @@ interface JobOpportunity {
 const initialJobs: JobOpportunity[] = [
   {
     id: "JOB-CODO-001",
-    companyName: "Codo Agency",
+    companyName: "CODO Agency",
     role: "Full Stack Developer",
     category: "Engineering",
     location: "Trivandrum (Hybrid)",
@@ -57,7 +57,7 @@ const initialJobs: JobOpportunity[] = [
   },
   {
     id: "JOB-CODO-002",
-    companyName: "Codo Agency",
+    companyName: "CODO Agency",
     role: "Mobile App Developer",
     category: "Mobile Team",
     location: "Trivandrum",
@@ -69,7 +69,7 @@ const initialJobs: JobOpportunity[] = [
   },
   {
     id: "JOB-CODO-003",
-    companyName: "Codo Agency",
+    companyName: "CODO Agency",
     role: "Software Tester",
     category: "Quality Assurance",
     location: "Remote",
@@ -81,7 +81,7 @@ const initialJobs: JobOpportunity[] = [
   },
   {
     id: "JOB-CODO-004",
-    companyName: "Codo Agency",
+    companyName: "CODO Agency",
     role: "UI/UX Designer",
     category: "Design Department",
     location: "Trivandrum",
@@ -93,7 +93,7 @@ const initialJobs: JobOpportunity[] = [
   },
   {
     id: "JOB-CODO-005",
-    companyName: "Codo Agency",
+    companyName: "CODO Agency",
     role: "Backend Developer",
     category: "Infrastructure",
     location: "Hybrid",
@@ -247,7 +247,7 @@ const JobDetailsModal = ({ job, onClose, onApply }: JobDetailsModalProps) => {
           <div>
             <h2 className="text-xl font-bold tracking-tight">Opportunity Details</h2>
             <p className="text-sm text-muted-foreground mt-1">
-              Internal placement at Codo Agency
+              Internal placement at CODO Agency
             </p>
           </div>
           <button onClick={onClose} className="p-2 rounded-xl hover:bg-muted transition-colors text-muted-foreground">
@@ -383,7 +383,7 @@ const PlacementUpdates = () => {
     setJobs(prev => prev.map(job => 
       job.id === id ? { ...job, status: "Applied" } : job
     ));
-    toast.success("Application submitted successfully to Codo Agency!");
+    toast.success("Application submitted successfully to CODO Agency!");
   };
 
   return (
@@ -401,7 +401,7 @@ const PlacementUpdates = () => {
                 Internal Placements
               </h1>
               <p className="text-muted-foreground text-sm mt-0.5 font-medium">
-                Exclusive career opportunities for CODO Academy interns at Codo Agency
+                Exclusive career opportunities for CODO Academy interns at CODO Agency
               </p>
             </div>
           </div>

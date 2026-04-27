@@ -176,6 +176,12 @@ export default function StudentGame() {
     if (gameState === "idle") setQuestion(createQuestion(difficulty));
   }, [difficulty, gameState]);
 
+  useEffect(() => {
+    if (gameState === "running" && !isSubmitting) {
+      queueMicrotask(() => inputRef.current?.focus());
+    }
+  }, [gameState, isSubmitting, question]);
+
   const submitAnswer = async () => {
     if (gameState !== "running" || isSubmitting) return;
 
@@ -198,7 +204,10 @@ export default function StudentGame() {
       queueMicrotask(() => inputRef.current?.focus());
     } finally {
       // Short micro-delay keeps button UI responsive and prevents double-submits.
-      window.setTimeout(() => setIsSubmitting(false), 120);
+      window.setTimeout(() => {
+        setIsSubmitting(false);
+        inputRef.current?.focus();
+      }, 120);
     }
   };
 
@@ -210,7 +219,7 @@ export default function StudentGame() {
       >
         <div className="grid grid-cols-12 gap-6">
           {/* ── Main Content (Left) ── */}
-          <Card className="col-span-12 lg:col-span-8 border-border/60 bg-card/80 shadow-sm backdrop-blur-sm overflow-hidden flex flex-col">
+          <Card className="col-span-12 xl:col-span-8 border-border/60 bg-card/80 shadow-sm backdrop-blur-sm overflow-hidden flex flex-col">
             <CardHeader className="border-b border-border/60 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex items-center gap-4">
@@ -225,13 +234,13 @@ export default function StudentGame() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto sm:flex-nowrap">
                   <Select
                     value={difficulty}
                     onValueChange={(v) => setDifficulty(v as Difficulty)}
                     disabled={gameState === "running"}
                   >
-                    <SelectTrigger className="w-[140px] rounded-xl bg-background/60 border-border/60 shadow-sm font-bold text-xs uppercase tracking-widest">
+                    <SelectTrigger className="h-11 w-full rounded-xl border-border/60 bg-background/60 text-xs font-bold uppercase tracking-widest shadow-sm sm:w-auto sm:min-w-[140px]">
                       <SelectValue placeholder="Difficulty" />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl">
@@ -244,7 +253,7 @@ export default function StudentGame() {
                   {gameState !== "running" ? (
                     <Button
                       onClick={start}
-                      className="rounded-xl px-8 font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary/20"
+                      className="min-h-11 w-full rounded-xl px-8 text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 sm:w-auto"
                       disabled={isSubmitting}
                     >
                       Start Game
@@ -254,14 +263,14 @@ export default function StudentGame() {
                       <AlertDialogTrigger asChild>
                         <Button
                           variant="outline"
-                          className="rounded-xl border-border/60 font-black text-[10px] uppercase tracking-widest px-6"
+                          className="min-h-11 w-full rounded-xl border-border/60 px-6 text-[10px] font-black uppercase tracking-widest sm:w-auto"
                           disabled={isSubmitting}
                         >
                           <RotateCcw className="mr-2 h-3.5 w-3.5" />
                           Restart
                         </Button>
                       </AlertDialogTrigger>
-                      <AlertDialogContent className="max-w-[400px] rounded-2xl">
+                      <AlertDialogContent className="w-full max-w-md rounded-2xl">
                         <AlertDialogHeader>
                           <AlertDialogTitle>Restart the game?</AlertDialogTitle>
                           <AlertDialogDescription>
@@ -285,10 +294,10 @@ export default function StudentGame() {
             </CardHeader>
 
             <CardContent className="p-0">
-              <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch min-h-[550px]">
+              <div className="grid min-h-[60vh] grid-cols-1 items-stretch xl:min-h-[550px] xl:grid-cols-12">
                 
                 {/* Left Column: Timer & Stats */}
-                <div className="lg:col-span-5 p-8 flex flex-col border-r border-border/40">
+                <div className="flex flex-col border-b border-border/40 p-4 sm:p-6 xl:col-span-5 xl:border-b-0 xl:border-r xl:p-8">
                   <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
                       <Timer className="h-3.5 w-3.5 text-primary" />
@@ -303,15 +312,15 @@ export default function StudentGame() {
                   </div>
 
                   <div className="flex-1 flex items-center justify-center">
-                    <div className="relative">
+                    <div className="relative w-full max-w-[12.5rem] sm:max-w-[14.5rem] md:max-w-[16rem] xl:max-w-[18rem]">
                       <CircularProgress
                         value={timePercent}
-                        size={240}
-                        strokeWidth={16}
-                        className="transition-all duration-1000 ease-linear"
+                        size={192}
+                        strokeWidth={14}
+                        className="h-auto w-full max-w-full transition-all duration-1000 ease-linear"
                       >
                         <div className="text-center">
-                          <div className="text-7xl font-black tabular-nums tracking-tighter">
+                          <div className="text-[clamp(2.25rem,1.6rem+2.8vw,4.5rem)] font-black tabular-nums tracking-tighter">
                             {secondsLeft}
                           </div>
                           <div className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground mt-1">
@@ -329,16 +338,24 @@ export default function StudentGame() {
                     </div>
                   </div>
 
-                  <div className="mt-8">
-                    <div className="grid grid-cols-3 gap-3">
+                  <div className="mt-6 sm:mt-8">
+                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
                       {[
                         { label: "Score", val: score, color: "text-foreground" },
                         { label: "Streak", val: streak, color: "text-primary" },
                         { label: "Accuracy", val: `${accuracy}%`, color: "text-foreground" }
-                      ].map((stat) => (
-                        <div key={stat.label} className="rounded-[2rem] border border-border/60 bg-muted/5 p-5 text-center shadow-inner">
-                          <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1.5">{stat.label}</p>
-                          <p className={cn("text-2xl font-black tabular-nums tracking-tight", stat.color)}>{stat.val}</p>
+                      ].map((stat, idx) => (
+                        <div
+                          key={stat.label}
+                          className={cn(
+                            "min-w-0 rounded-3xl sm:rounded-[2rem] border border-border/60 bg-muted/5 px-1.5 py-3 sm:p-5 text-center shadow-inner",
+                            idx === 2 && "col-span-2 mx-auto w-full max-w-[220px]",
+                          )}
+                        >
+                          <p className="text-[7px] sm:text-[9px] font-black text-muted-foreground uppercase tracking-[0.12em] sm:tracking-widest mb-1">
+                            {stat.label}
+                          </p>
+                          <p className={cn("text-lg sm:text-2xl font-black tabular-nums tracking-tight", stat.color)}>{stat.val}</p>
                         </div>
                       ))}
                     </div>
@@ -346,7 +363,7 @@ export default function StudentGame() {
                 </div>
 
                 {/* Right Column: Question & Interaction */}
-                <div className="lg:col-span-7 p-8 flex flex-col bg-muted/5">
+                <div className="flex flex-col bg-muted/5 p-4 sm:p-6 xl:col-span-7 xl:p-8">
                   <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
                       <Sparkles className="h-3.5 w-3.5 text-primary" />
@@ -363,7 +380,7 @@ export default function StudentGame() {
                   <div className="flex-1 flex flex-col items-center justify-center">
                     <div className="text-center">
                       <p className="text-[11px] font-black uppercase tracking-[0.5em] text-muted-foreground opacity-30 mb-4">Solve the problem</p>
-                      <div className="text-9xl font-black tracking-tighter tabular-nums text-foreground animate-in zoom-in-95 duration-500">
+                      <div className="max-w-full break-words text-[clamp(2rem,1.2rem+5vw,4.75rem)] font-black tracking-tighter tabular-nums text-foreground animate-in zoom-in-95 duration-500">
                         {question.prompt}
                       </div>
                     </div>
@@ -372,7 +389,7 @@ export default function StudentGame() {
                   <div className="mt-8">
                     {gameState !== "finished" ? (
                       <div className="space-y-4">
-                        <div className="flex items-center gap-3">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                           <Input
                             ref={inputRef}
                             inputMode="numeric"
@@ -383,12 +400,13 @@ export default function StudentGame() {
                               if (e.key === "Enter") submitAnswer();
                             }}
                             disabled={gameState !== "running" || isSubmitting}
-                            className="h-20 rounded-[2rem] bg-white border-border/60 shadow-md text-3xl font-black tabular-nums text-center focus:ring-primary/20 transition-all focus:scale-[1.02]"
+                            className="h-16 min-h-11 w-full min-w-0 flex-1 rounded-[1.5rem] border-border/60 bg-white text-center text-2xl font-black tabular-nums shadow-md transition-all focus:scale-[1.02] focus:ring-primary/20 sm:h-20 sm:rounded-[2rem] sm:text-3xl"
                           />
                           <Button
                             onClick={submitAnswer}
+                            onMouseDown={(e) => e.preventDefault()}
                             disabled={gameState !== "running" || isSubmitting}
-                            className="h-20 px-12 rounded-[2rem] shadow-xl shadow-primary/20 font-black text-xs uppercase tracking-[0.2em] hover:scale-[1.02] transition-transform"
+                            className="min-h-11 h-16 w-full rounded-[1.5rem] px-6 text-xs font-black uppercase tracking-[0.2em] shadow-xl shadow-primary/20 transition-transform hover:scale-[1.02] sm:h-20 sm:w-auto sm:min-w-[170px] sm:rounded-[2rem] sm:px-10"
                           >
                             {isSubmitting ? "..." : "Submit"}
                           </Button>
@@ -416,24 +434,24 @@ export default function StudentGame() {
                         </div>
                       </div>
                     ) : (
-                      <div className="rounded-[2.5rem] border border-primary/20 bg-primary/5 p-8 animate-in zoom-in-95">
-                        <div className="flex flex-col sm:flex-row items-center gap-8">
-                          <div className="flex-1 text-center sm:text-left space-y-2">
+                      <div className="rounded-[2rem] sm:rounded-[2.5rem] border border-primary/20 bg-primary/5 p-4 sm:p-8 animate-in zoom-in-95">
+                        <div className="flex flex-col items-stretch gap-4 sm:gap-6 2xl:flex-row 2xl:items-center">
+                          <div className="flex-1 min-w-0 text-center 2xl:text-left space-y-2">
                             <h4 className="text-lg font-black tracking-tight text-primary">Session Over!</h4>
-                            <p className="text-xs font-medium text-muted-foreground leading-relaxed">
+                            <p className="mx-auto max-w-sm text-sm 2xl:mx-0 2xl:max-w-none 2xl:text-xs font-medium text-muted-foreground leading-relaxed">
                               Great run! You can review your accuracy or change difficulty before your next attempt.
                             </p>
                           </div>
-                          <div className="flex flex-col gap-3 shrink-0">
+                          <div className="mx-auto flex w-full max-w-sm flex-col gap-2 sm:gap-3 2xl:mx-0 2xl:w-auto 2xl:min-w-[220px]">
                             <Button 
-                              className="h-12 px-8 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary/30"
+                              className="h-11 sm:h-12 w-full px-6 sm:px-8 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary/30"
                               onClick={start}
                             >
                               Play Again
                             </Button>
                             <Button 
                               variant="outline"
-                              className="h-12 px-8 rounded-2xl font-black text-[10px] uppercase tracking-widest text-muted-foreground hover:bg-white"
+                              className="h-11 sm:h-12 w-full px-6 sm:px-8 rounded-2xl font-black text-[10px] uppercase tracking-widest text-muted-foreground hover:bg-white"
                               onClick={reset}
                             >
                               Back to Ready
@@ -449,7 +467,7 @@ export default function StudentGame() {
           </Card>
 
           {/* ── Sidebar (Right) ── */}
-          <div className="col-span-12 lg:col-span-4 space-y-6">
+          <div className="col-span-12 xl:col-span-4 space-y-6">
             <Card className="border-border/60 bg-card/80 shadow-sm backdrop-blur-sm overflow-hidden h-full">
               <CardHeader className="pb-2 border-b border-border/40 bg-muted/5">
                 <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">

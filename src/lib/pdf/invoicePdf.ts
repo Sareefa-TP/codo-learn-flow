@@ -19,12 +19,7 @@ interface InvoiceGeneratorInput {
   transaction: InvoiceTransaction;
 }
 
-const currency = (value: number) =>
-  new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(value);
+const currency = (value: number) => `INR ${Math.round(value).toLocaleString("en-IN")}`;
 
 export function downloadInvoicePdf({
   studentName,
@@ -35,24 +30,35 @@ export function downloadInvoicePdf({
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 48;
+  const rightColX = pageWidth / 2 + 14;
+  const rightColWidth = pageWidth - margin - rightColX - 16;
 
   const brandGreen: [number, number, number] = [20, 89, 63];
   const textDark: [number, number, number] = [24, 35, 31];
   const textMuted: [number, number, number] = [102, 112, 105];
   const border: [number, number, number] = [222, 218, 206];
+  const brandLight: [number, number, number] = [230, 244, 237];
 
   // Header
   doc.setFillColor(...brandGreen);
   doc.rect(0, 0, pageWidth, 92, "F");
 
+  // Brand logo lockup
+  doc.setFillColor(...brandLight);
+  doc.circle(margin + 16, 46, 14, "F");
+  doc.setTextColor(...brandGreen);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(13);
+  doc.text("C", margin + 16, 50, { align: "center" });
+
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(18);
-  doc.text("CODO LMS", margin, 42);
+  doc.text("CODO LMS", margin + 40, 42);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(11);
-  doc.text("Official Payment Invoice", margin, 62);
+  doc.text("Official Payment Invoice", margin + 40, 62);
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
@@ -75,10 +81,10 @@ export function downloadInvoicePdf({
   doc.text("BILL TO", margin + 16, y + 24);
   doc.text("COURSE", margin + 16, y + 72);
 
-  doc.text("DATE", pageWidth / 2 + 10, y + 24);
-  doc.text("PAYMENT METHOD", pageWidth / 2 + 10, y + 48);
-  doc.text("TRANSACTION ID", pageWidth / 2 + 10, y + 72);
-  doc.text("STATUS", pageWidth / 2 + 10, y + 96);
+  doc.text("DATE", rightColX, y + 24);
+  doc.text("PAYMENT METHOD", rightColX, y + 54);
+  doc.text("TRANSACTION ID", rightColX, y + 84);
+  doc.text("STATUS", rightColX, y + 114);
 
   doc.setTextColor(...textDark);
   doc.setFont("helvetica", "bold");
@@ -87,11 +93,15 @@ export function downloadInvoicePdf({
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(11);
-  doc.text(`${courseName} (${category})`, margin + 16, y + 90);
+  doc.text(`${courseName} (${category})`, margin + 16, y + 90, {
+    maxWidth: pageWidth / 2 - margin - 20,
+  });
 
-  doc.text(transaction.date, pageWidth / 2 + 10, y + 24);
-  doc.text(transaction.method, pageWidth / 2 + 10, y + 48);
-  doc.text(transaction.txnId, pageWidth / 2 + 10, y + 72);
+  doc.text(transaction.date, rightColX, y + 38, { maxWidth: rightColWidth });
+  doc.text(transaction.method, rightColX, y + 68, { maxWidth: rightColWidth });
+
+  doc.setFontSize(10);
+  doc.text(transaction.txnId, rightColX, y + 98, { maxWidth: rightColWidth });
 
   const statusColor: Record<InvoiceStatus, [number, number, number]> = {
     Paid: [26, 140, 99],
@@ -101,7 +111,8 @@ export function downloadInvoicePdf({
   const [sr, sg, sb] = statusColor[transaction.status];
   doc.setTextColor(sr, sg, sb);
   doc.setFont("helvetica", "bold");
-  doc.text(transaction.status, pageWidth / 2 + 10, y + 96);
+  doc.setFontSize(11);
+  doc.text(transaction.status, rightColX, y + 128, { maxWidth: rightColWidth });
 
   y += 170;
 

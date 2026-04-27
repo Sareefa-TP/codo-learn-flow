@@ -30,9 +30,9 @@ export default function AppShell({
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-svh w-full overflow-hidden bg-gradient-to-br from-background via-background to-muted/30">
+      <div className="flex min-h-svh w-full overflow-x-clip bg-gradient-to-br from-background via-background to-muted/30">
         <AppSidebar />
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
           <div className="sticky top-0 z-20 border-b border-border/60 bg-background/75 backdrop-blur supports-[backdrop-filter]:bg-background/65 md:hidden">
             <div className="mx-auto flex w-full max-w-[1320px] items-center justify-between gap-3 px-4 py-3">
               <div className="flex min-w-0 items-center gap-2">
@@ -67,8 +67,8 @@ export default function AppShell({
 
           {topbar}
 
-          <main className={cn("flex flex-1 overflow-auto", contentPaddingClassName)}>
-            <div className={cn("mx-auto h-full w-full", maxWidthClassName)}>
+          <main className={cn("flex min-w-0 flex-1 overflow-auto", contentPaddingClassName)}>
+            <div className={cn("mx-auto h-full min-w-0 w-full", maxWidthClassName)}>
               {withCard ? (
                 <div className="min-h-full rounded-3xl border border-border/60 bg-card/80 p-4 shadow-soft backdrop-blur-sm sm:p-6 lg:p-8">
                   {children}

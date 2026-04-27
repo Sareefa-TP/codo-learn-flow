@@ -399,7 +399,7 @@ const SupportTickets = () => {
                                         setView("details");
                                     }}>
                                         <CardContent className="p-0">
-                                            <div className="flex flex-col sm:flex-row sm:items-center p-5 gap-4">
+                                            <div className="flex flex-col p-5 gap-4">
                                                 <div className="w-12 h-12 bg-primary/5 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
                                                     <MessageSquare className="w-6 h-6 text-primary" />
                                                 </div>
@@ -424,12 +424,20 @@ const SupportTickets = () => {
                                                     </div>
                                                 </div>
 
-                                                <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 border-t sm:border-t-0 pt-4 sm:pt-0">
-                                                    <div className="text-right sm:block hidden">
+                                                <div className="flex items-center justify-between gap-4 border-t border-border/50 pt-4">
+                                                    <div>
                                                         <p className="text-[10px] uppercase font-bold text-muted-foreground mb-0.5">Priority</p>
                                                         <p className={cn("text-xs font-bold", getPriorityColor(ticket.priority))}>{ticket.priority}</p>
                                                     </div>
-                                                    <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-all group-hover:translate-x-1" />
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-9 rounded-xl px-3 text-xs font-semibold text-foreground group-hover:text-primary"
+                                                    >
+                                                        View Ticket
+                                                        <ChevronRight className="ml-1.5 w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                                                    </Button>
                                                 </div>
                                             </div>
                                         </CardContent>
