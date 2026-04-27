@@ -16,6 +16,14 @@ export interface Message {
   timestamp: string;
   courseTag?: string;
   isOwn: boolean;
+  isVoice?: boolean;
+  voiceDuration?: string;
+  voiceUrl?: string;
+  isFile?: boolean;
+  fileType?: 'image' | 'pdf' | 'other';
+  fileName?: string;
+  fileUrl?: string;
+  replyTo?: Message;
 }
 
 export interface UnifiedChat {

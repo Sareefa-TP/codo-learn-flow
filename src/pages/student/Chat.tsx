@@ -1,25 +1,70 @@
 import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import ChatWindow from "@/components/student/chat/ChatWindow";
-import { unifiedSupportChat } from "@/data/chatMock";
+import { unifiedSupportChat, Message } from "@/data/chatMock";
 
 export default function StudentChat() {
   const [messages, setMessages] = useState(unifiedSupportChat.messages);
   const location = useLocation();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const isParticipantsOpen = location.pathname === "/student/chat/participants";
+  const selectedMediaUrl = searchParams.get("media");
 
-  const handleSendMessage = (text: string, courseTag?: string) => {
+  const handleOpenMedia = (url: string) => {
+    setSearchParams({ media: url });
+  };
+
+  const handleCloseMedia = () => {
+    setSearchParams({});
+  };
+
+  const handleSendMessage = (text: string, courseTag?: string, files?: File[], replyTo?: Message) => {
+    if (files && files.length > 0) {
+      const newMessages = files.map(file => ({
+        id: (Date.now() + Math.random()).toString(),
+        senderId: "s1",
+        senderName: "YOU",
+        text: text || "File attached",
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        courseTag,
+        isOwn: true,
+        isFile: true,
+        fileName: file.name,
+        fileType: file.type.includes('image') ? 'image' as const : 'pdf' as const,
+        fileUrl: URL.createObjectURL(file),
+        replyTo
+      }));
+      setMessages([...messages, ...newMessages]);
+    } else {
+      const newMessage: Message = {
+        id: Date.now().toString(),
+        senderId: "s1",
+        senderName: "YOU",
+        text,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        courseTag,
+        isOwn: true,
+        isFile: false,
+        replyTo
+      };
+      setMessages([...messages, newMessage]);
+    }
+  };
+
+  const handleSendVoice = (duration: string, voiceUrl?: string) => {
     const newMessage = {
       id: Date.now().toString(),
-      senderId: "s1", // Student ID from mock
+      senderId: "s1",
       senderName: "YOU",
-      text,
+      text: "Voice message",
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      courseTag,
       isOwn: true,
+      isVoice: true,
+      voiceDuration: duration,
+      voiceUrl
     };
     setMessages([...messages, newMessage]);
   };
@@ -48,11 +93,15 @@ export default function StudentChat() {
           <ChatWindow 
             messages={messages} 
             onSendMessage={handleSendMessage} 
+            onSendVoice={handleSendVoice}
             onDeleteMessage={handleDeleteMessage}
             onClearHistory={handleClearHistory}
             isParticipantsOpen={isParticipantsOpen}
             onOpenParticipants={handleOpenParticipants}
             onCloseParticipants={handleCloseParticipants}
+            selectedMediaUrl={selectedMediaUrl}
+            onOpenMedia={handleOpenMedia}
+            onCloseMedia={handleCloseMedia}
           />
         </div>
       </div>
