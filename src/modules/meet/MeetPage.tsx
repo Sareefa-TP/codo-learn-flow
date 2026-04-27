@@ -322,7 +322,7 @@ const SessionRow = ({
                     <p className="text-lg font-bold text-foreground">{session.time} • {session.duration}</p>
                   </div>
 
-                  <div className="md:col-span-2 rounded-2xl border border-slate-200 bg-slate-50/70 p-4 sm:p-5">
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 sm:p-5">
                     <div className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-600 mb-2">
                       <Video className="w-3.5 h-3.5" />
                       Platform
@@ -334,7 +334,19 @@ const SessionRow = ({
                 })()}
               </div>
 
-              <div className="p-6 border-t border-border/50 bg-muted/5 flex items-center justify-center flex-shrink-0">
+              <div className="p-6 border-t border-border/50 bg-muted/5 flex items-center justify-center gap-3 flex-wrap flex-shrink-0">
+                {session.recordingLink && (
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsRecordingOpen(true)}
+                    className="rounded-xl px-6 h-11 font-bold hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      <PlayCircle className="w-4 h-4" />
+                      Recording
+                    </span>
+                  </Button>
+                )}
                 <Button
                   onClick={() => window.open(session.meetLink, "_blank")}
                   className="rounded-xl px-8 h-11 bg-primary hover:bg-primary/90 font-bold shadow-lg shadow-primary/20"
