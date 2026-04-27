@@ -67,10 +67,10 @@ const StudentCertificates = () => {
         
         {/* Header Section */}
         <div className="space-y-2 text-left">
-          <h1 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight">
+          <h1 className="text-[clamp(1.5rem,1.15rem+1vw,2rem)] font-bold tracking-tight text-foreground">
             My Certificates
           </h1>
-          <p className="text-muted-foreground text-sm font-medium">
+          <p className="text-[clamp(0.9rem,0.84rem+0.2vw,1rem)] font-medium text-muted-foreground">
             Download and share the certificates you've earned across your completed courses.
           </p>
         </div>
@@ -83,7 +83,7 @@ const StudentCertificates = () => {
         />
 
         {/* Certificates Grid */}
-        <div className="grid grid-cols-1 gap-4 pb-12 sm:grid-cols-2 lg:grid-cols-3 xl:gap-6">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4 pb-12 xl:gap-6">
           {filteredCertificates.map((cert) => (
             <CourseCard
               key={cert.id}
@@ -106,8 +106,8 @@ const StudentCertificates = () => {
           ))}
 
           {filteredCertificates.length === 0 && (
-            <div className="col-span-full py-20 text-center bg-muted/20 rounded-3xl border border-dashed border-border/50">
-              <p className="text-muted-foreground font-medium text-sm">No certificates found matching your search.</p>
+            <div className="col-span-full rounded-3xl border border-dashed border-border/50 bg-muted/20 py-20 text-center">
+              <p className="text-[clamp(0.9rem,0.84rem+0.2vw,1rem)] font-medium text-muted-foreground">No certificates found matching your search.</p>
             </div>
           )}
         </div>

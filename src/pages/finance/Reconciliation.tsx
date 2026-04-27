@@ -263,7 +263,7 @@ const Reconciliation = () => {
         {/* ── Footnote ── */}
         <div className="flex items-center justify-center py-6 gap-3 opacity-30">
           <ShieldCheck className="w-4 h-4" />
-          <p className="text-[10px] font-black uppercase tracking-[0.3em]">Codo Matching Engine v2.4 — Live Status</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.3em]">CODO Matching Engine v2.4 — Live Status</p>
         </div>
       </div>
     </FinanceLayout>
