@@ -104,14 +104,11 @@ const Dashboard = () => {
           ))}
         </div>
 
-        {/* 3. Main Content Area */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          
-          {/* Left Column (8/12) */}
-          <div className="lg:col-span-8 space-y-10">
-            
-            {/* A. Revenue Performance (Sync with Action Items height) */}
-            <Card className="rounded-[3rem] border-border/40 shadow-sm overflow-hidden bg-white flex flex-col h-[580px]">
+        {/* 3. Row 1: Primary Analytics & Urgent Actions */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch">
+          {/* Left: Revenue Performance (8/12) */}
+          <div className="lg:col-span-8">
+            <Card className="rounded-[3rem] border-border/40 shadow-sm overflow-hidden bg-white flex flex-col h-full">
               <CardHeader className="px-10 pt-10 pb-4 flex flex-row items-center justify-between shrink-0">
                 <div>
                   <CardTitle className="text-2xl font-black tracking-tight">Revenue Performance</CardTitle>
@@ -125,7 +122,7 @@ const Dashboard = () => {
                   Open Detailed Report <ArrowUpRight className="w-4 h-4" />
                 </Button>
               </CardHeader>
-              <CardContent className="px-6 pb-10 flex-1 flex items-center">
+              <CardContent className="px-6 pb-10 flex-1 flex items-center min-h-[400px]">
                 <div className="h-[400px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={revenueTrendData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
@@ -162,85 +159,11 @@ const Dashboard = () => {
                 </div>
               </CardContent>
             </Card>
-
-            {/* B. Analytical Cards (Course & Dues) - Shorter height to match Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-stretch">
-              {/* Revenue by Course */}
-              <Card className="rounded-[3rem] border-border/40 shadow-sm bg-white flex flex-col h-[560px] overflow-hidden">
-                <CardHeader className="px-10 pt-10 pb-4 shrink-0">
-                  <CardTitle className="text-2xl font-black tracking-tight">Revenue by Course</CardTitle>
-                  <CardDescription className="text-xs font-bold uppercase tracking-widest text-muted-foreground/40 mt-1">Top performing programs</CardDescription>
-                </CardHeader>
-                <CardContent className="px-10 pb-8 flex-1 flex flex-col justify-between min-h-0">
-                  <div className="space-y-5 overflow-auto pr-2 scrollbar-hide">
-                    {revenueByCourseData.map((course) => (
-                      <div key={course.name} className="space-y-2 group cursor-pointer" onClick={() => navigate("/finance/revenue")}>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-xl bg-muted/5 group-hover:bg-primary/5 transition-colors border border-transparent group-hover:border-primary/10">
-                              <course.icon className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                            </div>
-                            <p className="text-[12px] font-black text-foreground group-hover:text-primary transition-colors uppercase tracking-tight">{course.name}</p>
-                          </div>
-                          <span className="text-[12px] font-black text-foreground tabular-nums">₹{(course.revenue/1000).toFixed(0)}k</span>
-                        </div>
-                        <Progress value={course.percentage} className="h-1.5 bg-slate-100" />
-                        <div className="flex justify-between text-[8px] font-black uppercase tracking-[0.15em] text-muted-foreground/50 ml-1">
-                          <span>{course.students} Students</span>
-                          <span>Avg. ₹{(course.avgFee/1000).toFixed(1)}k</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <Button variant="outline" className="w-full mt-4 rounded-2xl h-12 font-black text-[10px] uppercase tracking-[0.2em] border-border/40 hover:bg-primary hover:text-white hover:border-primary transition-all shadow-sm shrink-0">
-                    View All Categories
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* Outstanding Dues */}
-              <Card className="rounded-[3rem] border-border/40 shadow-sm bg-white flex flex-col h-[560px] overflow-hidden">
-                <CardHeader className="px-10 pt-10 pb-4 shrink-0">
-                  <CardTitle className="text-2xl font-black tracking-tight text-rose-600">Outstanding Dues</CardTitle>
-                  <CardDescription className="text-xs font-bold uppercase tracking-widest text-muted-foreground/40 mt-1">Aging analysis</CardDescription>
-                </CardHeader>
-                <CardContent className="px-10 pb-8 flex-1 flex flex-col justify-between min-h-0">
-                  <div className="space-y-6 pt-1 overflow-auto pr-2 scrollbar-hide">
-                    {agingBuckets.map((bucket) => (
-                      <div key={bucket.label} className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[8px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">{bucket.label}</span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-[12px] font-black text-foreground tabular-nums">{bucket.amount}</span>
-                            <span className="text-[8px] font-bold text-muted-foreground/40">({bucket.count} items)</span>
-                          </div>
-                        </div>
-                        <div className="relative h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                          <div 
-                            className={cn("absolute inset-y-0 left-0 transition-all duration-1000 ease-out rounded-full", bucket.color)} 
-                            style={{ width: `${bucket.percentage}%` }} 
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <Button 
-                    onClick={() => navigate("/finance/invoices")}
-                    variant="outline" 
-                    className="w-full mt-4 rounded-2xl h-12 font-black text-[10px] uppercase tracking-[0.2em] border-rose-500/20 text-rose-500 hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all shadow-sm shrink-0"
-                  >
-                    Manage Receivables
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
           </div>
 
-          {/* Right Column (4/12) */}
-          <div className="lg:col-span-4 space-y-10">
-            
-            {/* A. Action Items (Sync with Revenue Performance height) */}
-            <Card className="rounded-[3rem] border-none bg-slate-950 shadow-2xl overflow-hidden relative group h-[580px] flex flex-col">
+          {/* Right: Action Items (4/12) */}
+          <div className="lg:col-span-4">
+            <Card className="rounded-[3rem] border-none bg-slate-950 shadow-2xl overflow-hidden relative group h-full flex flex-col">
               <div className="absolute top-0 right-0 p-10 opacity-10 group-hover:opacity-20 transition-opacity">
                 <TrendingUp className="w-48 h-48 text-primary" strokeWidth={0.2} />
               </div>
@@ -248,7 +171,7 @@ const Dashboard = () => {
                 <CardTitle className="text-2xl font-black tracking-tight text-white">Action Items</CardTitle>
                 <CardDescription className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500 mt-1">Immediate attention required</CardDescription>
               </CardHeader>
-              <CardContent className="p-8 pt-4 space-y-4 relative flex-1 flex flex-col justify-center">
+              <CardContent className="p-8 pb-12 pt-4 space-y-4 relative flex-1 flex flex-col justify-center">
                 {actionItems.map((item) => (
                   <div 
                     key={item.id}
@@ -274,9 +197,91 @@ const Dashboard = () => {
                 ))}
               </CardContent>
             </Card>
+          </div>
+        </div>
 
-            {/* B. Quick Actions (Sync with Analytical Cards height) */}
-            <div className="grid grid-cols-2 gap-6">
+        {/* 4. Row 2: Secondary Analytics & Quick Tools */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch mt-10">
+          {/* Left Column — Course & Dues (8/12) */}
+          <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-10 items-stretch">
+            {/* Revenue by Course */}
+            <Card className="rounded-[3rem] border-border/40 shadow-sm bg-white flex flex-col h-full overflow-hidden">
+              <CardHeader className="px-10 pt-10 pb-4 shrink-0">
+                <CardTitle className="text-2xl font-black tracking-tight">Revenue by Course</CardTitle>
+                <CardDescription className="text-xs font-bold uppercase tracking-widest text-muted-foreground/40 mt-1">Top performing programs</CardDescription>
+              </CardHeader>
+              <CardContent className="px-10 pb-8 flex-1 flex flex-col justify-between min-h-0">
+                <div className="space-y-5 overflow-auto pr-2 scrollbar-hide">
+                  {revenueByCourseData.map((course) => (
+                    <div key={course.name} className="space-y-2 group cursor-pointer" onClick={() => navigate("/finance/revenue")}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-xl bg-muted/5 group-hover:bg-primary/5 transition-colors border border-transparent group-hover:border-primary/10">
+                            <course.icon className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                          </div>
+                          <p className="text-[12px] font-black text-foreground group-hover:text-primary transition-colors uppercase tracking-tight">{course.name}</p>
+                        </div>
+                        <span className="text-[12px] font-black text-foreground tabular-nums">₹{(course.revenue/1000).toFixed(0)}k</span>
+                      </div>
+                      <Progress value={course.percentage} className="h-1.5 bg-slate-100" />
+                      <div className="flex justify-between text-[8px] font-black uppercase tracking-[0.15em] text-muted-foreground/50 ml-1">
+                        <span>{course.students} Students</span>
+                        <span>Avg. ₹{(course.avgFee/1000).toFixed(1)}k</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <Button 
+                  onClick={() => navigate("/finance/revenue")}
+                  variant="outline" 
+                  className="w-full mt-4 rounded-2xl h-12 font-black text-[10px] uppercase tracking-[0.2em] border-border/40 hover:bg-primary hover:text-white hover:border-primary transition-all shadow-sm shrink-0"
+                >
+                  View All Categories
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Outstanding Dues */}
+            <Card className="rounded-[3rem] border-border/40 shadow-sm bg-white flex flex-col h-full overflow-hidden">
+              <CardHeader className="px-10 pt-10 pb-4 shrink-0">
+                <CardTitle className="text-2xl font-black tracking-tight text-rose-600">Outstanding Dues</CardTitle>
+                <CardDescription className="text-xs font-bold uppercase tracking-widest text-muted-foreground/40 mt-1">Aging analysis</CardDescription>
+              </CardHeader>
+              <CardContent className="px-10 pb-8 flex-1 flex flex-col justify-between min-h-0">
+                <div className="space-y-6 pt-1 overflow-auto pr-2 scrollbar-hide">
+                  {agingBuckets.map((bucket) => (
+                    <div key={bucket.label} className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[8px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">{bucket.label}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[12px] font-black text-foreground tabular-nums">{bucket.amount}</span>
+                          <span className="text-[8px] font-bold text-muted-foreground/40">({bucket.count} items)</span>
+                        </div>
+                      </div>
+                      <div className="relative h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                        <div 
+                          className={cn("absolute inset-y-0 left-0 transition-all duration-1000 ease-out rounded-full", bucket.color)} 
+                          style={{ width: `${bucket.percentage}%` }} 
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <Button 
+                  onClick={() => navigate("/finance/invoices")}
+                  variant="outline" 
+                  className="w-full mt-4 rounded-2xl h-12 font-black text-[10px] uppercase tracking-[0.2em] border-rose-500/20 text-rose-500 hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all shadow-sm shrink-0"
+                >
+                  Manage Receivables
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right Column — Quick Actions (4/12) */}
+          <div className="lg:col-span-4">
+            {/* B. Quick Actions */}
+            <div className="grid grid-cols-2 gap-6 h-full">
               <QuickActionButton icon={Plus} label="Manual Payment" onClick={() => navigate("/finance/payments")} />
               <QuickActionButton icon={DollarSign} label="Process Payout" onClick={() => navigate("/finance/payouts")} />
               <QuickActionButton icon={FileText} label="Generate Invoice" onClick={() => navigate("/finance/invoices")} />
@@ -284,10 +289,8 @@ const Dashboard = () => {
               <QuickActionButton icon={ShieldCheck} label="GST Summary" onClick={() => navigate("/finance/tax")} />
               <QuickActionButton icon={RotateCcw} label="Process Refund" onClick={() => navigate("/finance/refunds")} />
             </div>
-
           </div>
         </div>
-
         {/* 5. Wide Live Feed Row (12/12) */}
         <Card className="rounded-[3rem] border-border/40 shadow-sm bg-white overflow-hidden mt-10">
           <CardHeader className="px-10 pt-10 pb-6 flex flex-row items-center justify-between">

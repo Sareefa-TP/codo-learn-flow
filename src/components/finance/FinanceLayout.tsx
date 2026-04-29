@@ -16,9 +16,20 @@ import AppShell from "@/components/layout/AppShell";
 
 interface FinanceLayoutProps {
   children: ReactNode;
+  eyebrow?: string;
+  title?: string;
+  subtitle?: string;
+  action?: ReactNode;
 }
 
-const FinanceLayout = ({ children }: FinanceLayoutProps) => {
+export const FinanceGhostButton = ({ children, icon: Icon, ...props }: any) => (
+  <Button variant="ghost" className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-2xl gap-3 h-11 px-6 transition-all" {...props}>
+    {children}
+    {Icon && <Icon className="w-4 h-4" />}
+  </Button>
+);
+
+const FinanceLayout = ({ children, eyebrow, title, subtitle, action }: FinanceLayoutProps) => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -71,7 +82,35 @@ const FinanceLayout = ({ children }: FinanceLayoutProps) => {
             </div>
           </header>
       }>
-        {children}
+        <div className="space-y-10">
+          {(title || eyebrow) && (
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+              <div className="space-y-1.5">
+                {eyebrow && (
+                  <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em] ml-1">
+                    {eyebrow}
+                  </p>
+                )}
+                {title && (
+                  <h1 className="text-4xl lg:text-5xl font-black tracking-tight text-foreground font-serif">
+                    {title}
+                  </h1>
+                )}
+                {subtitle && (
+                  <p className="text-sm font-medium text-muted-foreground max-w-2xl ml-1">
+                    {subtitle}
+                  </p>
+                )}
+              </div>
+              {action && (
+                <div className="shrink-0 pb-1">
+                  {action}
+                </div>
+              )}
+            </div>
+          )}
+          {children}
+        </div>
       </AppShell>
       {/* Command Menu */}
       <CommandDialog open={open} onOpenChange={setOpen}>

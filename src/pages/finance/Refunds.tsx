@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import FinanceLayout from "@/components/finance/FinanceLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -49,10 +49,20 @@ import {
   TrendingUp,
   History,
   Trash2,
+  ChevronDown,
+  Info,
+  CreditCard,
+  Building,
+  ShieldAlert,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { refundsList, refundStats } from "@/data/financeMock";
+import { refundsList, refundStats, transactionsList } from "@/data/financeMock";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -63,24 +73,50 @@ const fmt = (n: number) => `₹${n.toLocaleString("en-IN")}`;
 interface DetailProps {
   refund: any | null;
   onClose: () => void;
+  onStatusUpdate: (id: string, newStatus: string) => void;
 }
 
-const RefundDetailDrawer = ({ refund, onClose }: DetailProps) => {
+const RefundDetailDialog = ({ refund, onClose, onStatusUpdate }: DetailProps) => {
+  const [isProcessing, setIsProcessing] = useState(false);
+  
   if (!refund) return null;
 
   const isCompleted = refund.status === "Completed";
   const isRejected = refund.status === "Rejected";
 
+  const handleAction = (status: string) => {
+    setIsProcessing(true);
+    setTimeout(() => {
+      onStatusUpdate(refund.id, status);
+      setIsProcessing(false);
+      onClose();
+      toast.success(`Refund ${status}`, {
+        description: `Reference ${refund.id} has been marked as ${status.toLowerCase()}.`
+      });
+    }, 1000);
+  };
+
   return (
-    <Sheet open={!!refund} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent className="sm:max-w-[500px] border-l border-border/60 p-0 overflow-y-auto">
-        {/* Header Section */}
-        <div className={cn(
-          "p-8 pb-10 border-b border-border/40",
-          isRejected ? "bg-slate-50/50" : "bg-rose-50/30"
-        )}>
-          <div className="flex items-center justify-between mb-8">
-             <div className="flex gap-2">
+    <Dialog open={!!refund} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-3xl rounded-[2rem] border-none p-0 overflow-hidden bg-white shadow-2xl max-h-[90vh] flex flex-col">
+        {/* Modal Header */}
+        <div className="flex items-center justify-between p-6 border-b border-border/50 bg-muted/5 flex-shrink-0">
+          <div>
+            <h2 className="text-xl font-bold tracking-tight text-slate-900">Refund Audit Log</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Complete trail of the refund request and settlement.
+            </p>
+          </div>
+        </div>
+
+        {/* Modal Body */}
+        <div className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar">
+          {/* Header Summary Section */}
+          <div className={cn(
+            "p-8 rounded-[2rem] border transition-colors duration-500 text-center space-y-2",
+            isRejected ? "bg-slate-50 border-slate-200" : "bg-rose-50 border-rose-100"
+          )}>
+            <div className="flex justify-center gap-2 mb-4">
                 <Badge variant="outline" className="rounded-full bg-white font-black text-[9px] uppercase px-3 py-1 border-border/40">
                   {refund.reason}
                 </Badge>
@@ -93,18 +129,12 @@ const RefundDetailDrawer = ({ refund, onClose }: DetailProps) => {
                 )}>
                   {refund.status}
                 </Badge>
-             </div>
-             <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full hover:bg-black/5">
-                <XCircle className="w-5 h-5 text-muted-foreground" />
-             </Button>
-          </div>
-          
-          <div className="space-y-1">
-             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Refund Amount</p>
-             <h2 className="text-5xl font-black tracking-tighter tabular-nums text-rose-600">
+            </div>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Total Refund Amount</p>
+            <h2 className="text-5xl font-black tracking-tighter tabular-nums text-rose-600">
                {fmt(refund.refundAmount)}
-             </h2>
-             <div className="flex items-center gap-2 mt-2">
+            </h2>
+            <div className="flex items-center justify-center gap-2 mt-2">
                 <p className="text-xs font-mono font-bold text-muted-foreground opacity-60">
                    {refund.id}
                 </p>
@@ -115,30 +145,28 @@ const RefundDetailDrawer = ({ refund, onClose }: DetailProps) => {
                 </button>
              </div>
           </div>
-        </div>
 
-        <div className="p-8 space-y-10">
           {/* Student Context */}
           <div className="space-y-4">
              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Student & Context</p>
-             <div className="p-5 rounded-3xl border border-border/60 bg-muted/5 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                   <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-sm">
+             <div className="p-6 rounded-[2rem] border border-border/60 bg-muted/5 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                   <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-lg">
                       {refund.student.charAt(0)}
                    </div>
                    <div>
-                      <p className="text-sm font-black">{refund.student}</p>
+                      <p className="text-base font-black text-slate-800">{refund.student}</p>
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">{refund.product}</p>
                    </div>
                 </div>
                 <div className="text-right">
                    <p className="text-[9px] font-bold text-muted-foreground uppercase">Original Pay</p>
-                   <p className="text-xs font-black">{fmt(refund.originalAmount)}</p>
+                   <p className="text-sm font-black text-slate-700">{fmt(refund.originalAmount)}</p>
                 </div>
              </div>
           </div>
 
-          {/* Refund Reason & Note */}
+          {/* Refund Details */}
           <div className="space-y-4">
              <div className="flex items-center justify-between">
                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Refund Details</p>
@@ -146,10 +174,10 @@ const RefundDetailDrawer = ({ refund, onClose }: DetailProps) => {
                    By {refund.requestedBy}
                 </Badge>
              </div>
-             <div className="p-5 rounded-3xl border border-border/60 bg-white space-y-4 shadow-sm">
+             <div className="p-6 rounded-[2rem] border border-border/60 bg-white space-y-4 shadow-sm">
                 <div className="flex items-start gap-3">
                    <MessageSquare className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                   <p className="text-xs font-medium leading-relaxed text-muted-foreground">
+                   <p className="text-sm font-medium leading-relaxed text-slate-600">
                       {refund.note}
                    </p>
                 </div>
@@ -158,81 +186,497 @@ const RefundDetailDrawer = ({ refund, onClose }: DetailProps) => {
 
           {/* Money Breakdown */}
           <div className="space-y-4">
-             <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Money Breakdown</p>
-             <div className="p-6 rounded-[2rem] border border-border/60 bg-muted/5 space-y-3">
-                <div className="flex justify-between text-xs font-medium">
-                   <span className="text-muted-foreground">Original Amount</span>
-                   <span className="tabular-nums font-bold">{fmt(refund.originalAmount)}</span>
+             <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Settlement Breakdown</p>
+             <div className="p-8 rounded-[2.5rem] border border-border/60 bg-slate-50/50 space-y-4">
+                <div className="flex justify-between text-sm font-medium">
+                   <span className="text-slate-500">Original Amount</span>
+                   <span className="tabular-nums font-bold text-slate-700">{fmt(refund.originalAmount)}</span>
                 </div>
                 {refund.deductions.map((d: any, i: number) => (
-                   <div key={i} className="flex justify-between text-xs font-medium">
-                      <span className="text-muted-foreground">{d.label}</span>
+                   <div key={i} className="flex justify-between text-sm font-medium">
+                      <span className="text-slate-500">{d.label}</span>
                       <span className="text-rose-600 tabular-nums">−{fmt(d.amount)}</span>
                    </div>
                 ))}
-                <div className="pt-4 mt-2 border-t border-border/40 flex justify-between items-end">
-                   <span className="text-[10px] font-black uppercase tracking-[0.2em]">Final Refund</span>
-                   <span className="text-2xl font-black text-rose-600 tabular-nums leading-none">{fmt(refund.refundAmount)}</span>
+                <div className="pt-6 mt-4 border-t border-slate-200 flex justify-between items-end">
+                   <span className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-400">Net Refunded</span>
+                   <span className="text-4xl font-black text-rose-600 tabular-nums leading-none">{fmt(refund.refundAmount)}</span>
                 </div>
              </div>
           </div>
 
-          {/* Timeline */}
+          {/* Approval Chain */}
           <div className="space-y-6">
              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Approval Chain</p>
-             <div className="relative pl-6 space-y-8 before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-[2px] before:bg-muted/40">
+             <div className="relative pl-8 space-y-10 before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-[2px] before:bg-slate-100">
                 <div className="relative">
-                   <div className="absolute -left-[27px] top-1 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />
-                   <p className="text-xs font-black">Requested</p>
-                   <p className="text-[10px] font-medium text-muted-foreground">{refund.requestedOn} • {refund.requestedBy}</p>
+                   <div className="absolute -left-[35px] top-1 w-4 h-4 rounded-full bg-emerald-500 border-4 border-white shadow-sm" />
+                   <p className="text-sm font-black text-slate-800">Requested</p>
+                   <p className="text-[11px] font-medium text-slate-500">{refund.requestedOn} • {refund.requestedBy}</p>
                 </div>
                 <div className="relative">
                    <div className={cn(
-                     "absolute -left-[27px] top-1 w-3 h-3 rounded-full border-2 border-white shadow-sm",
-                     refund.status !== "Requested" ? "bg-emerald-500" : "bg-muted"
+                     "absolute -left-[35px] top-1 w-4 h-4 rounded-full border-4 border-white shadow-sm",
+                     refund.status !== "Requested" ? "bg-emerald-500" : "bg-slate-200"
                    )} />
-                   <p className={cn("text-xs font-black", refund.status === "Requested" && "text-muted-foreground")}>Finance Review</p>
-                   {refund.status !== "Requested" && <p className="text-[10px] font-medium text-muted-foreground">Approved by Finance Team</p>}
+                   <p className={cn("text-sm font-black", refund.status === "Requested" ? "text-slate-400" : "text-slate-800")}>Finance Review</p>
+                   {refund.status !== "Requested" && <p className="text-[11px] font-medium text-slate-500">Approved by Finance Team</p>}
                 </div>
                 <div className="relative">
                    <div className={cn(
-                     "absolute -left-[27px] top-1 w-3 h-3 rounded-full border-2 border-white shadow-sm",
-                     isCompleted ? "bg-emerald-500" : "bg-muted"
+                     "absolute -left-[35px] top-1 w-4 h-4 rounded-full border-4 border-white shadow-sm",
+                     isCompleted ? "bg-emerald-500" : "bg-slate-200"
                    )} />
-                   <p className={cn("text-xs font-black", !isCompleted && "text-muted-foreground")}>Gateway Processed</p>
-                   {isCompleted && <p className="text-[10px] font-medium text-muted-foreground">Successfully settled via Razorpay</p>}
+                   <p className={cn("text-sm font-black", !isCompleted ? "text-slate-400" : "text-slate-800")}>Gateway Processed</p>
+                   {isCompleted && <p className="text-[11px] font-medium text-slate-500">Successfully settled via Razorpay</p>}
                 </div>
              </div>
           </div>
         </div>
 
-        <SheetFooter className="absolute bottom-0 left-0 right-0 p-8 bg-background border-t border-border/60 gap-3">
+        <DialogFooter className="p-6 bg-muted/5 border-t border-border/50 flex items-center justify-center gap-3">
           {refund.status === "Requested" ? (
              <>
-                <Button variant="ghost" className="rounded-2xl font-black text-[10px] uppercase tracking-widest flex-1 h-12 text-rose-600 hover:bg-rose-50 hover:text-rose-700">
+                <Button 
+                  variant="ghost" 
+                  disabled={isProcessing}
+                  onClick={() => handleAction("Rejected")}
+                  className="rounded-2xl font-black text-[10px] uppercase tracking-widest h-12 px-8 text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+                >
                    <XCircle className="w-4 h-4 mr-2" />
-                   Reject
+                   {isProcessing ? "Wait..." : "Reject Request"}
                 </Button>
-                <Button className="rounded-2xl bg-primary text-white font-black text-[10px] uppercase tracking-widest flex-1 h-12 shadow-xl shadow-primary/20">
+                <Button 
+                  disabled={isProcessing}
+                  onClick={() => handleAction("Approved")}
+                  className="rounded-2xl bg-primary text-white font-black text-[10px] uppercase tracking-widest px-10 h-12 shadow-lg shadow-primary/20"
+                >
                    <CheckCircle2 className="w-4 h-4 mr-2" />
-                   Approve
+                   {isProcessing ? "Processing..." : "Approve Refund"}
                 </Button>
              </>
           ) : (
              <>
-                <Button variant="outline" className="rounded-2xl font-black text-[10px] uppercase tracking-widest flex-1 h-12 border-border/60">
+                <Button variant="outline" className="rounded-2xl font-black text-[10px] uppercase tracking-widest h-12 border-border/60 px-8">
                    <FileText className="w-4 h-4 mr-2" />
                    Credit Note
                 </Button>
-                <Button variant="outline" className="rounded-2xl font-black text-[10px] uppercase tracking-widest flex-1 h-12 border-border/60">
+                <Button variant="outline" className="rounded-2xl font-black text-[10px] uppercase tracking-widest h-12 border-border/60 px-8">
                    <Wallet className="w-4 h-4 mr-2" />
                    Wallet Cr.
                 </Button>
              </>
           )}
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// ─── Initiate Refund Modal ──────────────────────────────────────────────────
+
+interface NewRefundProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSuccess: (newRefund: any) => void;
+}
+
+const InitiateRefundDialog = ({ open, onOpenChange, onSuccess }: NewRefundProps) => {
+  const [selectedTxnId, setSelectedTxnId] = useState("");
+  const [refundType, setRefundType] = useState<"full" | "partial">("full");
+  const [refundAmount, setRefundAmount] = useState("");
+  const [reason, setReason] = useState("");
+  const [notes, setNotes] = useState("");
+  const [destination, setDestination] = useState("original");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Derived: Find selected transaction details
+  const linkedTxn = useMemo(() => {
+    return transactionsList.find(t => t.id === selectedTxnId);
+  }, [selectedTxnId]);
+
+  // Effect: Auto-fill amount if "Full" is selected
+  useEffect(() => {
+    if (refundType === "full" && linkedTxn) {
+      setRefundAmount(linkedTxn.amount.toString());
+    }
+  }, [refundType, linkedTxn]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedTxnId || !refundAmount || !reason) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    // Simulate API Call
+    setTimeout(() => {
+      const newRefund = {
+        id: `RFD-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+        orderId: linkedTxn?.id || "ORD-MOCK",
+        student: linkedTxn?.party || "Unknown Student",
+        product: "Course Enrollment",
+        refundAmount: parseFloat(refundAmount),
+        originalAmount: linkedTxn?.amount || 0,
+        status: "Requested",
+        reason: reason.toUpperCase(),
+        requestedOn: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+        requestedBy: "Finance Admin",
+        note: notes,
+        deductions: refundType === "partial" ? [{ label: "Processing Fee", amount: (linkedTxn?.amount || 0) - parseFloat(refundAmount) }] : []
+      };
+
+      onSuccess(newRefund);
+      setIsSubmitting(false);
+      toast.success("Refund request initiated successfully");
+      onOpenChange(false);
+      
+      // Reset
+      setSelectedTxnId("");
+      setRefundType("full");
+      setRefundAmount("");
+      setReason("");
+      setNotes("");
+    }, 1200);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="w-[600px] max-w-[600px] rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl bg-[#FDFCF8] max-h-[90vh] flex flex-col">
+        <form onSubmit={handleSubmit} className="flex flex-col h-full overflow-hidden">
+          <div className="p-8 border-b border-rose-100 bg-rose-50/20 flex-shrink-0 relative">
+             <div className="space-y-1">
+                <DialogTitle className="text-3xl font-black tracking-tighter text-slate-900 leading-none font-serif">
+                   Initiate Refund Request
+                </DialogTitle>
+                <p className="text-sm font-medium text-rose-600/70">
+                   Transactions can only be refunded if the original status is 'Success'.
+                </p>
+             </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+             {/* Section 1: Search & Link */}
+             <div className="mb-8 space-y-4">
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">Section 1: Search & Link</p>
+                <div className="space-y-4">
+                   <div className="relative">
+                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <select 
+                        className="w-full h-12 pl-12 pr-4 rounded-2xl border-slate-200 bg-white font-bold text-xs appearance-none focus:ring-2 focus:ring-rose-500/20 outline-none transition-all shadow-sm"
+                        value={selectedTxnId}
+                        onChange={(e) => setSelectedTxnId(e.target.value)}
+                        required
+                      >
+                         <option value="">Select Original Transaction/Order...</option>
+                         {transactionsList.filter(t => t.status === "Success").map(t => (
+                            <option key={t.id} value={t.id}>{t.id} — {t.party} ({fmt(t.amount)})</option>
+                         ))}
+                      </select>
+                      <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                   </div>
+
+                   {linkedTxn && (
+                      <div className="p-6 rounded-[2rem] bg-white border border-rose-100 shadow-sm animate-in zoom-in-95 duration-300">
+                         <div className="flex items-center justify-between">
+                            <div className="space-y-1">
+                               <p className="text-[9px] font-black uppercase text-slate-400">Linked Student</p>
+                               <p className="text-sm font-black text-slate-800">{linkedTxn.party}</p>
+                            </div>
+                            <div className="text-right space-y-1">
+                               <p className="text-[9px] font-black uppercase text-slate-400">Original Amount Paid</p>
+                               <p className="text-xl font-black text-[#1A4D3E] tabular-nums">{fmt(linkedTxn.amount)}</p>
+                            </div>
+                         </div>
+                      </div>
+                   )}
+                </div>
+             </div>
+
+             {/* Section 2: Refund Logic */}
+             <div className="grid grid-cols-2 gap-8 mb-8">
+                <div className="space-y-3">
+                   <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">Refund Type</p>
+                   <div className="flex p-1.5 bg-slate-100 rounded-2xl gap-1">
+                      <button 
+                        type="button"
+                        onClick={() => setRefundType("full")}
+                        className={cn("flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all", refundType === "full" ? "bg-white shadow-sm text-slate-900" : "text-slate-400 hover:text-slate-600")}
+                      >
+                         Full Refund
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={() => setRefundType("partial")}
+                        className={cn("flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all", refundType === "partial" ? "bg-white shadow-sm text-slate-900" : "text-slate-400 hover:text-slate-600")}
+                      >
+                         Partial
+                      </button>
+                   </div>
+                </div>
+                <div className="space-y-3">
+                   <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">Refund Amount (₹)</p>
+                   <div className="relative">
+                      <Input 
+                        type="number" 
+                        value={refundAmount}
+                        onChange={(e) => setRefundAmount(e.target.value)}
+                        readOnly={refundType === "full"}
+                        className={cn("h-11 rounded-2xl border-slate-200 font-black text-sm shadow-inner", refundType === "full" ? "bg-slate-50 text-slate-400" : "bg-white")}
+                        placeholder="0.00"
+                        required
+                      />
+                   </div>
+                </div>
+             </div>
+
+             {/* Section 3: Compliance */}
+             <div className="mb-8 space-y-6">
+                <div className="space-y-3">
+                   <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">Reason for Refund</p>
+                   <div className="relative">
+                     <select 
+                       required
+                       value={reason}
+                       onChange={(e) => setReason(e.target.value)}
+                       className="w-full h-11 px-4 rounded-2xl border-slate-200 bg-white font-bold text-xs focus:ring-2 focus:ring-rose-500/20 outline-none appearance-none shadow-sm"
+                     >
+                        <option value="">Select a reason...</option>
+                        <option value="Course Cancellation">Course Cancellation</option>
+                        <option value="Duplicate Payment">Duplicate Payment</option>
+                        <option value="Quality Issue">Quality Issue</option>
+                        <option value="Accidental Purchase">Accidental Purchase</option>
+                     </select>
+                     <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                   </div>
+                </div>
+                <div className="space-y-3">
+                   <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">Internal Audit Notes</p>
+                   <Textarea 
+                     value={notes}
+                     onChange={(e) => setNotes(e.target.value)}
+                     className="rounded-[1.5rem] border-slate-200 min-h-[100px] font-medium text-sm p-4 shadow-sm" 
+                     placeholder="Document why this refund is being processed..." 
+                   />
+                </div>
+             </div>
+
+             {/* Section 4: Payout Destination */}
+             <div className="mb-4 space-y-4">
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">Payout Destination</p>
+                <RadioGroup value={destination} onValueChange={setDestination} className="grid grid-cols-2 gap-4">
+                   <Label 
+                     className={cn(
+                       "flex flex-col gap-3 p-5 rounded-[2rem] border-2 cursor-pointer transition-all",
+                       destination === "original" ? "border-[#1A4D3E] bg-emerald-50/50" : "border-slate-100 bg-white hover:border-slate-200"
+                     )}
+                   >
+                      <div className="flex items-center justify-between">
+                         <CreditCard className={cn("w-5 h-5", destination === "original" ? "text-[#1A4D3E]" : "text-slate-400")} />
+                         <RadioGroupItem value="original" className="border-[#1A4D3E] text-[#1A4D3E]" />
+                      </div>
+                      <div className="space-y-1">
+                         <p className="text-xs font-black uppercase tracking-tight">Original Method</p>
+                         <p className="text-[10px] font-medium text-slate-500">Refund back to Card/Netbanking</p>
+                      </div>
+                   </Label>
+                   <Label 
+                     className={cn(
+                       "flex flex-col gap-3 p-5 rounded-[2rem] border-2 cursor-pointer transition-all",
+                       destination === "wallet" ? "border-[#1A4D3E] bg-emerald-50/50" : "border-slate-100 bg-white hover:border-slate-200"
+                     )}
+                   >
+                      <div className="flex items-center justify-between">
+                         <Wallet className={cn("w-5 h-5", destination === "wallet" ? "text-[#1A4D3E]" : "text-slate-400")} />
+                         <RadioGroupItem value="wallet" className="border-[#1A4D3E] text-[#1A4D3E]" />
+                      </div>
+                      <div className="space-y-1">
+                         <p className="text-xs font-black uppercase tracking-tight">CODO Wallet Credits</p>
+                         <p className="text-[10px] font-medium text-slate-500">Refund to student's internal wallet</p>
+                      </div>
+                   </Label>
+                </RadioGroup>
+             </div>
+          </div>
+
+          {/* Modal Footer (Sticky) */}
+          <div className="p-8 border-t border-slate-100 bg-slate-50/80 backdrop-blur-sm sticky bottom-0 left-0 right-0 flex items-center justify-between flex-shrink-0 z-10">
+             <button 
+               type="button"
+               onClick={() => onOpenChange(false)}
+               className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 hover:text-slate-600 transition-colors"
+             >
+                Cancel
+             </button>
+             <Button 
+               type="submit"
+               disabled={isSubmitting}
+               className="h-12 px-10 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-[10px] uppercase tracking-widest shadow-2xl shadow-rose-200"
+             >
+                {isSubmitting ? "Processing..." : "Process Refund"}
+             </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// ─── Export Refunds Modal ──────────────────────────────────────────────────
+
+interface ExportProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  data: any[];
+}
+
+const ExportRefundsDialog = ({ open, onOpenChange, data }: ExportProps) => {
+  const [format, setFormat] = useState("csv");
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExport = () => {
+    setIsExporting(true);
+    
+    // Simulate real file generation
+    setTimeout(() => {
+      const fileName = `Refund_Ledger_${new Date().toISOString().split('T')[0]}.${format}`;
+      const content = "ID,Student,Order,Reason,Amount,Status\n" + 
+                     data.map(r => `${r.id},${r.student},${r.orderId},${r.reason},${r.refundAmount},${r.status}`).join("\n");
+      
+      const blob = new Blob([content], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      setIsExporting(false);
+      onOpenChange(false);
+      toast.success(`${format.toUpperCase()} Ledger Downloaded`, {
+        description: `Check your browser downloads for ${fileName}`,
+      });
+    }, 1500);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="w-[600px] max-w-[600px] rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl bg-[#FDFCF8] max-h-[90vh] flex flex-col">
+        {/* Modal Header */}
+        <div className="p-8 border-b border-slate-100 bg-slate-50/20 flex-shrink-0">
+          <div className="space-y-1">
+            <DialogTitle className="text-3xl font-black tracking-tighter text-slate-900 leading-none font-serif">
+               Export Refund Ledger
+            </DialogTitle>
+            <p className="text-sm font-medium text-muted-foreground">
+               Review records and select format before processing the download.
+            </p>
+          </div>
+        </div>
+
+        {/* Modal Body */}
+        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+          {/* Export Summary */}
+          <div className="grid grid-cols-2 gap-4 mb-8">
+             <div className="p-6 rounded-[2rem] bg-white border border-slate-100 shadow-sm">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Total Records</p>
+                <p className="text-2xl font-black text-slate-900 tabular-nums">{data.length}</p>
+             </div>
+             <div className="p-6 rounded-[2rem] bg-white border border-slate-100 shadow-sm">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Date Range</p>
+                <p className="text-xs font-black text-slate-900 uppercase">Apr 01 — Apr 27, 2026</p>
+             </div>
+          </div>
+
+          {/* Data Preview */}
+          <div className="mb-8 space-y-4">
+             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">Live Preview (Top 4 Records)</p>
+             <div className="rounded-2xl border border-slate-100 bg-white overflow-hidden shadow-sm">
+                <Table>
+                   <TableHeader className="bg-slate-50">
+                      <TableRow>
+                         <TableHead className="text-[9px] font-black uppercase tracking-widest">ID</TableHead>
+                         <TableHead className="text-[9px] font-black uppercase tracking-widest">Student</TableHead>
+                         <TableHead className="text-[9px] font-black uppercase tracking-widest text-right">Amount</TableHead>
+                      </TableRow>
+                   </TableHeader>
+                   <TableBody>
+                      {data.slice(0, 4).map((row) => (
+                         <TableRow key={row.id}>
+                            <TableCell className="text-[10px] font-mono font-bold text-slate-400">{row.id}</TableCell>
+                            <TableCell className="text-xs font-black text-slate-800">{row.student}</TableCell>
+                            <TableCell className="text-xs font-black text-rose-600 text-right">{fmt(row.refundAmount)}</TableCell>
+                         </TableRow>
+                      ))}
+                   </TableBody>
+                </Table>
+             </div>
+          </div>
+
+          {/* Format Selection */}
+          <div className="space-y-4">
+             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">Export Format</p>
+             <RadioGroup value={format} onValueChange={setFormat} className="grid grid-cols-2 gap-4">
+                <Label 
+                  className={cn(
+                    "flex items-center justify-between p-5 rounded-2xl border-2 cursor-pointer transition-all",
+                    format === "csv" ? "border-[#1A4D3E] bg-emerald-50/30" : "border-slate-100 bg-white hover:border-slate-200"
+                  )}
+                >
+                   <div className="flex items-center gap-3">
+                      <div className={cn("w-10 h-10 rounded-full flex items-center justify-center", format === "csv" ? "bg-[#1A4D3E]/10 text-[#1A4D3E]" : "bg-slate-50 text-slate-400")}>
+                         <FileText className="w-5 h-5" />
+                      </div>
+                      <div>
+                         <p className="text-xs font-black uppercase">CSV Ledger</p>
+                         <p className="text-[9px] font-medium text-slate-500">Universal data format</p>
+                      </div>
+                   </div>
+                   <RadioGroupItem value="csv" className="border-[#1A4D3E] text-[#1A4D3E]" />
+                </Label>
+                <Label 
+                  className={cn(
+                    "flex items-center justify-between p-5 rounded-2xl border-2 cursor-pointer transition-all",
+                    format === "xlsx" ? "border-[#1A4D3E] bg-emerald-50/30" : "border-slate-100 bg-white hover:border-slate-200"
+                  )}
+                >
+                   <div className="flex items-center gap-3">
+                      <div className={cn("w-10 h-10 rounded-full flex items-center justify-center", format === "xlsx" ? "bg-[#1A4D3E]/10 text-[#1A4D3E]" : "bg-slate-50 text-slate-400")}>
+                         <TrendingUp className="w-5 h-5" />
+                      </div>
+                      <div>
+                         <p className="text-xs font-black uppercase">MS Excel</p>
+                         <p className="text-[9px] font-medium text-slate-500">Optimized for reporting</p>
+                      </div>
+                   </div>
+                   <RadioGroupItem value="xlsx" className="border-[#1A4D3E] text-[#1A4D3E]" />
+                </Label>
+             </RadioGroup>
+          </div>
+        </div>
+
+        {/* Modal Footer */}
+        <div className="p-8 border-t border-slate-100 bg-slate-50/80 backdrop-blur-sm sticky bottom-0 flex items-center justify-between z-10">
+           <button 
+             type="button"
+             onClick={() => onOpenChange(false)}
+             className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 hover:text-slate-600"
+           >
+              Cancel
+           </button>
+           <Button 
+             onClick={handleExport}
+             disabled={isExporting}
+             className="h-12 px-10 rounded-2xl bg-primary text-white font-black text-[10px] uppercase tracking-widest shadow-2xl shadow-primary/20"
+           >
+              {isExporting ? "Processing..." : "Confirm & Download Ledger"}
+           </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 
@@ -242,9 +686,12 @@ const Refunds = () => {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedRefund, setSelectedRefund] = useState<any | null>(null);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [showInitiateModal, setShowInitiateModal] = useState(false);
+  const [localRefunds, setLocalRefunds] = useState(refundsList);
 
   const filteredData = useMemo(() => {
-    return refundsList.filter(row => {
+    return localRefunds.filter(row => {
       const q = search.toLowerCase();
       const matchesSearch = row.student.toLowerCase().includes(q) || 
                            row.id.toLowerCase().includes(q) || 
@@ -252,7 +699,15 @@ const Refunds = () => {
       const matchesStatus = filterStatus === "all" || row.status === filterStatus;
       return matchesSearch && matchesStatus;
     });
-  }, [search, filterStatus]);
+  }, [search, filterStatus, localRefunds]);
+
+  const handleStatusUpdate = (id: string, newStatus: string) => {
+    setLocalRefunds(prev => prev.map(r => r.id === id ? { ...r, status: newStatus } : r));
+  };
+
+  const handleRefundSuccess = (newRefund: any) => {
+    setLocalRefunds(prev => [newRefund, ...prev]);
+  };
 
   return (
     <FinanceLayout>
@@ -261,9 +716,6 @@ const Refunds = () => {
         {/* ── Header ── */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-1.5">
-            <Badge variant="outline" className="rounded-full bg-primary/5 text-primary border-primary/20 font-black text-[9px] uppercase px-3 py-1 tracking-widest mb-2">
-              Module 05
-            </Badge>
             <h1 className="text-4xl lg:text-5xl font-black tracking-tighter text-foreground leading-none">
               Refunds
             </h1>
@@ -273,16 +725,37 @@ const Refunds = () => {
           </div>
           
           <div className="flex items-center gap-3">
-            <Button variant="ghost" className="h-12 rounded-2xl font-black text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground hover:bg-muted/50">
+            <Button 
+              variant="ghost" 
+              onClick={() => setShowExportModal(true)}
+              className="h-12 rounded-2xl font-black text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground hover:bg-muted/50"
+            >
               <Download className="w-4 h-4 mr-2" />
               Export Refunds
             </Button>
-            <Button className="h-12 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-[10px] uppercase tracking-widest px-8 shadow-2xl shadow-rose-200">
+            <Button 
+              onClick={() => setShowInitiateModal(true)}
+              className="h-12 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-[10px] uppercase tracking-widest px-8 shadow-2xl shadow-rose-200"
+            >
               <Plus className="w-4 h-4 mr-2" />
               New Refund
             </Button>
           </div>
         </div>
+
+        {/* Export Refunds Modal */}
+        <ExportRefundsDialog 
+          open={showExportModal} 
+          onOpenChange={setShowExportModal} 
+          data={filteredData}
+        />
+
+        {/* Initiate Refund Modal */}
+        <InitiateRefundDialog 
+          open={showInitiateModal} 
+          onOpenChange={setShowInitiateModal} 
+          onSuccess={handleRefundSuccess}
+        />
 
         {/* ── KPI Summary ── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -421,7 +894,11 @@ const Refunds = () => {
         </Card>
       </div>
 
-      <RefundDetailDrawer refund={selectedRefund} onClose={() => setSelectedRefund(null)} />
+      <RefundDetailDialog 
+        refund={selectedRefund} 
+        onClose={() => setSelectedRefund(null)} 
+        onStatusUpdate={handleStatusUpdate}
+      />
     </FinanceLayout>
   );
 };

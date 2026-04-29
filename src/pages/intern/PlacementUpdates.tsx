@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { 
-  MapPin, 
-  Calendar, 
-  Building2, 
-  CheckCircle2, 
-  Clock, 
+import {
+  MapPin,
+  Calendar,
+  Building2,
+  CheckCircle2,
+  Clock,
   Eye,
   XCircle,
   X,
@@ -45,7 +45,7 @@ interface JobOpportunity {
 const initialJobs: JobOpportunity[] = [
   {
     id: "JOB-CODO-001",
-    companyName: "Codo Agency",
+    companyName: "CODO Agency",
     role: "Full Stack Developer",
     category: "Engineering",
     location: "Trivandrum (Hybrid)",
@@ -57,7 +57,7 @@ const initialJobs: JobOpportunity[] = [
   },
   {
     id: "JOB-CODO-002",
-    companyName: "Codo Agency",
+    companyName: "CODO Agency",
     role: "Mobile App Developer",
     category: "Mobile Team",
     location: "Trivandrum",
@@ -69,7 +69,7 @@ const initialJobs: JobOpportunity[] = [
   },
   {
     id: "JOB-CODO-003",
-    companyName: "Codo Agency",
+    companyName: "CODO Agency",
     role: "Software Tester",
     category: "Quality Assurance",
     location: "Remote",
@@ -81,7 +81,7 @@ const initialJobs: JobOpportunity[] = [
   },
   {
     id: "JOB-CODO-004",
-    companyName: "Codo Agency",
+    companyName: "CODO Agency",
     role: "UI/UX Designer",
     category: "Design Department",
     location: "Trivandrum",
@@ -93,7 +93,7 @@ const initialJobs: JobOpportunity[] = [
   },
   {
     id: "JOB-CODO-005",
-    companyName: "Codo Agency",
+    companyName: "CODO Agency",
     role: "Backend Developer",
     category: "Infrastructure",
     location: "Hybrid",
@@ -107,12 +107,12 @@ const initialJobs: JobOpportunity[] = [
 
 // --- Sub-components ---
 
-const JobCard = ({ 
-  job, 
+const JobCard = ({
+  job,
   onApply,
   onViewDetails
-}: { 
-  job: JobOpportunity; 
+}: {
+  job: JobOpportunity;
   onApply: (id: string) => void;
   onViewDetails: (job: JobOpportunity) => void;
 }) => {
@@ -148,7 +148,7 @@ const JobCard = ({
             <div className="w-14 h-14 rounded-2xl bg-primary/5 flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-all duration-300 shadow-inner border border-primary/10">
               <Building2 className="w-7 h-7 text-primary/70" />
             </div>
-            
+
             <div className="space-y-1.5">
               <div className="flex items-center gap-3 flex-wrap">
                 <h3 className="font-bold text-xl leading-tight text-foreground group-hover:text-primary transition-colors">
@@ -158,7 +158,7 @@ const JobCard = ({
                   {job.category}
                 </Badge>
               </div>
-              
+
               <div className="flex items-center gap-x-4 gap-y-1 text-xs text-muted-foreground flex-wrap font-medium">
                 <div className="flex items-center gap-1.5">
                   <span className="text-foreground/90 font-bold">{job.companyName}</span>
@@ -182,26 +182,26 @@ const JobCard = ({
             </Badge>
 
             <div className="flex items-center gap-2">
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => onViewDetails(job)}
                 className="h-10 px-4 rounded-xl hover:bg-muted font-bold text-xs gap-1.5"
               >
                 <Eye className="w-4 h-4" />
                 Details
               </Button>
-              
+
               {job.status === "Open" ? (
-                <Button 
+                <Button
                   onClick={() => onApply(job.id)}
                   className="h-10 px-5 rounded-xl bg-primary hover:bg-primary/90 font-bold text-xs shadow-md shadow-primary/20"
                 >
                   Apply Now
                 </Button>
               ) : (
-                <Button 
-                  disabled 
+                <Button
+                  disabled
                   variant="outline"
                   className={cn(
                     "h-10 px-5 rounded-xl font-bold text-xs",
@@ -238,7 +238,7 @@ const JobDetailsModal = ({ job, onClose, onApply }: JobDetailsModalProps) => {
 
   return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 overflow-hidden">
-      <div 
+      <div
         className="bg-background border border-border/50 rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col animate-in fade-in zoom-in duration-300"
         onClick={e => e.stopPropagation()}
       >
@@ -247,7 +247,7 @@ const JobDetailsModal = ({ job, onClose, onApply }: JobDetailsModalProps) => {
           <div>
             <h2 className="text-xl font-bold tracking-tight">Opportunity Details</h2>
             <p className="text-sm text-muted-foreground mt-1">
-              Internal placement at Codo Agency
+              Internal placement at CODO Agency
             </p>
           </div>
           <button onClick={onClose} className="p-2 rounded-xl hover:bg-muted transition-colors text-muted-foreground">
@@ -257,7 +257,7 @@ const JobDetailsModal = ({ job, onClose, onApply }: JobDetailsModalProps) => {
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto p-8 space-y-8 no-scrollbar">
-          
+
           {/* Main Info Card */}
           <div className="flex items-start gap-6 p-6 rounded-2xl bg-primary/5 border border-primary/10">
             <div className="w-20 h-20 rounded-2xl bg-background flex items-center justify-center shrink-0 shadow-sm border border-primary/10">
@@ -331,15 +331,15 @@ const JobDetailsModal = ({ job, onClose, onApply }: JobDetailsModalProps) => {
 
         {/* Footer */}
         <div className="p-6 border-t border-border/50 bg-muted/5 flex items-center justify-end gap-3">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={onClose}
             className="rounded-xl px-6 font-bold hover:bg-muted"
           >
             Close
           </Button>
           {job.status === "Open" && (
-            <Button 
+            <Button
               onClick={() => {
                 onApply(job.id);
                 onClose();
@@ -368,7 +368,7 @@ const PlacementUpdates = () => {
 
   const filteredJobs = jobs.filter(job => {
     const matchesTab = activeTab === "All" || job.status === activeTab;
-    const matchesSearch = 
+    const matchesSearch =
       job.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
       job.role.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesTab && matchesSearch;
@@ -380,16 +380,16 @@ const PlacementUpdates = () => {
   };
 
   const handleApply = (id: string) => {
-    setJobs(prev => prev.map(job => 
+    setJobs(prev => prev.map(job =>
       job.id === id ? { ...job, status: "Applied" } : job
     ));
-    toast.success("Application submitted successfully to Codo Agency!");
+    toast.success("Application submitted successfully to CODO Agency!");
   };
 
   return (
     <DashboardLayout>
       <div className="animate-fade-in space-y-8 max-w-6xl mx-auto px-4 md:px-6 lg:px-8 pb-10">
-        
+
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="flex items-center gap-4">
@@ -401,7 +401,7 @@ const PlacementUpdates = () => {
                 Internal Placements
               </h1>
               <p className="text-muted-foreground text-sm mt-0.5 font-medium">
-                Exclusive career opportunities for CODO Academy interns at Codo Agency
+                Exclusive career opportunities for CODO Academy interns at CODO Agency
               </p>
             </div>
           </div>
@@ -427,8 +427,8 @@ const PlacementUpdates = () => {
                     onClick={() => setActiveTab(filter)}
                     className={cn(
                       "flex items-center justify-center gap-2.5 py-4 transition-all duration-300 outline-none group border-r last:border-r-0 border-slate-50 relative",
-                      isActive 
-                        ? "bg-primary/[0.03] text-primary" 
+                      isActive
+                        ? "bg-primary/[0.03] text-primary"
                         : "text-slate-400 hover:text-slate-600 hover:bg-slate-50/50"
                     )}
                   >
@@ -440,8 +440,8 @@ const PlacementUpdates = () => {
                     </span>
                     <div className={cn(
                       "flex items-center justify-center min-w-[20px] h-5 rounded-full text-[9px] font-black px-1.5 transition-colors",
-                      isActive 
-                        ? "bg-primary text-white shadow-sm" 
+                      isActive
+                        ? "bg-primary text-white shadow-sm"
                         : "bg-slate-100 text-slate-400 group-hover:bg-slate-200"
                     )}>
                       {count}
@@ -457,9 +457,9 @@ const PlacementUpdates = () => {
         <div className="space-y-5">
           {filteredJobs.length > 0 ? (
             filteredJobs.map(job => (
-              <JobCard 
-                key={job.id} 
-                job={job} 
+              <JobCard
+                key={job.id}
+                job={job}
                 onApply={handleApply}
                 onViewDetails={setViewingJob}
               />
@@ -473,8 +473,8 @@ const PlacementUpdates = () => {
               <p className="text-muted-foreground text-sm max-w-sm mt-2 font-medium">
                 We couldn't find any internal opportunities matching your criteria. Try adjusting your search or filters.
               </p>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="mt-8 rounded-xl font-bold px-8 h-11 hover:bg-muted"
                 onClick={() => { setSearchQuery(""); setActiveTab("All"); }}
               >
@@ -486,8 +486,8 @@ const PlacementUpdates = () => {
 
         {/* Job Details Modal */}
         {viewingJob && (
-          <JobDetailsModal 
-            job={viewingJob} 
+          <JobDetailsModal
+            job={viewingJob}
             onClose={() => setViewingJob(null)}
             onApply={handleApply}
           />

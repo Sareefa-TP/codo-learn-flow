@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import FinanceLayout from "@/components/finance/FinanceLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -48,8 +49,10 @@ import {
   ExternalLink,
   CheckCircle2,
   ShieldCheck,
+  Info,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Textarea } from "@/components/ui/textarea";
 import { revenueRows, revenueStats } from "@/data/financeMock";
 import { toast } from "sonner";
 
@@ -151,6 +154,10 @@ const ManualEntryDialog = ({ open, onOpenChange }: ManualEntryProps) => {
                 <Input id="amount" type="number" placeholder="0.00" className="h-11 rounded-xl border-border/60 pl-8 font-black tabular-nums" required />
               </div>
             </div>
+            <div className="space-y-2 col-span-2">
+              <Label htmlFor="remarks" className="text-[10px] font-black uppercase tracking-widest ml-1">Remarks / Internal Notes</Label>
+              <Textarea id="remarks" placeholder="Add any internal remarks (e.g. Received at branch...)" className="rounded-xl border-border/60 font-medium min-h-[80px]" />
+            </div>
           </div>
           <DialogFooter className="pt-4 gap-3">
             <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="rounded-xl font-bold uppercase tracking-widest text-[10px]">Cancel</Button>
@@ -175,7 +182,67 @@ const RevenueDetailDialog = ({ entry, onClose }: DetailProps) => {
   if (!entry) return null;
 
   const handleDownload = () => {
-    toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), {
+    const invoiceHtml = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: sans-serif; padding: 40px; color: #334155; }
+          .header { border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 30px; }
+          .title { font-size: 24px; font-weight: 900; color: #0f172a; }
+          .meta { display: grid; grid-template-cols: 1fr 1fr; gap: 20px; margin-bottom: 40px; }
+          .label { font-size: 10px; font-weight: 900; text-transform: uppercase; color: #64748b; }
+          .val { font-size: 14px; font-weight: 700; }
+          .table { width: 100%; border-collapse: collapse; }
+          .table th { text-align: left; border-bottom: 1px solid #e2e8f0; padding: 10px; font-size: 12px; }
+          .table td { padding: 10px; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+          .total { margin-top: 30px; text-align: right; font-size: 20px; font-weight: 900; color: #10b981; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="title">CODO ACADEMY - INVOICE</div>
+          <p style="font-size: 12px; color: #94a3b8;">${entry.orderId} | ${entry.date}</p>
+        </div>
+        <div class="meta">
+          <div>
+            <p class="label">Bill To</p>
+            <p class="val">${entry.studentName}</p>
+          </div>
+          <div>
+            <p class="label">Payment Method</p>
+            <p class="val">${entry.method}</p>
+          </div>
+        </div>
+        <table class="table">
+          <thead>
+            <tr><th>Description</th><th>Type</th><th>Amount</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>${entry.productName}</td><td>${entry.type}</td><td>${fmt(entry.gross)}</td></tr>
+            <tr style="color: #ef4444;"><td>Discount</td><td>Coupon</td><td>-${fmt(entry.disc)}</td></tr>
+            <tr style="color: #64748b;"><td>Tax (GST 18%)</td><td>Service Tax</td><td>${fmt(entry.tax)}</td></tr>
+          </tbody>
+        </table>
+        <div class="total">Total Paid: ${fmt(entry.total)}</div>
+        <div style="margin-top: 60px; font-size: 10px; color: #94a3b8; text-align: center;">This is a computer generated invoice. No signature required.</div>
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob([invoiceHtml], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `Invoice_${entry.orderId}.html`;
+
+    toast.promise(new Promise(resolve => {
+      setTimeout(() => {
+        link.click();
+        URL.revokeObjectURL(url);
+        resolve(true);
+      }, 1500);
+    }), {
       loading: "Generating styled invoice...",
       success: `Invoice ${entry.orderId}.html downloaded successfully`,
       error: "Failed to generate invoice",
@@ -276,13 +343,150 @@ const RevenueDetailDialog = ({ entry, onClose }: DetailProps) => {
   );
 };
 
+// ─── Export Preview Dialog ──────────────────────────────────────────────────
+
+interface ExportPreviewProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  data: RevenueEntry[];
+}
+
+const ExportPreviewDialog = ({ open, onOpenChange, data }: ExportPreviewProps) => {
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleConfirmExport = () => {
+    setIsExporting(true);
+    toast.promise(new Promise(resolve => setTimeout(resolve, 2000)), {
+      loading: "Preparing spreadsheet payload...",
+      success: "Revenue_Ledger_Export.csv ready for download",
+      error: "Export failed",
+    });
+    setTimeout(() => {
+      // Actual file generation and download trigger
+      const headers = "Order ID,Student,Product,Type,Gross,Discount,Tax,Total,Method,Date,Status\n";
+      const rows = data.map(r => `${r.orderId},"${r.studentName}","${r.productName}",${r.type},${r.gross},${r.disc},${r.tax},${r.total},${r.method},${r.date},${r.status}`).join("\n");
+      const blob = new Blob([headers + rows], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `Revenue_Ledger_${new Date().toLocaleDateString('en-GB').replace(/\//g, '-')}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setIsExporting(false);
+      onOpenChange(false);
+    }, 2000);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[700px] rounded-[2.5rem] border-border/60 p-0 overflow-hidden">
+        <div className="p-8">
+          <DialogHeader className="mb-8">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600">
+                <FileText className="w-5 h-5" />
+              </div>
+              <DialogTitle className="text-2xl font-black tracking-tight">Export Preview</DialogTitle>
+            </div>
+            <DialogDescription className="text-sm font-medium text-muted-foreground">
+              Review the data structure before generating the Excel file. Total {data.length} records will be exported.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="rounded-3xl border border-border/60 overflow-hidden bg-muted/5">
+            <div className="max-h-[300px] overflow-y-auto scrollbar-hide">
+              <Table>
+                <TableHeader className="bg-muted/20 sticky top-0 z-10 backdrop-blur-md">
+                  <TableRow className="hover:bg-transparent border-b border-border/60">
+                    <TableHead className="text-[9px] font-black uppercase tracking-widest pl-6 h-12">ID</TableHead>
+                    <TableHead className="text-[9px] font-black uppercase tracking-widest h-12">Student</TableHead>
+                    <TableHead className="text-[9px] font-black uppercase tracking-widest text-right pr-6 h-12">Total</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data.map((row) => (
+                    <TableRow key={row.id} className="border-border/40 last:border-0 hover:bg-muted/10 transition-colors">
+                      <TableCell className="text-[10px] font-mono font-bold pl-6 py-4">{row.orderId}</TableCell>
+                      <TableCell className="text-[10px] font-bold py-4">{row.studentName}</TableCell>
+                      <TableCell className="text-[10px] font-black text-right pr-6 py-4">{fmt(row.total)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+
+          <div className="mt-8 p-6 rounded-3xl bg-amber-500/5 border border-amber-500/10 flex items-start gap-4">
+            <Info className="w-5 h-5 text-amber-600 mt-0.5" />
+            <p className="text-xs font-medium text-amber-800 leading-relaxed">
+              The export will include all columns including tax breakdowns, payment methods, and timestamps in `.xlsx` format.
+            </p>
+          </div>
+        </div>
+
+        <DialogFooter className="p-6 bg-muted/30 border-t border-border/60 gap-3">
+          <Button variant="ghost" onClick={() => onOpenChange(false)} className="rounded-2xl font-black text-[10px] uppercase tracking-widest h-12 px-8">
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleConfirmExport}
+            disabled={isExporting}
+            className="rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10px] uppercase tracking-widest h-12 px-10 shadow-lg shadow-emerald-600/20"
+          >
+            {isExporting ? "Generating..." : "Confirm Export"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
 const Revenue = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState("all");
-  const [isManualOpen, setIsManualOpen] = useState(false);
-  const [selectedEntry, setSelectedEntry] = useState<RevenueEntry | null>(null);
+
+  // URL state helpers
+  const modal = searchParams.get("modal");
+  const detailId = searchParams.get("id");
+
+  const isManualOpen = modal === "record-entry";
+  const isExportOpen = modal === "export-preview";
+  const selectedEntry = detailId 
+    ? (revenueRows as RevenueEntry[]).find(r => r.orderId === detailId) || null
+    : null;
+
+  const setModal = (name: string | null) => {
+    if (name) {
+      searchParams.set("modal", name);
+    } else {
+      searchParams.delete("modal");
+    }
+    setSearchParams(searchParams);
+  };
+
+  const setSelectedEntry = (entry: RevenueEntry | null) => {
+    if (entry) {
+      searchParams.set("modal", "detail");
+      searchParams.set("id", entry.orderId);
+    } else {
+      searchParams.delete("modal");
+      searchParams.delete("id");
+    }
+    setSearchParams(searchParams);
+  };
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 8;
+
+  // Reset pagination when searching or filtering
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filterType]);
 
   const filteredData = useMemo(() => {
     return (revenueRows as RevenueEntry[]).filter(row => {
@@ -295,6 +499,12 @@ const Revenue = () => {
     });
   }, [search, filterType]);
 
+  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+  const paginatedData = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredData.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredData, currentPage]);
+
   return (
     <FinanceLayout>
       <div className="animate-fade-in space-y-8 max-w-7xl mx-auto pb-20">
@@ -302,9 +512,6 @@ const Revenue = () => {
         {/* ── Header ── */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-1.5">
-            <Badge variant="outline" className="rounded-full bg-primary/5 text-primary border-primary/20 font-black text-[9px] uppercase px-3 py-1 tracking-widest mb-2">
-              Module 02
-            </Badge>
             <h1 className="text-4xl lg:text-5xl font-black tracking-tighter text-foreground leading-none">
               Revenue ledger
             </h1>
@@ -314,12 +521,16 @@ const Revenue = () => {
           </div>
           
           <div className="flex items-center gap-3">
-            <Button variant="ghost" className="h-12 rounded-2xl font-black text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground hover:bg-muted/50">
+            <Button 
+              onClick={() => setModal("export-preview")}
+              variant="ghost" 
+              className="h-12 rounded-2xl font-black text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground hover:bg-muted/50"
+            >
               <Download className="w-4 h-4 mr-2" />
               Export Excel
             </Button>
             <Button 
-              onClick={() => setIsManualOpen(true)}
+              onClick={() => setModal("record-entry")}
               className="h-12 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black text-[10px] uppercase tracking-widest px-8 shadow-2xl shadow-primary/20"
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -363,9 +574,6 @@ const Revenue = () => {
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
-              <Button variant="outline" className="h-11 w-11 p-0 rounded-2xl border-border/60 hover:bg-primary/5 hover:border-primary/20 hover:text-primary">
-                <Filter className="w-4 h-4" />
-              </Button>
             </div>
           </div>
 
@@ -387,7 +595,7 @@ const Revenue = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredData.map((row) => (
+                {paginatedData.map((row) => (
                   <TableRow 
                     key={row.id} 
                     className="hover:bg-muted/10 transition-colors border-b border-border/30 last:border-0 group cursor-pointer"
@@ -430,6 +638,16 @@ const Revenue = () => {
                     </TableCell>
                   </TableRow>
                 ))}
+                {paginatedData.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={11} className="h-64 text-center">
+                      <div className="flex flex-col items-center justify-center space-y-3 opacity-40">
+                        <Search className="w-8 h-8" />
+                        <p className="text-[10px] font-black uppercase tracking-[0.3em]">No matching transactions found</p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </div>
@@ -439,12 +657,59 @@ const Revenue = () => {
               End of ledger • FY 2026-27
             </p>
             <div className="flex items-center gap-4">
-              <Button variant="ghost" disabled className="h-10 rounded-xl font-black text-[10px] uppercase tracking-widest opacity-50">Prev</Button>
-              <div className="flex gap-1">
-                <Button className="h-10 w-10 rounded-xl bg-primary text-white font-black text-[10px]">1</Button>
-                <Button variant="ghost" className="h-10 w-10 rounded-xl font-black text-[10px]">2</Button>
+              <Button 
+                variant="ghost" 
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                className="h-10 rounded-xl font-black text-[10px] uppercase tracking-widest disabled:opacity-30 group"
+              >
+                <ArrowRight className="w-3.5 h-3.5 rotate-180 mr-2 group-hover:-translate-x-0.5 transition-transform" />
+                Prev
+              </Button>
+              <div className="flex items-center gap-1">
+                {(() => {
+                  const pages = [];
+                  const delta = 1; // Number of pages to show around current page
+                  
+                  for (let i = 1; i <= totalPages; i++) {
+                    if (
+                      i === 1 || 
+                      i === totalPages || 
+                      (i >= currentPage - delta && i <= currentPage + delta)
+                    ) {
+                      pages.push(
+                        <Button 
+                          key={i}
+                          onClick={() => setCurrentPage(i)}
+                          className={cn(
+                            "h-10 w-10 rounded-xl font-black text-[10px] transition-all",
+                            currentPage === i ? "bg-primary text-white shadow-lg shadow-primary/20" : "bg-transparent text-foreground hover:bg-muted/50"
+                          )}
+                        >
+                          {i}
+                        </Button>
+                      );
+                    } else if (
+                      i === currentPage - delta - 1 || 
+                      i === currentPage + delta + 1
+                    ) {
+                      pages.push(
+                        <span key={i} className="px-1 text-muted-foreground/40 font-black text-xs">...</span>
+                      );
+                    }
+                  }
+                  return pages;
+                })()}
               </div>
-              <Button variant="ghost" className="h-10 rounded-xl font-black text-[10px] uppercase tracking-widest">Next</Button>
+              <Button 
+                variant="ghost" 
+                disabled={currentPage === totalPages || totalPages === 0}
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                className="h-10 rounded-xl font-black text-[10px] uppercase tracking-widest disabled:opacity-30 group"
+              >
+                Next
+                <ArrowRight className="w-3.5 h-3.5 ml-2 group-hover:translate-x-0.5 transition-transform" />
+              </Button>
             </div>
           </div>
         </Card>
@@ -457,7 +722,8 @@ const Revenue = () => {
       </div>
 
       {/* ── Dialogs ── */}
-      <ManualEntryDialog open={isManualOpen} onOpenChange={setIsManualOpen} />
+      <ManualEntryDialog open={isManualOpen} onOpenChange={(open) => !open && setModal(null)} />
+      <ExportPreviewDialog open={isExportOpen} onOpenChange={(open) => !open && setModal(null)} data={filteredData} />
       <RevenueDetailDialog entry={selectedEntry} onClose={() => setSelectedEntry(null)} />
 
     </FinanceLayout>

@@ -16,6 +16,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import {
   ScrollText,
   FileText,
   Download,
@@ -30,8 +38,15 @@ import {
   ShieldCheck,
   ChevronRight,
   Eye,
+  ChevronDown,
+  Check,
+  Building,
+  User,
+  CreditCard,
+  Percent,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 // ─── Types & Mock Data ────────────────────────────────────────────────────────
 
@@ -64,10 +79,205 @@ const statusColors = {
   Draft: "bg-slate-50 text-slate-600 border-slate-200",
 };
 
+// ─── Create Invoice Modal ────────────────────────────────────────────────
+
+interface CreateInvoiceProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+const CreateInvoiceDialog = ({ open, onOpenChange }: CreateInvoiceProps) => {
+  const [isGst, setIsGst] = useState(true);
+  const [baseAmount, setBaseAmount] = useState<string>("0");
+  const [discount, setDiscount] = useState<string>("0");
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const subtotal = Math.max(0, parseFloat(baseAmount || "0") - parseFloat(discount || "0"));
+  const gstAmount = isGst ? subtotal * 0.18 : 0;
+  const totalAmount = subtotal + gstAmount;
+
+  const handleGenerate = () => {
+    setIsGenerating(true);
+    setTimeout(() => {
+      setIsGenerating(false);
+      onOpenChange(false);
+      toast.success("Invoice Generated", {
+        description: "The tax invoice has been generated and emailed to the student."
+      });
+    }, 1500);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="w-[950px] max-w-[950px] rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl bg-[#FDFCF8] max-h-[90vh] flex flex-col">
+        {/* Header */}
+        <div className="p-8 border-b border-slate-100 bg-white/50 flex items-center justify-between flex-shrink-0">
+          <div className="space-y-1">
+            <DialogTitle className="text-3xl font-black tracking-tighter text-slate-900 leading-none font-serif">
+               Generate New Billing Entry
+            </DialogTitle>
+            <p className="text-sm font-medium text-muted-foreground">
+               Create tax-compliant invoices or pro-forma billing for students.
+            </p>
+          </div>
+          <div className="flex items-center gap-4 bg-white px-5 py-3 rounded-2xl border border-slate-100 shadow-sm">
+             <div className="space-y-0.5">
+                <Label className="text-[9px] font-black uppercase tracking-widest text-slate-500">GST Registration</Label>
+                <p className="text-[10px] font-bold text-slate-900">{isGst ? "Registered (18%)" : "Non-GST"}</p>
+             </div>
+             <Switch 
+               checked={isGst} 
+               onCheckedChange={setIsGst}
+               className="data-[state=checked]:bg-[#1A4D3E]"
+             />
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto p-10 custom-scrollbar">
+           <div className="grid grid-cols-12 gap-12">
+              {/* Left Column: Entity Details */}
+              <div className="col-span-6 space-y-8">
+                 <div className="space-y-6">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">Section 1: Entity Details</p>
+                    
+                    <div className="space-y-2">
+                       <Label className="text-[11px] font-black uppercase text-slate-500">Select Student</Label>
+                       <div className="relative">
+                          <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                          <select className="w-full h-12 pl-12 pr-4 rounded-2xl border-slate-200 bg-white font-bold text-xs appearance-none outline-none shadow-sm focus:ring-2 focus:ring-[#1A4D3E]/10">
+                             <option>Search student name...</option>
+                             <option>Aarav Sharma (STU-881)</option>
+                             <option>Meera Reddy (STU-102)</option>
+                          </select>
+                          <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                       </div>
+                    </div>
+
+                    <div className="space-y-2">
+                       <Label className="text-[11px] font-black uppercase text-slate-500">Billing Address</Label>
+                       <Textarea 
+                         placeholder="Full address of the recipient..."
+                         className="min-h-[100px] rounded-2xl border-slate-200 bg-white shadow-sm focus:ring-[#1A4D3E]/10 resize-none font-bold text-xs p-4"
+                       />
+                    </div>
+
+                    <div className="space-y-2">
+                       <Label className="text-[11px] font-black uppercase text-slate-500">Place of Supply</Label>
+                       <div className="relative">
+                          <Building className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                          <select className="w-full h-12 pl-12 pr-4 rounded-2xl border-slate-200 bg-white font-bold text-xs appearance-none outline-none shadow-sm focus:ring-2 focus:ring-[#1A4D3E]/10">
+                             <option>Karnataka (State Code: 29)</option>
+                             <option>Maharashtra (State Code: 27)</option>
+                             <option>Delhi (State Code: 07)</option>
+                          </select>
+                          <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                       </div>
+                    </div>
+                 </div>
+              </div>
+
+              {/* Right Column: Itemization */}
+              <div className="col-span-6 space-y-8">
+                 <div className="space-y-6">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">Section 2: Itemization</p>
+                    
+                    <div className="space-y-2">
+                       <Label className="text-[11px] font-black uppercase text-slate-500">Course / Item</Label>
+                       <div className="relative">
+                          <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                          <select className="w-full h-12 pl-12 pr-4 rounded-2xl border-slate-200 bg-white font-bold text-xs appearance-none outline-none shadow-sm focus:ring-2 focus:ring-[#1A4D3E]/10">
+                             <option>Select course bundle...</option>
+                             <option>Full Stack Pro Mastery</option>
+                             <option>Python Backend Development</option>
+                          </select>
+                          <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                       </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-6">
+                       <div className="space-y-2">
+                          <Label className="text-[11px] font-black uppercase text-slate-500">Base Amount (₹)</Label>
+                          <Input 
+                            type="number"
+                            value={baseAmount}
+                            onChange={(e) => setBaseAmount(e.target.value)}
+                            className="h-12 rounded-2xl border-slate-200 bg-white font-black text-xs px-4"
+                          />
+                       </div>
+                       <div className="space-y-2">
+                          <Label className="text-[11px] font-black uppercase text-slate-500">Discount (₹)</Label>
+                          <div className="relative">
+                             <Percent className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                             <Input 
+                               type="number"
+                               value={discount}
+                               onChange={(e) => setDiscount(e.target.value)}
+                               className="h-12 pl-12 rounded-2xl border-slate-200 bg-white font-black text-xs px-4"
+                             />
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+
+                 {/* Calculation Summary */}
+                 <div className="pt-8 border-t border-slate-100">
+                    <div className="bg-slate-50/50 rounded-[2.5rem] p-8 space-y-4 border border-slate-100">
+                       <div className="flex justify-between items-center text-xs font-bold text-slate-500">
+                          <span>Subtotal</span>
+                          <span>₹{subtotal.toLocaleString()}</span>
+                       </div>
+                       <div className="flex justify-between items-center text-xs font-bold text-slate-500">
+                          <span>GST (18%)</span>
+                          <span>₹{gstAmount.toLocaleString()}</span>
+                       </div>
+                       <div className="pt-4 border-t border-slate-200 flex justify-between items-end">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Invoice Value</span>
+                          <span className="text-4xl font-black tracking-tighter text-[#1A4D3E] tabular-nums leading-none">
+                             ₹{totalAmount.toLocaleString()}
+                          </span>
+                       </div>
+                    </div>
+                 </div>
+              </div>
+           </div>
+        </div>
+
+        {/* Footer */}
+        <div className="p-8 border-t border-slate-100 bg-white sticky bottom-0 flex items-center justify-between flex-shrink-0 z-10">
+           <button 
+             type="button"
+             onClick={() => onOpenChange(false)}
+             className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 hover:text-slate-600 transition-colors"
+           >
+              Save as Draft
+           </button>
+           <div className="flex items-center gap-4">
+              <button 
+                onClick={() => onOpenChange(false)}
+                className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 hover:text-slate-600"
+              >
+                 Cancel
+              </button>
+              <Button 
+                onClick={handleGenerate}
+                disabled={isGenerating}
+                className="h-14 px-10 rounded-2xl bg-[#1A4D3E] hover:bg-[#1A4D3E]/90 text-white font-black text-[10px] uppercase tracking-widest shadow-2xl shadow-emerald-100"
+              >
+                 {isGenerating ? "Generating Invoice..." : "Generate & Email Invoice"}
+              </Button>
+           </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 // ─── Component ───────────────────────────────────────────────────────────────
 
 const Invoices = () => {
   const [globalGst, setGlobalGst] = useState(true);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   return (
     <FinanceLayout>
@@ -99,7 +309,10 @@ const Invoices = () => {
                   className="data-[state=checked]:bg-primary"
                />
             </div>
-            <Button className="h-11 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold text-xs uppercase tracking-widest px-6 shadow-xl shadow-primary/20">
+            <Button 
+              onClick={() => setShowCreateModal(true)}
+              className="h-11 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold text-xs uppercase tracking-widest px-6 shadow-xl shadow-primary/20"
+            >
               <Plus className="w-4 h-4 mr-2" />
               New Invoice
             </Button>
@@ -237,7 +450,10 @@ const Invoices = () => {
             </Table>
           </div>
         </Card>
-
+        <CreateInvoiceDialog 
+          open={showCreateModal} 
+          onOpenChange={setShowCreateModal} 
+        />
       </div>
     </FinanceLayout>
   );

@@ -399,6 +399,7 @@ const App = () => (
           <Route path="/finance/transactions" element={<FinanceTransactions />} />
           <Route path="/finance/refunds" element={<FinanceRefunds />} />
           <Route path="/finance/payouts" element={<Payouts />} />
+          <Route path="/finance/payouts/:payoutId" element={<Payouts />} />
           <Route path="/finance/invoices" element={<FinanceInvoices />} />
           <Route path="/finance/tax-compliance" element={<FinanceTaxCompliance />} />
           <Route path="/finance/reports" element={<FinanceReportsAnalytics />} />

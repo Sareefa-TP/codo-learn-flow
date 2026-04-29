@@ -118,7 +118,7 @@ const fixedSessions: MeetRegularSession[] = [
   {
     id: "fs1",
     title: "Growth Glimps",
-    mentor: "Team Codo",
+    mentor: "Team CODO",
     schedule: "Every Tue & Thu",
     time: "10:00 AM",
     isActive: true,
@@ -127,7 +127,7 @@ const fixedSessions: MeetRegularSession[] = [
   {
     id: "fs2",
     title: "Weekly Meet",
-    mentor: "Team Codo",
+    mentor: "Team CODO",
     schedule: "Every Mon",
     time: "04:00 PM",
     isActive: true,
