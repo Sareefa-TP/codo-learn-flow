@@ -497,15 +497,6 @@ const StudentExams = () => {
 
         return (
             <div className="mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-5 sm:space-y-8">
-                <Button
-                    variant="ghost"
-                    className="text-muted-foreground hover:text-foreground pl-0 group font-bold text-[11px] uppercase tracking-widest"
-                    onClick={() => navigate(`/student/exam/${courseSlug}`)}
-                >
-                    <ChevronLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-                    Back to Exams
-                </Button>
-
                 <Card className="border-border/50 bg-card overflow-hidden rounded-[1.5rem] sm:rounded-[2rem] shadow-xl sm:shadow-2xl shadow-primary/5 mx-auto">
                     {/* Header */}
                     <div className="bg-gradient-to-br from-primary/10 via-background to-background p-5 sm:p-12 border-b border-border/40">
@@ -671,7 +662,7 @@ const StudentExams = () => {
         const isLowTime = timeLeft < 300; // less than 5 minutes
 
         return (
-            <div className="mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500 flex flex-col lg:flex-row gap-8 pb-10">
+            <div className="mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500 flex flex-col xl:flex-row gap-8 pb-10">
                 {/* Left Column: Question Area */}
                 <div className="flex-1 space-y-6">
                     {/* Question Card */}
@@ -694,7 +685,7 @@ const StudentExams = () => {
                                             key={opt}
                                             onClick={() => handleSelectOption(opt)}
                                             className={cn(
-                                                "p-5 rounded-2xl border-2 cursor-pointer transition-all duration-300 flex items-center gap-5 group transform hover:scale-[1.01]",
+                                                "p-4 sm:p-5 rounded-2xl border-2 cursor-pointer transition-all duration-300 flex items-center gap-3 sm:gap-5 group transform hover:scale-[1.01]",
                                                 isSelected 
                                                     ? "border-primary bg-primary/[0.03] shadow-inner shadow-primary/5" 
                                                     : "border-border/40 bg-muted/10 hover:border-primary/30 hover:bg-muted/20"
@@ -706,7 +697,12 @@ const StudentExams = () => {
                                             )}>
                                                 {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-primary-foreground animate-in zoom-in duration-300" />}
                                             </div>
-                                            <span className={cn("text-base font-semibold transition-colors duration-300", isSelected ? "text-foreground" : "text-muted-foreground group-hover:text-foreground")}>
+                                            <span
+                                                className={cn(
+                                                    "min-w-0 whitespace-normal break-words text-sm sm:text-base leading-relaxed font-semibold transition-colors duration-300",
+                                                    isSelected ? "text-foreground" : "text-muted-foreground group-hover:text-foreground",
+                                                )}
+                                            >
                                                 {question[key]}
                                             </span>
                                         </div>
@@ -717,10 +713,10 @@ const StudentExams = () => {
                     </Card>
 
                     {/* Action Footer */}
-                    <div className="flex justify-between items-center bg-card p-5 rounded-2xl border border-border/50 shadow-sm">
+                    <div className="flex flex-col gap-3 bg-card p-4 sm:p-5 rounded-2xl border border-border/50 shadow-sm md:flex-row md:items-center md:justify-between">
                         <Button
                             variant="ghost"
-                            className="rounded-xl font-bold text-xs uppercase tracking-widest px-6"
+                            className="h-11 w-full rounded-xl font-bold text-xs uppercase tracking-widest px-4 sm:px-6 md:w-auto"
                             disabled={currentQuestionIndex === 0}
                             onClick={() => setCurrentQuestionIndex(prev => prev - 1)}
                         >
@@ -729,14 +725,14 @@ const StudentExams = () => {
                         </Button>
 
                         {!isLastQuestion ? (
-                            <Button className="rounded-xl font-bold text-xs uppercase tracking-widest px-8 h-12 shadow-lg shadow-primary/10" onClick={() => setCurrentQuestionIndex(prev => prev + 1)}>
+                            <Button className="h-11 w-full rounded-xl font-bold text-xs uppercase tracking-[0.14em] sm:tracking-widest px-4 sm:px-8 shadow-lg shadow-primary/10 md:h-12 md:w-auto" onClick={() => setCurrentQuestionIndex(prev => prev + 1)}>
                                 Next Question
                                 <ChevronRight className="w-4 h-4 ml-2" />
                             </Button>
                         ) : (
                             <Button
                                 variant="default"
-                                className="bg-primary hover:bg-primary/90 rounded-xl font-bold text-xs uppercase tracking-widest px-10 h-12 shadow-lg shadow-primary/20 animate-in fade-in duration-500"
+                                className="h-11 w-full bg-primary hover:bg-primary/90 rounded-xl font-bold text-xs uppercase tracking-[0.14em] sm:tracking-widest px-4 sm:px-10 shadow-lg shadow-primary/20 animate-in fade-in duration-500 md:h-12 md:w-auto"
                                 onClick={() => setShowConfirmSubmit(true)}
                             >
                                 Submit Exam
@@ -747,7 +743,7 @@ const StudentExams = () => {
                 </div>
 
                 {/* Right Column: Navigator */}
-                <div className="lg:w-80 shrink-0 space-y-4">
+                <div className="xl:w-80 shrink-0 space-y-4">
                     <Card className="border-border/50 bg-card shadow-xl shadow-black/[0.02] rounded-3xl sticky top-6">
                         <CardContent className="p-6">
                             <h3 className="font-bold text-foreground text-base mb-6 border-b border-border/40 pb-4 uppercase tracking-widest text-[11px]">Question Navigator</h3>
@@ -947,7 +943,7 @@ const StudentExams = () => {
                             onClick={() => navigate(`/student/exam/${courseSlug}/${examSlug}/details/review`)}
                         >
                             <Search className="w-4 h-4 mr-2" />
-                            Review Detailed Analysis
+                            Review Analysis
                         </Button>
                     </CardContent>
                 </Card>
@@ -993,9 +989,9 @@ const StudentExams = () => {
                 </div>
 
                 <div className="rounded-3xl border-y border-r border-l-[8px] border-l-primary border-border/50 bg-card p-5 shadow-xl shadow-black/[0.02] sm:rounded-[2.5rem] sm:border-l-[12px] sm:p-10 md:p-12">
-                    <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center md:gap-6">
-                        <div>
-                            <h2 className="mb-2 text-lg font-black tracking-tight text-foreground sm:mb-3 sm:text-2xl">{selectedExam.exam_title}</h2>
+                <div className="flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-center lg:gap-6">
+                        <div className="min-w-0">
+                            <h2 className="mb-2 break-words text-[clamp(1.125rem,1rem+0.6vw,1.625rem)] font-black tracking-tight text-foreground sm:mb-3">{selectedExam.exam_title}</h2>
                             <p className="text-muted-foreground font-bold uppercase tracking-widest text-xs opacity-70 flex items-center gap-2">
                                 <BookOpen className="w-4 h-4" />
                                 {selectedExam.course_name} • Knowledge Review
@@ -1003,7 +999,7 @@ const StudentExams = () => {
                         </div>
                         <Button 
                             variant="outline" 
-                            className="w-full rounded-xl border-border/60 text-xs font-bold uppercase tracking-widest hover:bg-muted md:w-auto"
+                            className="min-h-11 w-full rounded-xl border-border/60 px-4 text-xs font-bold uppercase tracking-widest hover:bg-muted lg:w-auto"
                             onClick={() => navigate(`/student/exam/${courseSlug}`)}
                         >
                             Exit Review
@@ -1051,7 +1047,7 @@ const StudentExams = () => {
                                         {question.question_text}
                                     </h3>
 
-                                    <div className="mb-8 grid grid-cols-1 gap-4 sm:mb-12 sm:grid-cols-2 sm:gap-6">
+                                    <div className="mb-8 grid grid-cols-1 gap-4 sm:mb-12 lg:grid-cols-2 sm:gap-6">
                                         {['a', 'b', 'c', 'd'].map((key) => {
                                             const optionKey = `option_${key}` as keyof Question;
                                             const isStudentSelected = studentAns === key;
@@ -1061,7 +1057,7 @@ const StudentExams = () => {
                                                 <div
                                                     key={key}
                                                     className={cn(
-                                                        "group relative flex items-start gap-4 rounded-2xl border-2 p-4 text-sm font-bold transition-all duration-500 sm:items-center sm:gap-6 sm:rounded-[1.5rem] sm:p-6",
+                                                        "group relative flex min-h-11 items-start gap-4 rounded-2xl border-2 p-4 pr-10 text-sm font-bold transition-all duration-500 sm:gap-6 sm:rounded-[1.5rem] sm:p-6",
                                                         isActuallyCorrect 
                                                             ? "bg-green-500/10 border-green-500/50 text-green-700 ring-4 ring-green-500/5 shadow-inner" 
                                                             : (isStudentSelected && !isCorrect ? "bg-destructive/5 border-destructive/50 text-destructive/80" : "bg-muted/10 border-border/40 text-muted-foreground/50 opacity-60")
@@ -1074,7 +1070,7 @@ const StudentExams = () => {
                                                     )}>
                                                         {letterMap[key]}
                                                     </div>
-                                                    <span className="flex-1 break-words leading-snug">{question[optionKey]}</span>
+                                                    <span className="min-w-0 flex-1 break-words leading-snug">{question[optionKey]}</span>
                                                     {isActuallyCorrect && (
                                                         <div className="absolute -top-3 -right-3">
                                                             <div className="bg-green-500 text-white p-2 rounded-xl shadow-lg animate-in zoom-in duration-500">

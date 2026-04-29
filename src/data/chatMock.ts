@@ -15,6 +15,11 @@ export interface Message {
   text: string;
   timestamp: string;
   courseTag?: string;
+  audioUrl?: string;
+  audioDurationSec?: number;
+  attachmentUrl?: string;
+  attachmentName?: string;
+  attachmentType?: string;
   isOwn: boolean;
   isVoice?: boolean;
   voiceDuration?: string;

@@ -34,7 +34,6 @@ import { Wallet as WalletIcon } from "lucide-react";
 import PageSearch from "@/components/shared/PageSearch";
 import { toast } from "sonner";
 import { PageHeader, PageSection } from "@/components/shared/PageScaffold";
-import BackButton from "@/components/shared/BackButton";
 import { studentData } from "@/data/studentData";
 import { downloadInvoicePdf } from "@/lib/pdf/invoicePdf";
 import {
@@ -45,6 +44,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 // Types
 interface Message {
@@ -335,7 +345,7 @@ const StudentWallet = () => {
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 2xl:grid-cols-3">
         {filteredCourses.map((course) => (
           <CourseCard
             key={course.id}
@@ -367,8 +377,6 @@ const StudentWallet = () => {
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6 lg:space-y-8 max-w-6xl mx-auto px-4 md:px-6 lg:px-8 pb-10">
         {/* Navigation & Header */}
         <div className="space-y-4">
-          <BackButton label="Back to Courses" onClick={() => navigate("/student/payments")} />
-
           <PageSection className="mb-0 bg-primary/5 p-4">
             <PageHeader
               title={courseData.courseName}
@@ -643,22 +651,42 @@ const StudentWallet = () => {
                     </div>
                   </div>
 
-                  <Button
-                    variant="outline"
-                    className="w-full rounded-xl"
-                    onClick={() => {
-                      downloadInvoicePdf({
-                        studentName: studentData.profile.name,
-                        courseName: courseData.courseName,
-                        category: courseData.category,
-                        transaction: payment,
-                      });
-                      toast.success(`Invoice ${payment.invoiceId} downloaded`);
-                    }}
-                  >
-                    <Download className="mr-2 w-4 h-4" />
-                    Download Invoice
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full rounded-xl"
+                      >
+                        <Download className="mr-2 w-4 h-4" />
+                        Download Invoice
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="rounded-2xl">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Download this invoice?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Invoice ID: {payment.invoiceId}
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          className="rounded-xl"
+                          onClick={() => {
+                            downloadInvoicePdf({
+                              studentName: studentData.profile.name,
+                              courseName: courseData.courseName,
+                              category: courseData.category,
+                              transaction: payment,
+                            });
+                            toast.success(`Invoice ${payment.invoiceId} downloaded`);
+                          }}
+                        >
+                          Download
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               ))}
             </div>
@@ -708,22 +736,42 @@ const StudentWallet = () => {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right pr-6">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-primary hover:text-primary hover:bg-primary/5"
-                          onClick={() => {
-                            downloadInvoicePdf({
-                              studentName: studentData.profile.name,
-                              courseName: courseData.courseName,
-                              category: courseData.category,
-                              transaction: payment,
-                            });
-                            toast.success(`Invoice ${payment.invoiceId} downloaded`);
-                          }}
-                        >
-                          <Download className="w-4 h-4" />
-                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-primary hover:text-primary hover:bg-primary/5"
+                            >
+                              <Download className="w-4 h-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent className="rounded-2xl">
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Download this invoice?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Invoice ID: {payment.invoiceId}
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                className="rounded-xl"
+                                onClick={() => {
+                                  downloadInvoicePdf({
+                                    studentName: studentData.profile.name,
+                                    courseName: courseData.courseName,
+                                    category: courseData.category,
+                                    transaction: payment,
+                                  });
+                                  toast.success(`Invoice ${payment.invoiceId} downloaded`);
+                                }}
+                              >
+                                Download
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </TableCell>
                     </TableRow>
                   ))}

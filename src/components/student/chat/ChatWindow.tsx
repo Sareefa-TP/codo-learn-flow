@@ -43,6 +43,12 @@ interface ChatWindowProps {
   onCloseMedia: () => void;
 }
 
+interface AttachmentPreview {
+  url: string;
+  name: string;
+  type?: string;
+}
+
 export default function ChatWindow({ 
   messages, 
   onSendMessage, 
@@ -156,6 +162,17 @@ export default function ChatWindow({
       courseTag = tagMatch[1];
       text = tagMatch[2];
     }
+    if (!courseTag && selectedQuickTag) {
+      courseTag = selectedQuickTag;
+    }
+
+    const attachment = attachedFile
+      ? {
+          url: URL.createObjectURL(attachedFile),
+          name: attachedFile.name,
+          type: attachedFile.type || "application/octet-stream",
+        }
+      : undefined;
 
     onSendMessage(text, courseTag, selectedFiles.length > 0 ? selectedFiles : undefined, replyingTo || undefined);
     setInputText("");
@@ -202,7 +219,20 @@ export default function ChatWindow({
 
   const filteredMessages = messages.filter(msg => 
     msg.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (msg.courseTag && msg.courseTag.toLowerCase().includes(searchQuery.toLowerCase()))
+    (msg.courseTag && msg.courseTag.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (msg.attachmentName && msg.attachmentName.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
+  const quickTags = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          unifiedSupportChat.participants
+            .map((p) => p.course)
+            .filter((course): course is string => Boolean(course)),
+        ),
+      ),
+    [],
   );
 
   const handleVoiceEnded = (currentId: string) => {
@@ -220,7 +250,7 @@ export default function ChatWindow({
   return (
     <div className="flex-1 flex flex-col bg-white overflow-hidden relative">
       {/* Header */}
-      <div className="px-8 py-6 border-b border-border/40 flex items-center justify-between bg-white/80 backdrop-blur-md sticky top-0 z-10 shadow-sm min-h-[100px]">
+      <div className="px-4 py-4 sm:px-8 sm:py-6 border-b border-border/40 flex items-center justify-between bg-white/80 backdrop-blur-md sticky top-0 z-10 shadow-sm min-h-[84px] sm:min-h-[100px]">
         {isSearchOpen ? (
           <div className="flex-1 flex items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
             <div className="flex-1 relative">
@@ -247,15 +277,15 @@ export default function ChatWindow({
           </div>
         ) : (
           <>
-            <div className="flex items-center gap-5">
-              <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center border border-primary/10">
-                <ShieldCheck className="w-6 h-6 text-primary" />
+            <div className="flex items-center gap-3 sm:gap-5 min-w-0">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-primary/5 flex items-center justify-center border border-primary/10 shrink-0">
+                <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
               </div>
-              <div>
-                <h2 className="text-lg font-black tracking-tight text-foreground">{unifiedSupportChat.title}</h2>
+              <div className="min-w-0">
+                <h2 className="text-base sm:text-lg font-black tracking-tight text-foreground truncate">{unifiedSupportChat.title}</h2>
                 <div className="flex items-center gap-2 mt-0.5">
                   <div className={cn("w-1.5 h-1.5 rounded-full", isMuted ? "bg-slate-300" : "bg-emerald-500")} />
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                  <p className="text-[9px] sm:text-[10px] font-bold text-muted-foreground uppercase tracking-widest truncate">
                     {isMuted ? "Notifications Muted" : "Support Team Online"}
                   </p>
                 </div>
@@ -266,7 +296,7 @@ export default function ChatWindow({
               <Dialog open={isParticipantsOpen} onOpenChange={(open) => !open && onCloseParticipants()}>
                 <button 
                   onClick={onOpenParticipants}
-                  className="flex flex-col items-end mr-4 hover:opacity-70 transition-opacity group outline-none"
+                  className="hidden sm:flex flex-col items-end mr-4 hover:opacity-70 transition-opacity group outline-none"
                 >
                   <div className="flex -space-x-3 mb-1">
                     {unifiedSupportChat.participants.slice(1, 4).map((p, i) => (
@@ -286,18 +316,19 @@ export default function ChatWindow({
                     Participants: <span className="text-foreground">7</span>
                   </p>
                 </button>
-                <DialogContent className="rounded-[2.5rem] max-w-lg p-10 border-none shadow-2xl">
-                  <DialogHeader className="mb-6">
-                    <DialogTitle className="text-2xl font-black tracking-tight">Group Participants</DialogTitle>
+
+                <DialogContent className="rounded-3xl sm:rounded-[2.5rem] w-[calc(100vw-1rem)] sm:w-[calc(100vw-3rem)] md:w-[calc(100vw-5rem)] max-w-4xl p-4 sm:p-8 border-none shadow-2xl max-h-[88vh] overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                  <DialogHeader className="mb-4 sm:mb-6">
+                    <DialogTitle className="text-xl sm:text-2xl font-black tracking-tight">Group Participants</DialogTitle>
                     <DialogDescription className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mt-1">
                       Assigned Support Experts
                     </DialogDescription>
                   </DialogHeader>
 
-                  <div className="space-y-6">
-                    <div className="rounded-3xl bg-muted/30 border border-border/40 p-6">
-                      <div className="flex items-center gap-4 mb-4">
-                        <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center border border-primary/10">
+                  <div className="space-y-4 sm:space-y-6">
+                    <div className="rounded-3xl bg-muted/30 border border-border/40 p-4 sm:p-6">
+                      <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-primary/5 flex items-center justify-center border border-primary/10">
                           <Users className="w-6 h-6 text-primary" />
                         </div>
                         <div>
@@ -312,7 +343,7 @@ export default function ChatWindow({
 
                     <div className="space-y-3">
                       <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest px-2">Team Members</p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 gap-2 sm:gap-3">
                         {unifiedSupportChat.participants.map((p) => (
                           <div key={p.id} className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-transparent hover:border-border/60 transition-all">
                             <div className="w-10 h-10 rounded-xl bg-white border border-border/40 flex items-center justify-center relative shadow-sm shrink-0">
@@ -348,6 +379,13 @@ export default function ChatWindow({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="rounded-[1.5rem] border-border/40 shadow-2xl p-2 min-w-[180px]">
+                  <DropdownMenuItem
+                    onClick={onOpenParticipants}
+                    className="rounded-xl p-3 text-xs font-bold gap-3 cursor-pointer"
+                  >
+                    <Users className="w-4 h-4 text-muted-foreground" />
+                    Participants
+                  </DropdownMenuItem>
                   <DropdownMenuItem 
                     onClick={() => setIsSearchOpen(true)}
                     className="rounded-xl p-3 text-xs font-bold gap-3 cursor-pointer"
@@ -672,6 +710,51 @@ export default function ChatWindow({
             <span>{isRecording ? "Click trash to cancel" : "Press Enter to send"}</span>
           </p>
       </div>
+
+      <Dialog
+        open={!!previewAttachment}
+        onOpenChange={(open) => {
+          if (!open) setPreviewAttachment(null);
+        }}
+      >
+        <DialogContent className="w-[calc(100vw-1rem)] max-w-4xl rounded-2xl p-4 sm:p-6">
+          <DialogHeader>
+            <DialogTitle className="truncate pr-8 text-sm sm:text-base">
+              {previewAttachment?.name || "Attachment Preview"}
+            </DialogTitle>
+          </DialogHeader>
+
+          {previewAttachment ? (
+            <div className="max-h-[80vh] overflow-auto rounded-xl border border-border/50 bg-muted/20 p-2 sm:p-3">
+              {isImageAttachment(previewAttachment.type, previewAttachment.name) ? (
+                <img
+                  src={previewAttachment.url}
+                  alt={previewAttachment.name}
+                  className="mx-auto max-h-[70vh] w-auto max-w-full rounded-lg object-contain"
+                />
+              ) : isPdfAttachment(previewAttachment.type, previewAttachment.name) ? (
+                <iframe
+                  src={previewAttachment.url}
+                  title={previewAttachment.name}
+                  className="h-[65vh] w-full rounded-lg bg-white"
+                />
+              ) : (
+                <div className="p-4 sm:p-6 text-center space-y-2">
+                  <p className="text-sm font-semibold text-foreground break-all">{previewAttachment.name}</p>
+                  <p className="text-xs text-muted-foreground">Preview is not available for this file type.</p>
+                  <a
+                    href={previewAttachment.url}
+                    download={previewAttachment.name}
+                    className="inline-flex rounded-lg border border-border/60 bg-background px-3 py-2 text-xs font-semibold text-foreground hover:bg-muted"
+                  >
+                    Download file
+                  </a>
+                </div>
+              )}
+            </div>
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </div>
       </div>
   );

@@ -69,6 +69,21 @@ export default function StudentChat() {
     setMessages([...messages, newMessage]);
   };
 
+  const handleSendVoiceMessage = (audioUrl: string, audioDurationSec: number, courseTag?: string) => {
+    const newMessage = {
+      id: Date.now().toString(),
+      senderId: "s1",
+      senderName: "YOU",
+      text: "",
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      courseTag,
+      audioUrl,
+      audioDurationSec,
+      isOwn: true,
+    };
+    setMessages((prev) => [...prev, newMessage]);
+  };
+
   const handleDeleteMessage = (messageId: string) => {
     setMessages(messages.filter(m => m.id !== messageId));
   };

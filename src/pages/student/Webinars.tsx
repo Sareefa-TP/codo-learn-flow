@@ -20,6 +20,7 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import PageSearch from "@/components/shared/PageSearch";
 import CourseCard from "@/components/student/CourseCard";
 import { PageEmptyState, PageHeader } from "@/components/shared/PageScaffold";
@@ -94,6 +95,7 @@ const StudentWebinars = () => {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState("");
     const [webinarList, setWebinarList] = useState<Webinar[]>(initialWebinars);
+    const [activeRecording, setActiveRecording] = useState<null | { title: string; link: string }>(null);
 
     const handleRegister = (webinarId: string, title: string) => {
         setWebinarList(prev => prev.map(w =>
@@ -116,15 +118,23 @@ const StudentWebinars = () => {
         window.open(link, "_blank");
     };
 
-    const handleWatch = (link?: string) => {
+    const handleWatch = (link?: string, title?: string) => {
         if (!link) {
             toast.error("Recording unavailable", {
                 description: "The recording for this session is being processed."
             });
             return;
         }
-        toast.info("Loading recording...");
-        window.open(link, "_blank");
+        setActiveRecording({ title: title || "Webinar Recording", link });
+    };
+
+    const toEmbedUrl = (url: string) => {
+        const clean = url.trim();
+        const vimeoMatch = clean.match(/vimeo\.com\/(\d+)/i);
+        if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+        const ytMatch = clean.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?/]+)/i);
+        if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
+        return clean;
     };
 
     const filteredWebinars = useMemo(() => {
@@ -150,7 +160,7 @@ const StudentWebinars = () => {
             actionText = "Join Now";
             ActionIcon = ExternalLink;
         } else if (webinar.status === "Past") {
-            actionText = "Watch Recording";
+            actionText = "Watch";
             ActionIcon = MonitorPlay;
         } else if (webinar.isRegistered) {
             actionText = "Registered";
@@ -177,7 +187,7 @@ const StudentWebinars = () => {
                 }}
                 onActionClick={() => {
                     if (webinar.status === "Live") handleJoin(webinar.meetingLink);
-                    else if (webinar.status === "Past") handleWatch(webinar.recordingLink);
+                    else if (webinar.status === "Past") handleWatch(webinar.recordingLink, webinar.title);
                     else if (!webinar.isRegistered) handleRegister(webinar.id, webinar.title);
                 }}
                 actionText={actionText}
@@ -299,6 +309,25 @@ const StudentWebinars = () => {
                 </Tabs>
                 </div>
             </div>
+
+            <Dialog open={!!activeRecording} onOpenChange={(open) => !open && setActiveRecording(null)}>
+                <DialogContent className="w-[calc(100vw-1rem)] max-w-5xl rounded-2xl p-4 sm:p-6">
+                    <DialogHeader>
+                        <DialogTitle className="truncate pr-8">{activeRecording?.title || "Recording"}</DialogTitle>
+                    </DialogHeader>
+                    {activeRecording ? (
+                        <div className="rounded-2xl border border-border/60 bg-black overflow-hidden">
+                            <iframe
+                                src={toEmbedUrl(activeRecording.link)}
+                                title={activeRecording.title}
+                                className="w-full h-[55vh] sm:h-[68vh]"
+                                allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                                allowFullScreen
+                            />
+                        </div>
+                    ) : null}
+                </DialogContent>
+            </Dialog>
         </DashboardLayout>
     );
 };
