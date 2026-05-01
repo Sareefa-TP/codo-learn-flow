@@ -50,6 +50,7 @@ import {
   Clock
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import PayoutStatementModal from "./PayoutStatementModal";
 
 // ─── Local Data ──────────────────────────────────────────────────────────────
 
@@ -108,6 +109,7 @@ const Payouts = () => {
   const [roleTab, setRoleTab] = useState<"all" | "Tutor" | "Mentor">("all");
   const [paidRecords, setPaidRecords] = useState<Record<string, { utr: string }>>({});
   const [confirm, setConfirm] = useState<PayoutRow | null>(null);
+  const [showStatementModal, setShowStatementModal] = useState(false);
 
   // Derived State for Dialog
   const detail = useMemo(() => {
@@ -174,7 +176,10 @@ const Payouts = () => {
       title="Payouts"
       subtitle="Disburse Admin-approved payouts to tutors and mentors. TDS already deducted as per policy."
       action={
-        <FinanceGhostButton icon={Download}>
+        <FinanceGhostButton 
+          icon={Download} 
+          onClick={() => setShowStatementModal(true)}
+        >
           Payout statement
         </FinanceGhostButton>
       }
@@ -419,7 +424,9 @@ const Payouts = () => {
         {/* ─── Detail Dialog ─── */}
         <Dialog open={!!detail} onOpenChange={(open) => !open && closeDetail()}>
           <DialogContent 
-            className="sm:max-w-lg p-0 rounded-3xl overflow-hidden border-none shadow-2xl bg-card max-h-[85vh] flex flex-col"
+            size="md"
+            variant="finance"
+            className="p-0 max-h-[85vh] flex flex-col"
             onPointerDownOutside={(e) => e.preventDefault()}
             onEscapeKeyDown={(e) => e.preventDefault()}
           >
@@ -515,7 +522,7 @@ const Payouts = () => {
 
         {/* ─── Confirm Dialog ─── */}
         <AlertDialog open={!!confirm} onOpenChange={(open) => !open && setConfirm(null)}>
-          <AlertDialogContent className="rounded-3xl border-none shadow-2xl bg-card p-8 sm:max-w-md">
+          <AlertDialogContent variant="finance" className="sm:max-w-[400px] p-8">
             {confirm && (
               <>
                 <AlertDialogHeader>
@@ -561,6 +568,11 @@ const Payouts = () => {
           </AlertDialogContent>
         </AlertDialog>
 
+        <PayoutStatementModal 
+          open={showStatementModal} 
+          onOpenChange={setShowStatementModal} 
+          paidRecords={paidRecords}
+        />
       </div>
     </FinanceLayout>
   );

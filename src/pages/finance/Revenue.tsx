@@ -101,7 +101,7 @@ const ManualEntryDialog = ({ open, onOpenChange }: ManualEntryProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] rounded-[2rem] border-border/60">
+      <DialogContent size="md" variant="finance">
         <DialogHeader>
           <DialogTitle className="text-xl font-black tracking-tight">Record Manual Entry</DialogTitle>
           <DialogDescription className="text-sm font-medium">
@@ -251,7 +251,7 @@ const RevenueDetailDialog = ({ entry, onClose }: DetailProps) => {
 
   return (
     <Dialog open={!!entry} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[600px] rounded-[2.5rem] border-border/60 p-0 overflow-hidden bg-background">
+      <DialogContent size="md" variant="finance" className="p-0">
         <div className="relative p-8 pb-4">
           <div className="flex items-start justify-between mb-8">
             <div className="space-y-3">
@@ -381,7 +381,7 @@ const ExportPreviewDialog = ({ open, onOpenChange, data }: ExportPreviewProps) =
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[700px] rounded-[2.5rem] border-border/60 p-0 overflow-hidden">
+      <DialogContent size="lg" variant="finance">
         <div className="p-8">
           <DialogHeader className="mb-8">
             <div className="flex items-center gap-3 mb-2">

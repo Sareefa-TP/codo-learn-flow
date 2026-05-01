@@ -703,14 +703,14 @@ const FinanceInvoices = () => {
 
         {/* ─── New Invoice Dialog ─── */}
         <Dialog open={isNewInvoiceOpen} onOpenChange={setIsNewInvoiceOpen}>
-          <DialogContent className="sm:max-w-[500px] p-0 rounded-3xl overflow-hidden border-none shadow-2xl bg-card">
+          <DialogContent size="md" variant="finance">
             <form onSubmit={handleCreateInvoice}>
-              <div className="p-8 border-b border-border/40 bg-muted/5">
+              <DialogHeader>
                 <DialogTitle className="font-display text-2xl font-black tracking-tight text-foreground">Create New Invoice</DialogTitle>
                 <DialogDescription className="text-sm font-medium text-muted-foreground mt-1.5">
                   Generate a tax-compliant document for student payment.
                 </DialogDescription>
-              </div>
+              </DialogHeader>
 
               <div className="p-8 space-y-5">
                 <div className="space-y-2">
@@ -820,7 +820,7 @@ const FinanceInvoices = () => {
                 </div>
               </div>
 
-              <div className="p-8 border-t border-border/40 bg-muted/5 flex justify-end gap-3">
+              <DialogFooter className="p-8 border-t border-border/40 bg-muted/5">
                 <Button 
                   type="button"
                   variant="ghost" 
@@ -835,19 +835,19 @@ const FinanceInvoices = () => {
                 >
                   Create Invoice
                 </Button>
-              </div>
+              </DialogFooter>
             </form>
           </DialogContent>
         </Dialog>
 
         {/* ─── Detail Dialog ─── */}
         <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
-          <DialogContent className="sm:max-w-2xl p-0 rounded-3xl overflow-hidden border-none shadow-2xl bg-card max-h-[90vh] flex flex-col">
+          <DialogContent size="lg" variant="finance">
             {selectedInvoice && (
-              <>
-                <div className="p-8 border-b border-border/40 bg-muted/5 flex justify-between items-start">
-                  <div>
-                    <div className="flex items-center gap-3 mb-3">
+              <div className="flex flex-col h-full overflow-hidden">
+                <DialogHeader>
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-3">
                       <Pill 
                         variant={
                           selectedInvoice.status === "Paid" ? "success" :
@@ -869,18 +869,12 @@ const FinanceInvoices = () => {
                     </div>
                     <DialogTitle className="font-display text-3xl font-black tracking-tight text-foreground flex items-center gap-3">
                       {selectedInvoice.number}
-                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => generateSinglePDF(selectedInvoice)}>
-                        <Download className="w-4 h-4 opacity-50" />
-                      </Button>
                     </DialogTitle>
-                    <p className="text-xs font-medium text-muted-foreground mt-1">
+                    <p className="text-xs font-medium text-muted-foreground mt-0">
                       Issued on {selectedInvoice.date} · Due by {selectedInvoice.due}
                     </p>
                   </div>
-                  <button onClick={() => setIsDetailOpen(false)} className="p-2 rounded-full hover:bg-muted transition-colors">
-                    <X className="w-5 h-5 text-muted-foreground/40" />
-                  </button>
-                </div>
+                </DialogHeader>
 
                 <div className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar">
                   {/* Bill To section */}
@@ -964,39 +958,28 @@ const FinanceInvoices = () => {
                       </div>
                     </div>
                   </div>
+                </div>
 
-                  {/* Action row at bottom */}
-                  <div className="flex flex-wrap gap-3 pt-6 border-t border-border/10">
-                    {selectedInvoice.status === "Draft" && (
+                <DialogFooter>
+                  <div className="flex items-center justify-between w-full">
+                    <button 
+                      onClick={() => setIsDetailOpen(false)}
+                      className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-all"
+                    >
+                      Close view
+                    </button>
+                    <div className="flex items-center gap-3">
                       <Button 
                         onClick={() => handleSend(selectedInvoice)}
-                        className="rounded-full gap-2 bg-primary hover:bg-primary/90 text-white font-black text-[10px] uppercase tracking-widest h-10 px-6"
+                        className="rounded-xl gap-2 bg-primary text-white font-black text-xs uppercase tracking-widest h-12 px-8 shadow-xl shadow-primary/20"
                       >
-                        <Mail className="w-3.5 h-3.5" />
-                        Send to Student
+                        <Mail className="w-4 h-4" />
+                        Resend
                       </Button>
-                    )}
-                    {selectedInvoice.status !== "Paid" && selectedInvoice.status !== "Cancelled" && (
-                      <Button 
-                        variant="outline"
-                        onClick={() => updateStatus(selectedInvoice.number, "Paid")}
-                        className="rounded-full gap-2 border-emerald-500/40 hover:bg-emerald-500/10 text-emerald-600 font-black text-[10px] uppercase tracking-widest h-10 px-6"
-                      >
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        Mark as Paid
-                      </Button>
-                    )}
-                    <Button 
-                      variant="outline" 
-                      onClick={() => generateSinglePDF(selectedInvoice)}
-                      className="rounded-full gap-2 border-border/40 hover:bg-muted text-foreground font-black text-[10px] uppercase tracking-widest h-10 px-6 ml-auto"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                      Download PDF
-                    </Button>
+                    </div>
                   </div>
-                </div>
-              </>
+                </DialogFooter>
+              </div>
             )}
           </DialogContent>
         </Dialog>

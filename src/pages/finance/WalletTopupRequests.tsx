@@ -120,20 +120,22 @@ interface ScreenshotModalProps {
 
 const ScreenshotModal = ({ url, studentName, onClose }: ScreenshotModalProps) => (
     <Dialog open={!!url} onOpenChange={open => { if (!open) onClose(); }}>
-        <DialogContent className="max-w-lg">
-            <DialogHeader className="flex flex-row items-start justify-between pr-8">
+        <DialogContent size="md" variant="finance" className="p-0 overflow-hidden">
+            <DialogHeader className="p-6 border-b border-border/40">
                 <div>
-                    <DialogTitle className="text-base font-semibold">Payment Screenshot</DialogTitle>
-                    <p className="text-sm text-muted-foreground mt-0.5">{studentName}</p>
+                    <DialogTitle className="text-xl font-black tracking-tight text-foreground">Payment Screenshot</DialogTitle>
+                    <p className="text-sm font-medium text-muted-foreground mt-0.5">{studentName}</p>
                 </div>
             </DialogHeader>
             {url && (
-                <div className="rounded-lg overflow-hidden border border-border/50 mt-2">
-                    <img
-                        src={url}
-                        alt={`Payment screenshot — ${studentName}`}
-                        className="w-full object-cover"
-                    />
+                <div className="p-8">
+                    <div className="rounded-2xl overflow-hidden border border-border/50 shadow-soft">
+                        <img
+                            src={url}
+                            alt={`Payment screenshot — ${studentName}`}
+                            className="w-full object-cover"
+                        />
+                    </div>
                 </div>
             )}
         </DialogContent>

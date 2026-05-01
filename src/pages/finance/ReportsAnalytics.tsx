@@ -27,6 +27,13 @@ import {
   FileSpreadsheet
 } from "lucide-react";
 import { toast } from "sonner";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogFooter 
+} from "@/components/ui/dialog";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -76,12 +83,6 @@ const ScheduleModal = ({ onClose }: { onClose: () => void }) => {
   const [freq, setFreq] = useState("weekly");
   const [format, setFormat] = useState("pdf");
 
-  // Lock body scroll
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = "auto"; };
-  }, []);
-
   const submit = () => {
     if (!email.includes("@")) {
       toast.error("Enter a valid email");
@@ -92,34 +93,14 @@ const ScheduleModal = ({ onClose }: { onClose: () => void }) => {
   };
 
   return (
-    <div 
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#050505]/90 backdrop-blur-xl animate-in fade-in duration-300" 
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-    >
-      <Card 
-        className="relative w-[90%] max-w-[600px] flex flex-col rounded-[24px] border-none bg-white p-0 shadow-[0_30px_100px_rgba(0,0,0,0.5)] animate-in zoom-in-95 duration-300 overflow-hidden" 
-        onClick={e => e.stopPropagation()}
-        style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)'
-        }}
-      >
-        <div className="px-10 pt-10 pb-8 border-b border-border/5 flex items-start justify-between bg-white shrink-0">
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/40">Automation</p>
-            <h3 className="mt-1 font-display text-2xl font-black tracking-tight text-foreground leading-none">Schedule delivery</h3>
-          </div>
-          <button 
-            onClick={onClose} 
-            className="h-10 w-10 flex items-center justify-center rounded-full hover:bg-muted transition-all active:scale-90"
-          >
-            <X className="h-5 w-5 text-muted-foreground" />
-          </button>
-        </div>
+    <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent size="md" variant="finance">
+        <DialogHeader>
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/40">Automation</p>
+          <DialogTitle className="mt-1 text-2xl font-black tracking-tight text-foreground leading-none">
+            Schedule delivery
+          </DialogTitle>
+        </DialogHeader>
 
         <div className="flex-1 overflow-y-auto px-10 py-10 space-y-8 bg-[#fafafa]">
           <Field label="Report">
@@ -188,7 +169,7 @@ const ScheduleModal = ({ onClose }: { onClose: () => void }) => {
           </div>
         </div>
 
-        <div className="px-10 py-8 border-t border-border/5 flex items-center justify-end gap-5 bg-white shrink-0">
+        <DialogFooter>
           <button 
             onClick={onClose} 
             className="px-6 py-3 text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-all"
@@ -201,9 +182,9 @@ const ScheduleModal = ({ onClose }: { onClose: () => void }) => {
           >
             Schedule
           </button>
-        </div>
-      </Card>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 
@@ -219,53 +200,20 @@ const PreviewModal = ({
   const snippet = report.rows.slice(0, 100);
   const hasMore = report.rows.length > 100;
 
-  // Lock body scroll
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handleEsc);
-    return () => {
-      document.body.style.overflow = "auto";
-      window.removeEventListener("keydown", handleEsc);
-    };
-  }, [onClose]);
-
   return (
-    <div 
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#050505]/90 backdrop-blur-xl animate-in fade-in duration-300" 
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-    >
-      <Card 
-        className="relative w-[92%] max-w-[1000px] flex flex-col rounded-[24px] border-none bg-white p-0 shadow-[0_30px_100px_rgba(0,0,0,0.5)] animate-in zoom-in-95 duration-300 overflow-hidden" 
-        onClick={e => e.stopPropagation()}
-        style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)'
-        }}
-      >
-        <div className="px-10 pt-10 pb-8 border-b border-border/5 flex items-start justify-between bg-white shrink-0">
-          <div>
-            <h3 className="font-display text-2xl font-black tracking-tight text-foreground leading-none">{report.name}</h3>
-            <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-[0.2em] mt-3 opacity-50">
-              {report.format.toUpperCase()} Format &middot; {report.rows.length - 1} total rows &middot; Preview report before download
-            </p>
-          </div>
-          <button 
-            onClick={onClose} 
-            className="h-10 w-10 flex items-center justify-center rounded-full hover:bg-muted transition-all active:scale-90"
-          >
-            <X className="h-5 w-5 text-muted-foreground" />
-          </button>
-        </div>
+    <Dialog open={!!report} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent size="lg" variant="finance">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-black tracking-tight text-foreground leading-none">
+            {report.name}
+          </DialogTitle>
+          <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-[0.2em] mt-3 opacity-50">
+            {report.format.toUpperCase()} Format &middot; {report.rows.length - 1} total rows &middot; Preview report before download
+          </p>
+        </DialogHeader>
 
         <div className="flex-1 overflow-hidden flex flex-col bg-[#fafafa]">
-          <div className="flex-1 overflow-y-auto px-10 py-6 max-h-[60vh]">
+          <div className="flex-1 overflow-y-auto px-10 py-6 max-h-[60vh] custom-scrollbar">
             <div className="overflow-x-auto border border-border/10 rounded-xl bg-white shadow-sm">
               <table className="w-full text-left border-collapse min-w-[800px]">
                 <thead className="sticky top-0 z-10 bg-[#f4f4f4] backdrop-blur-md">
@@ -300,7 +248,7 @@ const PreviewModal = ({
           </div>
         </div>
 
-        <div className="px-10 py-8 border-t border-border/5 flex items-center justify-end gap-5 bg-white shrink-0">
+        <DialogFooter>
           <button 
             onClick={onClose} 
             className="px-6 py-3 text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-all"
@@ -314,9 +262,9 @@ const PreviewModal = ({
             {report.format === "csv" ? <FileSpreadsheet className="h-5 w-5" /> : <FileText className="h-5 w-5" />}
             Confirm & Download
           </button>
-        </div>
-      </Card>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

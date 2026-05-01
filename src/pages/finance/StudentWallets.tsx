@@ -1,11 +1,19 @@
 import { Wallet, Users, CircleDollarSign, AlertCircle, X, ArrowUpRight, ArrowDownLeft } from "lucide-react";
 import PageSearch from "@/components/shared/PageSearch";
 import FinanceLayout from "@/components/finance/FinanceLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState, useMemo } from "react";
+import { cn } from "@/lib/utils";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -123,68 +131,67 @@ const WalletTransactionModal = ({ student, onClose }: ModalProps) => {
     const txns = mockTransactions[student.id] ?? [];
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
-            <div
-                className="bg-background border border-border/50 rounded-xl shadow-2xl w-full max-w-xl mx-4 max-h-[90vh] flex flex-col"
-                onClick={e => e.stopPropagation()}
-            >
+        <Dialog open={!!student} onOpenChange={open => !open && onClose()}>
+            <DialogContent size="md" variant="finance" className="p-0 flex flex-col max-h-[90vh]">
                 {/* Modal Header */}
-                <div className="flex items-start justify-between p-5 border-b border-border/50">
-                    <div>
-                        <h2 className="text-base font-semibold text-foreground">{student.name}</h2>
-                        <p className="text-sm text-muted-foreground mt-0.5">{student.email}</p>
-                        <div className="flex items-center gap-2 mt-2">
-                            <span className="text-xs text-muted-foreground">Current Balance:</span>
-                            <span className={`text-sm font-bold ${student.balance > 0 ? "text-emerald-600" : "text-muted-foreground"
-                                }`}>
-                                {fmt(student.balance)}
-                            </span>
-                        </div>
+                <div className="flex flex-col p-8 border-b border-border/40 bg-muted/5">
+                    <div className="flex items-center gap-3 mb-4">
+                        <Badge variant="outline" className="rounded-full bg-white font-black text-[9px] uppercase px-3 py-1 border-border/40">
+                            Wallet Details
+                        </Badge>
+                        <span className={cn(
+                            "text-sm font-black tabular-nums",
+                            student.balance > 0 ? "text-emerald-600" : "text-muted-foreground"
+                        )}>
+                            Balance: {fmt(student.balance)}
+                        </span>
                     </div>
-                    <button
-                        onClick={onClose}
-                        className="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
-                    >
-                        <X className="w-4 h-4" />
-                    </button>
+                    <DialogTitle className="text-2xl font-black tracking-tight text-foreground">{student.name}</DialogTitle>
+                    <DialogDescription className="text-sm font-medium text-muted-foreground mt-1">
+                        {student.email}
+                    </DialogDescription>
                 </div>
 
                 {/* Transaction Table */}
-                <div className="overflow-y-auto flex-1">
+                <div className="overflow-y-auto flex-1 custom-scrollbar">
                     {txns.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-14 text-muted-foreground">
-                            <Wallet className="w-8 h-8 opacity-25 mb-2" />
-                            <p className="text-sm">No transactions found.</p>
+                        <div className="flex flex-col items-center justify-center py-20 text-muted-foreground/40">
+                            <Wallet className="w-12 h-12 mb-4 opacity-20" />
+                            <p className="text-sm font-bold uppercase tracking-widest">No transactions found</p>
                         </div>
                     ) : (
                         <table className="w-full text-sm">
-                            <thead className="sticky top-0 bg-muted/30 border-b border-border/50">
+                            <thead className="sticky top-0 bg-muted/30 backdrop-blur-sm border-b border-border/40">
                                 <tr>
-                                    <th className="text-left px-5 py-2.5 font-medium text-muted-foreground">Date</th>
-                                    <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">Type</th>
-                                    <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">Description</th>
-                                    <th className="text-right px-4 pr-5 py-2.5 font-medium text-muted-foreground">Amount</th>
+                                    <th className="text-left px-8 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Date</th>
+                                    <th className="text-left px-4 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Type</th>
+                                    <th className="text-left px-4 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Description</th>
+                                    <th className="text-right px-8 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Amount</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="divide-y divide-border/20">
                                 {txns.map(tx => (
-                                    <tr key={tx.id} className="border-b border-border/30 last:border-0 hover:bg-muted/20 transition-colors">
-                                        <td className="px-5 py-3 text-muted-foreground whitespace-nowrap">{tx.date}</td>
-                                        <td className="px-4 py-3">
-                                            <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border ${tx.type === "Credit"
-                                                ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
-                                                : "bg-destructive/10 text-destructive border-destructive/20"
-                                                }`}>
+                                    <tr key={tx.id} className="hover:bg-muted/10 transition-colors">
+                                        <td className="px-8 py-4 text-xs font-bold text-muted-foreground whitespace-nowrap">{tx.date}</td>
+                                        <td className="px-4 py-4">
+                                            <span className={cn(
+                                                "inline-flex items-center gap-1 text-[9px] font-black uppercase px-2 py-0.5 rounded-full border",
+                                                tx.type === "Credit"
+                                                    ? "bg-emerald-50 text-emerald-600 border-emerald-200"
+                                                    : "bg-rose-50 text-rose-600 border-rose-200"
+                                            )}>
                                                 {tx.type === "Credit"
                                                     ? <ArrowUpRight className="w-3 h-3" />
                                                     : <ArrowDownLeft className="w-3 h-3" />}
                                                 {tx.type}
                                             </span>
                                         </td>
-                                        <td className="px-4 py-3">{tx.description}</td>
-                                        <td className={`px-4 pr-5 py-3 text-right font-semibold ${tx.type === "Credit" ? "text-emerald-600" : "text-destructive"
-                                            }`}>
-                                            {tx.type === "Credit" ? "+" : "-"}{fmt(tx.amount)}
+                                        <td className="px-4 py-4 text-xs font-medium text-slate-600">{tx.description}</td>
+                                        <td className={cn(
+                                            "px-8 py-4 text-right text-sm font-black tabular-nums",
+                                            tx.type === "Credit" ? "text-emerald-600" : "text-rose-600"
+                                        )}>
+                                            {tx.type === "Credit" ? "+" : "−"}{fmt(tx.amount)}
                                         </td>
                                     </tr>
                                 ))}
@@ -192,8 +199,8 @@ const WalletTransactionModal = ({ student, onClose }: ModalProps) => {
                         </table>
                     )}
                 </div>
-            </div>
-        </div>
+            </DialogContent>
+        </Dialog>
     );
 };
 
@@ -418,7 +425,7 @@ const StudentWallets = () => {
             </FinanceLayout>
 
             {/* ── Transaction Modal ── */}
-            {isModalOpen && <WalletTransactionModal student={selectedStudent} onClose={closeModal} />}
+            <WalletTransactionModal student={selectedStudent} onClose={closeModal} />
         </>
     );
 };

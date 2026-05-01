@@ -94,7 +94,7 @@ const TransactionDetailDialog = ({ transaction, onClose }: DetailProps) => {
 
   return (
     <Dialog open={!!transaction} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-3xl rounded-[2rem] border-none p-0 overflow-hidden bg-white shadow-2xl max-h-[90vh] flex flex-col">
+      <DialogContent size="lg" variant="finance" className="p-0">
         {/* Modal Header */}
         <div className="flex items-center justify-between p-6 border-b border-border/50 bg-muted/5 flex-shrink-0">
           <div>
@@ -258,7 +258,7 @@ const ExportPreviewDialog = ({ open, onOpenChange, data }: { open: boolean, onOp
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl rounded-[2.5rem] border-border/60 p-0 overflow-hidden bg-white shadow-2xl">
+      <DialogContent size="lg" variant="finance" className="p-0">
         <div className="p-8">
            <DialogHeader className="mb-8">
               <div className="flex items-center gap-3 mb-2">
@@ -391,7 +391,7 @@ const NewTransactionDialog = ({ open, onOpenChange, onSuccess }: { open: boolean
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl bg-white max-h-[90vh] flex flex-col">
+      <DialogContent size="lg" variant="finance" className="p-0">
         <form onSubmit={handleSubmit} className="flex flex-col h-full overflow-hidden">
            {/* Modal Header */}
            <div className="flex items-center justify-between p-6 border-b border-border/50 bg-muted/5 flex-shrink-0">

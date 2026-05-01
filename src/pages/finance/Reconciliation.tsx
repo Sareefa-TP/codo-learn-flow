@@ -99,7 +99,7 @@ const ManualPaymentDialog = ({ open, onOpenChange }: { open: boolean, onOpenChan
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl bg-white max-h-[95vh] flex flex-col">
+      <DialogContent size="lg" variant="finance" className="p-0">
         {/* ── Header ── */}
         <div className="bg-slate-50 p-6 border-b border-slate-200/60 relative shrink-0">
           <div className="flex items-center gap-4">
@@ -339,7 +339,7 @@ const ReconciliationMatchDialog = ({ open, onOpenChange, entry }: { open: boolea
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl bg-white max-h-[90vh] flex flex-col">
+      <DialogContent size="lg" variant="finance" className="p-0">
         <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
 
           {/* ── Left Side: Source (Gateway) ── */}

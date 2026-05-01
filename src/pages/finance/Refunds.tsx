@@ -56,7 +56,7 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { refundsList, refundStats, transactionsList } from "@/data/financeMock";
+import { refundsList, refundStats, transactionsList, RefundRow } from "@/data/financeMock";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -71,9 +71,9 @@ const fmt = (n: number) => `₹${n.toLocaleString("en-IN")}`;
 // ─── Refund Detail Drawer ────────────────────────────────────────────────────
 
 interface DetailProps {
-  refund: any | null;
+  refund: RefundRow | null;
   onClose: () => void;
-  onStatusUpdate: (id: string, newStatus: string) => void;
+  onStatusUpdate: (id: string, newStatus: RefundRow['status']) => void;
 }
 
 const RefundDetailDialog = ({ refund, onClose, onStatusUpdate }: DetailProps) => {
@@ -84,7 +84,7 @@ const RefundDetailDialog = ({ refund, onClose, onStatusUpdate }: DetailProps) =>
   const isCompleted = refund.status === "Completed";
   const isRejected = refund.status === "Rejected";
 
-  const handleAction = (status: string) => {
+  const handleAction = (status: RefundRow['status']) => {
     setIsProcessing(true);
     setTimeout(() => {
       onStatusUpdate(refund.id, status);
@@ -98,16 +98,12 @@ const RefundDetailDialog = ({ refund, onClose, onStatusUpdate }: DetailProps) =>
 
   return (
     <Dialog open={!!refund} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-3xl rounded-[2rem] border-none p-0 overflow-hidden bg-white shadow-2xl max-h-[90vh] flex flex-col">
-        {/* Modal Header */}
-        <div className="flex items-center justify-between p-6 border-b border-border/50 bg-muted/5 flex-shrink-0">
-          <div>
-            <h2 className="text-xl font-bold tracking-tight text-slate-900">Refund Audit Log</h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              Complete trail of the refund request and settlement.
-            </p>
-          </div>
-        </div>
+      <DialogContent size="md" variant="finance" className="p-0">
+        <DialogHeader className="p-8 border-b bg-muted/5">
+          <DialogTitle className="text-2xl font-black tracking-tight text-foreground">
+            Refund Details
+          </DialogTitle>
+        </DialogHeader>
 
         {/* Modal Body */}
         <div className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar">
@@ -278,7 +274,7 @@ const RefundDetailDialog = ({ refund, onClose, onStatusUpdate }: DetailProps) =>
 interface NewRefundProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSuccess: (newRefund: any) => void;
+  onSuccess: (newRefund: RefundRow) => void;
 }
 
 const InitiateRefundDialog = ({ open, onOpenChange, onSuccess }: NewRefundProps) => {
@@ -313,7 +309,7 @@ const InitiateRefundDialog = ({ open, onOpenChange, onSuccess }: NewRefundProps)
     
     // Simulate API Call
     setTimeout(() => {
-      const newRefund = {
+      const newRefund: RefundRow = {
         id: `RFD-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
         orderId: linkedTxn?.id || "ORD-MOCK",
         student: linkedTxn?.party || "Unknown Student",
@@ -344,19 +340,17 @@ const InitiateRefundDialog = ({ open, onOpenChange, onSuccess }: NewRefundProps)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[600px] max-w-[600px] rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl bg-[#FDFCF8] max-h-[90vh] flex flex-col">
-        <form onSubmit={handleSubmit} className="flex flex-col h-full overflow-hidden">
-          <div className="p-8 border-b border-rose-100 bg-rose-50/20 flex-shrink-0 relative">
-             <div className="space-y-1">
-                <DialogTitle className="text-3xl font-black tracking-tighter text-slate-900 leading-none font-serif">
-                   Initiate Refund Request
-                </DialogTitle>
-                <p className="text-sm font-medium text-rose-600/70">
-                   Transactions can only be refunded if the original status is 'Success'.
-                </p>
-             </div>
-          </div>
+      <DialogContent size="md" variant="finance" className="max-h-[85vh] flex flex-col">
+        <DialogHeader className="p-8 pb-0 border-none bg-transparent">
+          <DialogTitle className="text-3xl font-black tracking-tighter text-slate-900 leading-none font-serif">
+             Initiate Refund Request
+          </DialogTitle>
+          <p className="text-sm font-medium text-rose-600/70">
+             Transactions can only be refunded if the original status is 'Success'.
+          </p>
+        </DialogHeader>
 
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
           <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
              {/* Section 1: Search & Link */}
              <div className="mb-8 space-y-4">
@@ -501,8 +495,8 @@ const InitiateRefundDialog = ({ open, onOpenChange, onSuccess }: NewRefundProps)
              </div>
           </div>
 
-          {/* Modal Footer (Sticky) */}
-          <div className="p-8 border-t border-slate-100 bg-slate-50/80 backdrop-blur-sm sticky bottom-0 left-0 right-0 flex items-center justify-between flex-shrink-0 z-10">
+          {/* Modal Footer */}
+          <DialogFooter className="p-8 bg-muted/5 border-t border-border/40">
              <button 
                type="button"
                onClick={() => onOpenChange(false)}
@@ -517,7 +511,7 @@ const InitiateRefundDialog = ({ open, onOpenChange, onSuccess }: NewRefundProps)
              >
                 {isSubmitting ? "Processing..." : "Process Refund"}
              </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
@@ -564,18 +558,15 @@ const ExportRefundsDialog = ({ open, onOpenChange, data }: ExportProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[600px] max-w-[600px] rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl bg-[#FDFCF8] max-h-[90vh] flex flex-col">
-        {/* Modal Header */}
-        <div className="p-8 border-b border-slate-100 bg-slate-50/20 flex-shrink-0">
-          <div className="space-y-1">
-            <DialogTitle className="text-3xl font-black tracking-tighter text-slate-900 leading-none font-serif">
-               Export Refund Ledger
-            </DialogTitle>
-            <p className="text-sm font-medium text-muted-foreground">
-               Review records and select format before processing the download.
-            </p>
-          </div>
-        </div>
+      <DialogContent size="lg" variant="finance" className="p-0">
+        <DialogHeader className="p-8 border-b bg-muted/5">
+          <DialogTitle className="text-3xl font-black tracking-tighter text-slate-900 leading-none font-serif">
+            Export Refund Ledger
+          </DialogTitle>
+          <p className="text-sm font-medium text-muted-foreground mt-1">
+            Review records and select format before processing the download.
+          </p>
+        </DialogHeader>
 
         {/* Modal Body */}
         <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
@@ -659,7 +650,7 @@ const ExportRefundsDialog = ({ open, onOpenChange, data }: ExportProps) => {
         </div>
 
         {/* Modal Footer */}
-        <div className="p-8 border-t border-slate-100 bg-slate-50/80 backdrop-blur-sm sticky bottom-0 flex items-center justify-between z-10">
+        <DialogFooter className="p-8 bg-muted/5 border-t border-border/40">
            <button 
              type="button"
              onClick={() => onOpenChange(false)}
@@ -674,7 +665,7 @@ const ExportRefundsDialog = ({ open, onOpenChange, data }: ExportProps) => {
            >
               {isExporting ? "Processing..." : "Confirm & Download Ledger"}
            </Button>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
@@ -685,7 +676,7 @@ const ExportRefundsDialog = ({ open, onOpenChange, data }: ExportProps) => {
 const Refunds = () => {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [selectedRefund, setSelectedRefund] = useState<any | null>(null);
+  const [selectedRefund, setSelectedRefund] = useState<RefundRow | null>(null);
   const [showExportModal, setShowExportModal] = useState(false);
   const [showInitiateModal, setShowInitiateModal] = useState(false);
   const [localRefunds, setLocalRefunds] = useState(refundsList);
@@ -701,11 +692,11 @@ const Refunds = () => {
     });
   }, [search, filterStatus, localRefunds]);
 
-  const handleStatusUpdate = (id: string, newStatus: string) => {
+  const handleStatusUpdate = (id: string, newStatus: RefundRow['status']) => {
     setLocalRefunds(prev => prev.map(r => r.id === id ? { ...r, status: newStatus } : r));
   };
 
-  const handleRefundSuccess = (newRefund: any) => {
+  const handleRefundSuccess = (newRefund: RefundRow) => {
     setLocalRefunds(prev => [newRefund, ...prev]);
   };
 
