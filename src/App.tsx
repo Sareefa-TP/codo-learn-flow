@@ -1,3 +1,4 @@
+// Finance Module: Diagnostic Flush
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -216,6 +217,20 @@ const App = () => (
           }}
         >
           <Routes>
+            {/* Finance Routes (Prioritized) */}
+            <Route path="/finance" element={<FinanceDashboard />} />
+            <Route path="/finance/revenue" element={<FinanceRevenue />} />
+            <Route path="/finance/reconciliation" element={<FinanceReconciliation />} />
+            <Route path="/finance/transactions" element={<FinanceTransactions />} />
+            <Route path="/finance/refunds" element={<FinanceRefunds />} />
+            <Route path="/finance/payouts" element={<Payouts />} />
+            <Route path="/finance/payouts/:payoutId" element={<Payouts />} />
+            <Route path="/finance/invoices" element={<FinanceInvoices />} />
+            <Route path="/finance/tax" element={<FinanceTaxCompliance />} />
+            <Route path="/finance/reports" element={<FinanceReportsAnalytics />} />
+            <Route path="/finance/settings" element={<FinanceSettings />} />
+            <Route path="/finance/profile" element={<FinanceProfile />} />
+
             {/* Public Routes */}
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
@@ -347,6 +362,7 @@ const App = () => (
 
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/meet" element={<AdminMeetList />} />
           <Route path="/admin/meet/schedule" element={<AdminScheduleMeet />} />
           <Route path="/admin/meet/:id" element={<AdminMeetDetails />} />
@@ -367,8 +383,6 @@ const App = () => (
           <Route path="/admin/mentors/add" element={<AddEditMentor mode="add" />} />
           <Route path="/admin/mentors/edit/:id" element={<AddEditMentor mode="edit" />} />
           <Route path="/admin/mentors/:id" element={<AdminMentorDetails />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/courses" element={<TutorBatches role="admin" batches={courses} />} />
           <Route path="/admin/courses/create" element={<CreateCourse mode="create" />} />
           <Route path="/admin/courses/:batchId/teaching" element={<TutorTeachingFlow role="admin" />} />
@@ -392,19 +406,6 @@ const App = () => (
           <Route path="/admin/notifications" element={<AdminNotifications />} />
           <Route path="/admin/profile" element={<AdminProfile />} />
 
-          {/* Finance Routes */}
-          <Route path="/finance" element={<FinanceDashboard />} />
-          <Route path="/finance/revenue" element={<FinanceRevenue />} />
-          <Route path="/finance/reconciliation" element={<FinanceReconciliation />} />
-          <Route path="/finance/transactions" element={<FinanceTransactions />} />
-          <Route path="/finance/refunds" element={<FinanceRefunds />} />
-          <Route path="/finance/payouts" element={<Payouts />} />
-          <Route path="/finance/payouts/:payoutId" element={<Payouts />} />
-          <Route path="/finance/invoices" element={<FinanceInvoices />} />
-          <Route path="/finance/tax-compliance" element={<FinanceTaxCompliance />} />
-          <Route path="/finance/reports" element={<FinanceReportsAnalytics />} />
-          <Route path="/finance/settings" element={<FinanceSettings />} />
-          <Route path="/finance/profile" element={<FinanceProfile />} />
 
 
           {/* Super Admin Routes */}

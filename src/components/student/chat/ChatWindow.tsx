@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Send, Plus, MoreVertical, ShieldCheck, GraduationCap, Users, Info, Search, Mic, Square, Play, Pause, X, Trash2, FileText, Image as ImageIcon, ZoomIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -74,6 +74,8 @@ export default function ChatWindow({
   const [isMuteConfirmOpen, setIsMuteConfirmOpen] = useState(false);
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const [playingMessageId, setPlayingMessageId] = useState<string | null>(null);
+  const [selectedQuickTag, setSelectedQuickTag] = useState<string | null>(null);
+  const [previewAttachment, setPreviewAttachment] = useState<AttachmentPreview | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -165,15 +167,6 @@ export default function ChatWindow({
     if (!courseTag && selectedQuickTag) {
       courseTag = selectedQuickTag;
     }
-
-    const attachment = attachedFile
-      ? {
-          url: URL.createObjectURL(attachedFile),
-          name: attachedFile.name,
-          type: attachedFile.type || "application/octet-stream",
-        }
-      : undefined;
-
     onSendMessage(text, courseTag, selectedFiles.length > 0 ? selectedFiles : undefined, replyingTo || undefined);
     setInputText("");
     setSelectedFiles([]);
@@ -245,6 +238,14 @@ export default function ChatWindow({
     } else {
       setPlayingMessageId(null);
     }
+  };
+
+  const isImageAttachment = (type?: string, name?: string) => {
+    return type?.startsWith("image/") || /\.(jpg|jpeg|png|gif|webp)$/i.test(name || "");
+  };
+
+  const isPdfAttachment = (type?: string, name?: string) => {
+    return type === "application/pdf" || name?.toLowerCase().endsWith(".pdf");
   };
 
   return (
@@ -588,13 +589,21 @@ export default function ChatWindow({
               {/* Quick Tags */}
               <div className="flex items-center gap-2 animate-in fade-in slide-in-from-bottom-1 duration-500">
                 <span className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-widest mr-2">Quick Tag:</span>
-                {["Full Stack", "UI/UX"].map(tag => (
+                {quickTags.map(tag => (
                   <button
                     key={tag}
-                    onClick={() => setInputText(`[${tag}] ${inputText}`)}
-                    className="px-3 py-1 rounded-full bg-slate-100 border border-border/40 text-[10px] font-bold text-muted-foreground hover:bg-primary/10 hover:text-primary hover:border-primary/20 transition-all active:scale-95"
+                    onClick={() => {
+                      if (selectedQuickTag === tag) setSelectedQuickTag(null);
+                      else setSelectedQuickTag(tag);
+                    }}
+                    className={cn(
+                      "px-3 py-1 rounded-full border text-[10px] font-bold transition-all active:scale-95",
+                      selectedQuickTag === tag 
+                        ? "bg-primary border-primary text-white shadow-md shadow-primary/20" 
+                        : "bg-slate-100 border-border/40 text-muted-foreground hover:bg-primary/10 hover:text-primary hover:border-primary/20"
+                    )}
                   >
-                    + {tag}
+                    {selectedQuickTag === tag ? "✓ " : "+ "}{tag}
                   </button>
                 ))}
               </div>
@@ -709,6 +718,7 @@ export default function ChatWindow({
             <span className="w-1 h-1 rounded-full bg-muted-foreground/20" />
             <span>{isRecording ? "Click trash to cancel" : "Press Enter to send"}</span>
           </p>
+        </div>
       </div>
 
       <Dialog
@@ -756,7 +766,6 @@ export default function ChatWindow({
         </DialogContent>
       </Dialog>
     </div>
-      </div>
   );
 }
 

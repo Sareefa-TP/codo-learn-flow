@@ -365,7 +365,22 @@ export const refundStats = [
   { label: "Avg processing time", value: "1.2 days", sub: "Target: < 2 days", color: "text-primary" },
 ];
 
-export const refundsList = [
+export type RefundRow = {
+  id: string;
+  orderId: string;
+  student: string;
+  product: string;
+  originalAmount: number;
+  refundAmount: number;
+  reason: string;
+  requestedOn: string;
+  status: "Requested" | "Approved" | "Completed" | "Rejected" | "Processing" | "Processed";
+  note: string;
+  requestedBy: string;
+  deductions: { label: string; amount: number }[];
+};
+
+export const refundsList: RefundRow[] = [
   { 
     id: "RFD-2026-0142", 
     orderId: "ORD-2026-0042", 
@@ -430,6 +445,12 @@ export const refundsList = [
 ];
 
 export const fmtINR = (n: number) => "₹" + n.toLocaleString("en-IN");
+
+export const fmtINRShort = (n: number) => {
+  if (n >= 100000) return "₹" + (n / 100000).toFixed(2) + "L";
+  if (n >= 1000) return "₹" + (n / 1000).toFixed(1) + "K";
+  return "₹" + n.toString();
+};
 
 export const financeSettings = {
   coolingPeriodDays: 14,
@@ -557,5 +578,165 @@ export const payoutQueue: PayoutRow[] = [
     requestedOn: "27 Apr, 09:10",
     status: "Approved",
     bank: "ICICI ••3344 · IFSC ICIC0000456",
+  },
+];
+
+export type InvoiceRow = {
+  number: string;
+  student: string;
+  course: string;
+  date: string;
+  due: string;
+  taxable: number;
+  tax: number;
+  total: number;
+  gst: boolean;
+  status: "Paid" | "Sent" | "Overdue" | "Draft" | "Cancelled";
+};
+
+export const initialInvoices: InvoiceRow[] = [
+  {
+    number: "INV-2026-001",
+    student: "Aarav Sharma",
+    course: "Full Stack Pro",
+    date: "24 Apr 2026",
+    due: "01 May 2026",
+    taxable: 18000,
+    tax: 3240,
+    total: 21240,
+    gst: true,
+    status: "Paid",
+  },
+  {
+    number: "PRO-2026-042",
+    student: "Meera Reddy",
+    course: "Full Stack Bundle",
+    date: "24 Apr 2026",
+    due: "28 Apr 2026",
+    taxable: 45000,
+    tax: 0,
+    total: 45000,
+    gst: false,
+    status: "Sent",
+  },
+  {
+    number: "INV-2026-003",
+    student: "John Doe",
+    course: "Python Backend",
+    date: "23 Apr 2026",
+    due: "30 Apr 2026",
+    taxable: 15000,
+    tax: 2700,
+    total: 17700,
+    gst: true,
+    status: "Overdue",
+  },
+  {
+    number: "INV-2026-004",
+    student: "Sarah Miller",
+    course: "Data Science Pro",
+    date: "22 Apr 2026",
+    due: "29 Apr 2026",
+    taxable: 25000,
+    tax: 4500,
+    total: 29500,
+    gst: true,
+    status: "Paid",
+  },
+  {
+    number: "INV-2026-005",
+    student: "Karan Singh",
+    course: "UI/UX Mastery",
+    date: "21 Apr 2026",
+    due: "28 Apr 2026",
+    taxable: 12000,
+    tax: 2160,
+    total: 14160,
+    gst: true,
+    status: "Draft",
+  },
+  {
+    number: "INV-2026-006",
+    student: "Sneha Roy",
+    course: "Full Stack Development",
+    date: "20 Apr 2026",
+    due: "27 Apr 2026",
+    taxable: 18500,
+    tax: 3330,
+    total: 21830,
+    gst: true,
+    status: "Sent",
+  },
+  {
+    number: "PRO-2026-043",
+    student: "Arjun Nair",
+    course: "Data Science 101",
+    date: "19 Apr 2026",
+    due: "26 Apr 2026",
+    taxable: 10000,
+    tax: 0,
+    total: 10000,
+    gst: false,
+    status: "Cancelled",
+  },
+  {
+    number: "INV-2026-008",
+    student: "Divya Menon",
+    course: "Python Pro",
+    date: "18 Apr 2026",
+    due: "25 Apr 2026",
+    taxable: 15000,
+    tax: 2700,
+    total: 17700,
+    gst: true,
+    status: "Paid",
+  },
+  {
+    number: "INV-2026-009",
+    student: "Siddharth Rao",
+    course: "Full Stack Pro",
+    date: "17 Apr 2026",
+    due: "24 Apr 2026",
+    taxable: 18000,
+    tax: 3240,
+    total: 21240,
+    gst: true,
+    status: "Overdue",
+  },
+  {
+    number: "INV-2026-010",
+    student: "Farah Sheikh",
+    course: "UI/UX Mastery",
+    date: "16 Apr 2026",
+    due: "23 Apr 2026",
+    taxable: 12000,
+    tax: 2160,
+    total: 14160,
+    gst: true,
+    status: "Paid",
+  },
+  {
+    number: "INV-2026-011",
+    student: "Karan Mehta",
+    course: "Python Backend",
+    date: "15 Apr 2026",
+    due: "22 Apr 2026",
+    taxable: 15000,
+    tax: 2700,
+    total: 17700,
+    gst: true,
+    status: "Sent",
+  },
+  {
+    number: "INV-2026-012",
+    student: "Aanya Sharma",
+    course: "Full Stack Bundle",
+    date: "14 Apr 2026",
+    due: "21 Apr 2026",
+    taxable: 45000,
+    tax: 8100,
+    total: 53100,
+    gst: true,
+    status: "Paid",
   },
 ];

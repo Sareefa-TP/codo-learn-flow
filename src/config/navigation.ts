@@ -191,7 +191,7 @@ export const financeNavigation: RoleNavigation = {
     { title: "Refunds", url: "/finance/refunds", icon: RotateCcw },
     { title: "Payouts", url: "/finance/payouts", icon: Wallet },
     { title: "Invoices & Billing", url: "/finance/invoices", icon: ScrollText },
-    { title: "Tax & Compliance", icon: ShieldCheck, url: "/finance/tax-compliance" },
+    { title: "Tax & Compliance", icon: ShieldCheck, url: "/finance/tax" },
     { title: "Reports & Analytics", url: "/finance/reports", icon: PieChart },
     { title: "Settings", url: "/finance/settings", icon: Settings },
   ],
